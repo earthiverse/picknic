@@ -16,6 +16,9 @@
       this.g_map_obj = {};
       var self = this;
 
+      // Markers go inside this array
+      this.markers = [{id: 1, coords: {latitude: 53.5333, longitude: -113.5000}}];
+
       $http.get('/api/things').then(response => {
         this.awesomeThings = response.data;
       });
