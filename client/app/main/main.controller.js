@@ -12,6 +12,8 @@
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
 
+      // created after tiles loaded
+      this.g_map_obj = {};
       var self = this;
 
       $http.get('/api/things').then(response => {
@@ -20,20 +22,21 @@
 
       uiGmapGoogleMapApi.then(function (maps) {
         var edmonton = new google.maps.LatLng(53.5333, -113.5000);
-        self.map = {center: {latitude: 53.5333, longitude: -113.5000}, zoom: 14};
+        self.map = {center: {latitude: 53.5333, longitude: -113.5000}, zoom: 14,
+          events: {
+            tilesloaded: function(map) {
+              self.g_map_obj = map;
+            }
+          }
+        };
         self.options = {scrollwheel: false};
-
-        console.log(maps);
 
         // Try W3C Geolocation (Preferred)
         if (navigator.geolocation) {
           self.browserSupportFlag = true;
           navigator.geolocation.getCurrentPosition(function (position) {
             self.initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            // TODO: Move map
-            //self.map.center = {latitude: self.initialLocation.lat(), longitude: self.initialLocation.lng()};
-            //maps.LatLng(self.initialLocation);
-            //maps.center(self.initialLocation)
+            self.g_map_obj.setCenter(self.initialLocation);
           }, function () {
             handleNoGeolocation(self.browserSupportFlag);
           });
@@ -52,10 +55,7 @@
             alert("Your browser doesn't support geolocation. We've placed you in Edmonton.");
             self.initialLocation = edmonton;
           }
-          // TODO: Move map
-          //maps.LatLng(self.initialLocation);
-          //maps.center(self.initialLocation)
-          //self.map.center = {latitude: self.initialLocation.lat(), longitude: self.initialLocation.lng()};
+          self.g_map_obj.setCenter(self.initialLocation);
         }
 
       });
