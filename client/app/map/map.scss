@@ -1,9 +1,14 @@
-#map {
-  height: 600px;
-  width: 600px;
+.angular-google-map-container {
+    width: 100%;
+    height: 600px;
 }
 
-#hmap {
-  height: 600px;
-  width: 600px;
+/* fix for Twitter Bootstrap handling of responsive images */
+.angular-google-map img {
+    max-width: none;
+}
+
+.angular-google-map {
+    top: 80px;
+
 }
