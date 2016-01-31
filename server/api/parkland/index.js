@@ -5,6 +5,7 @@ var controller = require('./parkland.controller');
 
 var router = express.Router();
 
+router.get('/:lng/:lat', controller.location);
 router.get('/', controller.index);
 router.get('/:id', controller.show);
 router.post('/', controller.create);
