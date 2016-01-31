@@ -22,7 +22,7 @@ column_number = 0
 
 # Set Up Mongo Connection
 mongo = pymongo.MongoClient()
-db = mongo.picknic
+db = mongo['picknic-dev']
 parklands = db.parklands
 
 # Clear all existing parkland
