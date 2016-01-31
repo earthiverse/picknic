@@ -58,7 +58,7 @@
     </div>
     <div class="progress-bar progress-bar-slider">
       <input class="progress-slider" type="range" min="100" max="5000" step="10" ng-model="main.slider"
-             ng-change="main.sliderChange()">
+             ng-mouseup="main.sliderChange()">
       <div class="inner" ng-style="{ width: main.slider / 50 + '%' || '0%' }"></div>
     </div>
     </div>
