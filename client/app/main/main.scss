@@ -1,3 +1,8 @@
+h1 {
+    font-family: 'Pacifico', cursive;
+    font-size: 28px;
+    color: #666;
+}
 .thing-form {
   margin: 20px 0;
 }
@@ -6,10 +11,48 @@
   margin-top: -20px;
 }
 
+/*
+#form-options {
+    transform: translate(0px,-300px);
+    display: none;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    &:hover {
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    transform: translate(0px,0px);
+    display: block;
+    }
+}
+
+#hoverbar {
+    height : 20px !important;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    &:hover + #form-options {
+    
+    display: block;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    transform: translate(0px,0px);
+    }
+}
+*/
+
+h3 {
+    margin-top: 10px;
+}
+.info {
+    color: lighten(green,20%);
+}
+
+.panel-default .panel-heading {
+    background-color:  #ffcccc;
+}
+
 .angular-google-map-container {
   width: 100%;
   height: 600px;
+  overflow: visible;
+
 }
+
 
 /* fix for Twitter Bootstrap handling of responsive images */
 .angular-google-map img {
@@ -18,4 +61,66 @@
 
 .angular-google-map {
   top: 80px;
+  height: 600px;
+}
+
+.progress-box {
+    width: 100%;
+    margin: 20px 0;
+}
+
+.progress-box .percentage-cur .num {
+    margin-right: 5px;
+}
+
+.progress-box .progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #f2f1f1;
+    margin-bottom: 3px;
+    border: 1px solid #dfdfdf;
+    box-shadow: 0 0 2px #D5D4D4 inset;
+    position: relative;
+}
+
+.progress-box .progress-bar .inner {
+    position: relative;
+    width: 0;
+    height:100%;
+    background: #239bd6; 
+}
+
+.progress-bar .inner {
+    height: 0;
+    width: 0;
+    transition: all 1s ease-out;
+}
+
+.progress-bar-slider .inner {
+    transition: none;
+}
+
+.progress-bar-slider .inner:after {
+    content: " ";
+    width: 5px;
+    height: 14px;;
+    background-color:#ccc;
+    position: absolute;
+    right: -2px;
+    top: -2px;
+    border: 1px solid #bbb;
+    border-radius: 2px;
+    box-shadow: 0px 0px 2px rgba(0,0,0,0.3);
+    margin: 0px;
+}
+
+.progress-slider {
+    opacity: 0;
+    width: 100%;
+    height: 15px;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    cursor: pointer;
+    z-index: 1;
 }

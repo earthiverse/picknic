@@ -1,13 +1,78 @@
 <navbar></navbar>
 <div id="spacer"></div>
+  <div class="container">
+  <div class="input-group">
+      <input id="address" type="text" class="form-control" placeholder="Find picnics near..." value="">
+      <span class="input-group-btn">
+        <button id="submit" class="btn btn-default" type="button">Go!</button>
+      </span>
+    </div><!-- /input-group -->
+    </div>
 <ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
                     options="main.options">
-  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options"
+                  idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill"
+                  radius="c.radius" options='""'></ui-gmap-circle>
+  <!--
+  <ui-gmap-polygons models="main.parks" path="'geometry'" fill="{ color: '#2c8aa7', opacity: '0.3' }"
+                    stroke="{ color: '#000000', weight: 3, opacity: '1.0' }"
+                    chunk="false" cleanchunk="false"
+  >
+  </ui-gmap-polygons>
+  -->
+  <ui-gmap-polygon ng-repeat="p in main.parks track by p._id" path="p.geometry"
+                   fill="{ color: '#2c8aa7', opacity: '0.3' }"
+                   stroke="{ color: '#2c8aa7', weight: 3, opacity: '1.0' }" visible="true" geodesic="true" fit="false"
+                   editable="false" static="true" ng-cloak=""></ui-gmap-polygon>
+
 </ui-gmap-google-map>
 
+
+
 <div class="container">
-  <input id="address" type="textbox" placeholder="Where would you like your picnic?" value="">
-  <input id="submit" type="button" value="Geocode">
+<h1> Welcome to Picknic</h1>
+<div id="form-options" class="panel panel-default">
+<div class="panel-heading">Picnic Preferences</div>
+<div class="panel-body">
+  <label>Children? <i class="fa fa-child"></i> {{main.formData.children}} </label>
+  <div class="form-group">
+      <label class="radio-inline">
+        <input type="radio" name="children" value="Yeah :(" ng-model="main.formData.children">
+        Yes
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="children" value="I don't mind" ng-model="main.formData.children">
+        Don't Care
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="children" value="I want some please and quiet" ng-model="main.formData.children">
+        Avoid
+      </label>
+  </div>
+
+  <div class="progress-box" ng-app>
+    <div class="percentage-cur">
+      <span class="num">{{ main.slider }}m</span>
+      <span class="num">{{ main.circles[0].radius }}m</span>
+    </div>
+    <div class="progress-bar progress-bar-slider">
+      <input class="progress-slider" type="range" min="100" max="5000" step="10" ng-model="main.slider"
+             ng-change="main.sliderChange()">
+      <div class="inner" ng-style="{ width: main.slider / 50 + '%' || '0%' }"></div>
+    </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading">Tips</div>
+<div class="panel-body">
+  <h3><span class="info">{{main.weather.main.temp - 273.15 | number:0}}°C</span> in Edmonton</h4>
+<h4><span class="info">{{main.weather.weather[0].main}}</span> with a <span class="info">{{main.weather.weather[0].description}}</span></h4>
+  <h4>The sun will set at <span class="info">{{main.weather.sys.sunset * 1000 | date:'shortTime'}}</span> tonight</h4>
+</div>
+</div>
 </div>
 
 <div class="container">

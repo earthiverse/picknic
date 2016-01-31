@@ -1,0 +1,17 @@
+<div>This is the advanced view.</div>
+<div class="progress-box" ng-app>
+    <div class="percentage-cur">
+        <span class="num">{{ slider }}%</span>
+    </div>
+<i class="fa fa-tree"></i>
+        <div class="progress-bar progress-bar-slider">
+            <input class="progress-slider" type="range" min="0" max="100" ng-model="slider">
+            <div class="inner" ng-style="{ width: slider + '%' || '0%' }"></div>
+        </div>
+    
+</div>
+
+<p> Children? </p>
+<label class="radio-inline"><input type="radio" name="optradio">Yes</label>
+<label class="radio-inline"><input type="radio" name="optradio">No</label>
+<label class="radio-inline"><input type="radio" name="optradio">Avoid</label>
