@@ -14,7 +14,6 @@
       this.initialLocation = {};
       this.formData = {children: ""};
       this.weather = {};
-      this.polyFillCtr = 0;
 
       // created after tiles loaded
       this.g_map_obj = {};
@@ -148,6 +147,7 @@
     }
 
     handleParks() {
+      // TODO: LINE 1295 of angular-google-maps.js CHANGE TO ARROW NOTATION, read README
       var lat = this.circles[0].center.latitude;
       var lng = this.circles[0].center.longitude;
       var radius = Number(this.circles[0].radius) / 1000;
@@ -157,14 +157,6 @@
         console.log(this.parks);
         //this.parks = response.data;
       });
-    }
-
-    getPolyFill(model) {
-      if (!model) {
-        console.log("model undefined!");
-        return;
-      }
-      return {color: '#2c8aa7', opacity: '0.3'};
     }
 
     addThing() {
