@@ -5,7 +5,18 @@
   <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options"
                   idkey="m.id"></ui-gmap-marker>
   <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill"
-                  radius="c.radius"></ui-gmap-circle>
+                  radius="c.radius" options='""'></ui-gmap-circle>
+  <!--
+  <ui-gmap-polygons models="main.parks" path='"geometry"' fill="main.getPolyFill"
+                    stroke="{ color: '#2c8aa7', weight: 3, opacity: '1.0' }" visible="true" geodesic="true"
+                    fit="false" editable="false" static="true" ng-cloak="" options='""'>
+  </ui-gmap-polygons>
+  -->
+  <ui-gmap-polygon ng-repeat="p in main.parks track by p._id" path="p.geometry"
+                   fill="{ color: '#2c8aa7', opacity: '0.3' }"
+                   stroke="{ color: '#2c8aa7', weight: 3, opacity: '1.0' }" visible="true" geodesic="true" fit="false"
+                   editable="false" static="true" ng-cloak=""></ui-gmap-polygon>
+
 </ui-gmap-google-map>
 
 <div class="container">

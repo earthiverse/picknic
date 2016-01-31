@@ -14,6 +14,7 @@
       this.initialLocation = {};
       this.formData = {children: "no"};
       this.weather = {};
+      this.polyFillCtr = 0;
 
       // created after tiles loaded
       this.g_map_obj = {};
@@ -50,53 +51,54 @@
         this.weather = response.data;
       });
 
+      this.handleParks();
+
       uiGmapGoogleMapApi.then(maps => {
         // Initialize the geoencoder
         var geocoder = new google.maps.Geocoder();
-        document.getElementById('submit').addEventListener('click', function () {
-          geocodeAddress(geocoder, this.g_map_obj);
+        document.getElementById('submit').addEventListener('click', () => {
+          this.geocodeAddress(geocoder, this.g_map_obj);
         });
+      });
+    }
 
-        function geocodeAddress(geocoder, resultsMap) {
-          var address = document.getElementById('address').value;
-          geocoder.geocode({'address': address}, (results, status) => {
-            if (status === google.maps.GeocoderStatus.OK) {
-              resultsMap.setCenter(results[0].geometry.location);
-              var me_exists = false;
-              for (var i = 0; i < this.markers.length; i++) {
-                if (this.markers[i].id === 'me') {
-                  this.markers[i].coords = {
-                    latitude: results[0].geometry.location.G,
-                    longitude: results[0].geometry.location.K
-                  };
-                  this.circles[0].center.latitude = results[0].geometry.location.G;
-                  this.circles[0].center.longitude = results[0].geometry.location.K;
-                  me_exists = true;
-                  break;
-                }
-              }
-              if (!me_exists) {
-                this.markers.push(
-                  {
-                    id: 'me',
-                    coords: {
-                      latitude: results[0].geometry.location.G,
-                      longitude: results[0].geometry.location.K
-                    },
-                    options: {
-                      icon: '/assets/images/logo/logo32.png'
-                    }
-                  });
-                this.circles[0].center.latitude = results[0].geometry.location.G;
-                this.circles[0].center.longitude = results[0].geometry.location.K;
-              }
-              this.handleParks();
-            } else {
-              alert('Geocode was not successful for the following reason: ' + status);
+    geocodeAddress(geocoder, resultsMap) {
+      var address = document.getElementById('address').value;
+      geocoder.geocode({'address': address}, (results, status) => {
+        if (status === google.maps.GeocoderStatus.OK) {
+          resultsMap.setCenter(results[0].geometry.location);
+          var me_exists = false;
+          for (var i = 0; i < this.markers.length; i++) {
+            if (this.markers[i].id === 'me') {
+              this.markers[i].coords = {
+                latitude: results[0].geometry.location.G,
+                longitude: results[0].geometry.location.K
+              };
+              this.circles[0].center.latitude = results[0].geometry.location.G;
+              this.circles[0].center.longitude = results[0].geometry.location.K;
+              me_exists = true;
+              break;
             }
-          });
+          }
+          if (!me_exists) {
+            this.markers.push(
+              {
+                id: 'me',
+                coords: {
+                  latitude: results[0].geometry.location.G,
+                  longitude: results[0].geometry.location.K
+                },
+                options: {
+                  icon: '/assets/images/logo/logo32.png'
+                }
+              });
+            this.circles[0].center.latitude = results[0].geometry.location.G;
+            this.circles[0].center.longitude = results[0].geometry.location.K;
+          }
+          this.handleParks();
+        } else {
+          alert('Geocode was not successful for the following reason: ' + status);
         }
-
       });
     }
 
@@ -149,10 +151,20 @@
       var lat = this.circles[0].center.latitude;
       var lng = this.circles[0].center.longitude;
       var radius = Number(this.circles[0].radius) / 1000;
+      this.parks = [];
       this.$http.get('/api/parklands/' + lng.toString() + '/' + lat.toString() + '?radius=' + radius.toString()).then(response => {
         this.parks = response.data;
+        console.log(this.parks);
+        //this.parks = response.data;
       });
-      console.log(this.parks);
+    }
+
+    getPolyFill(model) {
+      if (!model) {
+        console.log("model undefined!");
+        return;
+      }
+      return {color: '#2c8aa7', opacity: '0.3'};
     }
 
     addThing() {
