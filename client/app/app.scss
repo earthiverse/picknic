@@ -2,6 +2,7 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/vendor/assets/font
 @import '../bower_components/bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
 $fa-font-path: "../bower_components/font-awesome/fonts";
 @import '../bower_components/font-awesome/scss/font-awesome';
+@import url(https://fonts.googleapis.com/css?family=Pacifico);
 
 /**
  * App-wide Styles
@@ -21,4 +22,5 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
 @import 'main/main.scss';
 @import '../components/footer/footer.scss';
 @import '../components/modal/modal.scss';
+@import '../components/navbar/navbar.scss';
 // endinjector

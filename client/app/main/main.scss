@@ -6,10 +6,39 @@
   margin-top: -20px;
 }
 
+/*
+#form-options {
+    transform: translate(0px,-300px);
+    display: none;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    &:hover {
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    transform: translate(0px,0px);
+    display: block;
+    }
+}
+
+#hoverbar {
+    height : 20px !important;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    &:hover + #form-options {
+    
+    display: block;
+    transition: all 1s cubic-bezier(0.17, 0.04, 0.03, 0.94);
+    transform: translate(0px,0px);
+    }
+}
+*/
+
+
+
 .angular-google-map-container {
   width: 100%;
   height: 600px;
+  overflow: visible;
+
 }
+
 
 /* fix for Twitter Bootstrap handling of responsive images */
 .angular-google-map img {
@@ -18,6 +47,7 @@
 
 .angular-google-map {
   top: 80px;
+  height: 600px;
 }
 
 .progress-box {

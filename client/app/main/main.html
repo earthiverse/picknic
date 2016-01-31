@@ -1,12 +1,7 @@
 <navbar></navbar>
 <div id="spacer"></div>
-<ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
-                    options="main.options">
-  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
-  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></ui-gmap-circle>
-</ui-gmap-google-map>
 
-<div class="container">
+<div id="form-options">
   <label>Children?</label>
   <div class="form-group">
     <div class="radio">
@@ -41,15 +36,22 @@
     </div>
   </div>
 
-  <h4>The Current Weather: {{main.weather.weather[0].main}} / {{main.weather.weather[0].description}}</h4>
-  <h4>Sunset: {{main.weather.sys.sunset * 1000 | date:'shortTime'}}</h4>
-  <h4>Temp: {{main.weather.main.temp - 273.15 | number:0}}°C</h4>
-
-
-  
-
   <input id="address" type="textbox" placeholder="Where would you like your picnic?" value="">
   <input id="submit" type="button" value="Geocode">
+</div>
+
+<ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
+                    options="main.options">
+  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></ui-gmap-circle>
+</ui-gmap-google-map>
+
+
+
+<div class="container">
+<h4>The Current Weather: {{main.weather.weather[0].main}} / {{main.weather.weather[0].description}}</h4>
+  <h4>Sunset: {{main.weather.sys.sunset * 1000 | date:'shortTime'}}</h4>
+  <h4>Temp: {{main.weather.main.temp - 273.15 | number:0}}°C</h4>
 </div>
 
 <div class="container">
