@@ -8,7 +8,11 @@
       this.$http = $http;
       this.awesomeThings = [];
       this.parks = [];
-      this.marker = {};
+      this.marker = {
+        id: 'me',
+        coords: {latitude: 53.5, longitude: -113.5},
+        options: {icon: '/assets/images/marker32.png'}
+      };
       this.options = {};
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
@@ -71,6 +75,7 @@
                 latitude: results[0].geometry.location.G,
                 longitude: results[0].geometry.location.K
               };
+              this.marker.options = {icon: '/assets/images/marker32.png'};
               this.circles[0].center.latitude = results[0].geometry.location.G;
               this.circles[0].center.longitude = results[0].geometry.location.K;
             }
