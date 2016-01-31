@@ -153,7 +153,6 @@
 
     sliderChange() {
       this.circles[0].radius = Number(this.slider);
-      this.handleParks();
     }
 
     deleteThing(thing) {
