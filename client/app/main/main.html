@@ -6,6 +6,46 @@
 </ui-gmap-google-map>
 
 <div class="container">
+  <label>Children?</label>
+  <div class="form-group">
+    <div class="radio">
+        <label>
+            <input type="radio" name="children" value="yes" ng-model="main.formData.children">
+            Yes
+        </label>
+    </div>
+    <div class="radio">
+        <label>
+            <input type="radio" name="children" value="no" ng-model="main.formData.children">
+            No
+        </label>
+    </div>
+    <div class="radio">
+        <label>
+            <input type="radio" name="children" value="avoid" ng-model="main.formData.children">
+            Avoid
+        </label>
+    </div>
+  </div>
+  <p>Children : {{main.formData.children}}</p>
+
+  <div class="progress-box" ng-app>
+    <div class="percentage-cur">
+      <span class="num">{{ main.slider }}%</span>
+    </div>
+    <div class="progress-bar progress-bar-slider">
+      <input class="progress-slider" type="range" min="0" max="100" ng-model="main.slider">
+      <div class="inner" ng-style="{ width: main.slider + '%' || '0%' }"></div>
+    </div>
+  </div>
+
+  <h4>The Current Weather is </h4>
+  
+</div>
+
+
+
+<div class="container">
   <div class="row">
     <div class="col-lg-12">
       <h1 class="page-header">Features:</h1>

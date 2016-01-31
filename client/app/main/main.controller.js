@@ -11,6 +11,9 @@
       this.options = {};
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
+      this.formData = {children : "no"};
+      this.slider = 50;
+      this.weather = {};
 
       // created after tiles loaded
       this.g_map_obj = {};
@@ -63,6 +66,8 @@
 
       });
     }
+
+
 
     addThing() {
       if (this.newThing) {
