@@ -12,7 +12,7 @@
       this.options = {};
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
-      this.formData = {children: "no"};
+      this.formData = {children: ""};
       this.weather = {};
 
       // created after tiles loaded
