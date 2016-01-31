@@ -138,7 +138,6 @@ exports.location = function (req, res) {
     [lng + deg_radius, lat - deg_radius],
     [lng - deg_radius, lat - deg_radius]
   ]];
-  console.log(searchSquare);
   Parkland.find().where('geometry').intersects().geometry(
     {type: 'Polygon', coordinates: searchSquare}
     )

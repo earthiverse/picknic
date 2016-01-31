@@ -2,30 +2,32 @@
 <div id="spacer"></div>
 <ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
                     options="main.options">
-  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
-  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></ui-gmap-circle>
+  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options"
+                  idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill"
+                  radius="c.radius"></ui-gmap-circle>
 </ui-gmap-google-map>
 
 <div class="container">
   <label>Children?</label>
   <div class="form-group">
     <div class="radio">
-        <label>
-            <input type="radio" name="children" value="yes" ng-model="main.formData.children">
-            Yes
-        </label>
+      <label>
+        <input type="radio" name="children" value="yes" ng-model="main.formData.children">
+        Yes
+      </label>
     </div>
     <div class="radio">
-        <label>
-            <input type="radio" name="children" value="no" ng-model="main.formData.children">
-            No
-        </label>
+      <label>
+        <input type="radio" name="children" value="no" ng-model="main.formData.children">
+        No
+      </label>
     </div>
     <div class="radio">
-        <label>
-            <input type="radio" name="children" value="avoid" ng-model="main.formData.children">
-            Avoid
-        </label>
+      <label>
+        <input type="radio" name="children" value="avoid" ng-model="main.formData.children">
+        Avoid
+      </label>
     </div>
   </div>
   <p>Children : {{main.formData.children}}</p>
@@ -36,8 +38,9 @@
       <span class="num">{{ main.circles[0].radius }}m</span>
     </div>
     <div class="progress-bar progress-bar-slider">
-      <input class="progress-slider" type="range" min="1000" max="20000" step="1000"ng-model="main.slider" ng-change="main.sliderChange()">
-      <div class="inner" ng-style="{ width: main.slider / 200 + '%' || '0%' }"></div>
+      <input class="progress-slider" type="range" min="100" max="5000" step="10" ng-model="main.slider"
+             ng-change="main.sliderChange()">
+      <div class="inner" ng-style="{ width: main.slider / 50 + '%' || '0%' }"></div>
     </div>
   </div>
 
@@ -45,8 +48,6 @@
   <h4>Sunset: {{main.weather.sys.sunset * 1000 | date:'shortTime'}}</h4>
   <h4>Temp: {{main.weather.main.temp - 273.15 | number:0}}°C</h4>
 
-
-  
 
   <input id="address" type="textbox" placeholder="Where would you like your picnic?" value="">
   <input id="submit" type="button" value="Geocode">
