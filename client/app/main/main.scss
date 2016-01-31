@@ -38,8 +38,17 @@ h1 {
 h3 {
     margin-top: 10px;
 }
+
+#submit {
+    height: 34px;
+}
 .info {
     color: lighten(green,20%);
+}
+
+.input-group {
+    margin-top: 7px;
+    margin-bottom: 7px;
 }
 
 .panel-default .panel-heading {
@@ -66,7 +75,8 @@ h3 {
 
 .progress-box {
     width: 100%;
-    margin: 20px 0;
+    margin: 10px 0;
+    margin-bottom: 20px;
 }
 
 .progress-box .percentage-cur .num {

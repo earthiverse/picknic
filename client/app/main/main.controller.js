@@ -27,16 +27,16 @@
       };
       this.options = {scrollwheel: false};
       //Range Slider
-      this.slider = 100;
+      this.slider = 1000;
       this.circles = [
         {
           id: 1,
           center: {
             latitude: 53.5, longitude: -113.5
           },
-          radius: 1, stroke: {color: '#08B21F', weight: 2, opacity: 0.5},
+          radius: 1, stroke: {color: '#ffcccc', weight: 3, opacity: 1},
           fill: {
-            color: '#08B21F', opacity: 0.25
+            color: '#ffcccc', opacity: 0.25
           }
         }
       ];
@@ -95,7 +95,7 @@
             id: 'me',
             coords: {latitude: position.coords.latitude, longitude: position.coords.longitude},
             options: {
-              icon: '/assets/images/logo/logo32.png'
+              icon: '/assets/images/marker32.png'
             }
           };
           //Set Circle
