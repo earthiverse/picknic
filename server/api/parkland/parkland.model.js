@@ -9,10 +9,8 @@ var ParklandSchema = new Schema({
     address: String,
     official: String
   },
-  
   geometry: {
-    type: String,
-    coordinates: [[[[Number]]]]
+    coordinates: []
   }
 });
 
