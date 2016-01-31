@@ -3,7 +3,7 @@
 var mongoose = require('bluebird').promisifyAll(require('mongoose'));
 var Schema = mongoose.Schema;
 
-var ClosestTreeSchema = new Schema({
+var TreeSchema = new Schema({
   location_type: String,
   location: [Number],
   condition_percent: Number,
@@ -11,4 +11,4 @@ var ClosestTreeSchema = new Schema({
   species_common: String
 });
 
-module.exports = mongoose.model('ClosestTree', ClosestTreeSchema);
+module.exports = mongoose.model('Tree', TreeSchema);
