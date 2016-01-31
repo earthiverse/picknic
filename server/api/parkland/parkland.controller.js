@@ -61,7 +61,18 @@ function removeEntity(res) {
 
 // Gets a list of Parklands
 exports.index = function(req, res) {
-  Parkland.findAsync()
+  function isInteger(value) {
+    return (!isNaN(value) && Math.floor(value) === value);
+  }
+  var query_dict = req.query;
+  var skip_num = 0;
+  if ('skip' in query_dict) {
+    if (isInteger(Number(query_dict['skip']))) {
+      skip_num = Number(query_dict['skip']);
+    }
+  }
+  Parkland.find().skip(skip_num).limit(10)
+    .execAsync()
     .then(responseWithResult(res))
     .catch(handleError(res));
 };
