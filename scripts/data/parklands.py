@@ -19,12 +19,6 @@ obj = json.load(parklands_url)
 # Get indexes
 columns = {}
 column_number = 0
-for column in obj["meta"]["view"]["columns"]:
-  # DEBUG
-  column_name = column["name"]
-  if column_name in desired_columns:
-    columns[column_name] = column_number
-  column_number += 1
 
 # Set Up Mongo Connection
 mongo = pymongo.MongoClient()
@@ -33,13 +27,13 @@ parklands = db.parkland
 
 # Clear all existing parkland
 print("Removing existing 'parkland' data...")
-parkland.delete_many({})
+parklands.delete_many({})
 
 # Add all the parklands
 print("Adding 'parkland' data...")
 num_parklands = 0
 for parkland in obj["features"]:
-  common_name = parkland["properties"]["common_name"]
+  common_name = parkland["properties"]["common"]
   official_name = parkland["properties"]["official"]
   address = parkland["properties"]["address"]
   geometry = parkland["geometry"]
