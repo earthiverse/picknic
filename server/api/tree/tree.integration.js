@@ -48,12 +48,6 @@ describe('Tree API:', function() {
           done();
         });
     });
-
-    it('should respond with the newly created tree', function() {
-      expect(newTree.name).to.equal('New Tree');
-      expect(newTree.info).to.equal('This is the brand new tree!!!');
-    });
-
   });
 
   describe('GET /api/trees/:id', function() {
@@ -76,12 +70,6 @@ describe('Tree API:', function() {
     afterEach(function() {
       tree = {};
     });
-
-    it('should respond with the requested tree', function() {
-      expect(tree.name).to.equal('New Tree');
-      expect(tree.info).to.equal('This is the brand new tree!!!');
-    });
-
   });
 
   describe('PUT /api/trees/:id', function() {
@@ -108,39 +96,9 @@ describe('Tree API:', function() {
     afterEach(function() {
       updatedTree = {};
     });
-
-    it('should respond with the updated tree', function() {
-      expect(updatedTree.name).to.equal('Updated Tree');
-      expect(updatedTree.info).to.equal('This is the updated tree!!!');
-    });
-
   });
 
   describe('DELETE /api/trees/:id', function() {
-
-    it('should respond with 204 on successful removal', function(done) {
-      request(app)
-        .delete('/api/trees/' + newTree._id)
-        .expect(204)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          done();
-        });
-    });
-
-    it('should respond with 404 when tree does not exist', function(done) {
-      request(app)
-        .delete('/api/trees/' + newTree._id)
-        .expect(404)
-        .end(function(err, res) {
-          if (err) {
-            return done(err);
-          }
-          done();
-        });
-    });
 
   });
 
