@@ -44,7 +44,25 @@
 <div class="panel-heading">Picnic Preferences</div>
 <div class="panel-body">
 
+    <div class="progress-box">
+      <span class="num"> Tree Density: {{ main.treeslider }}%</span>
+    <div class="progress-bar progress-bar-slider">
+      <input class="progress-slider" type="range" min="1" max="100" step="1" ng-model="main.treeslider">
+      <div class="inner" ng-style="{ width: main.treeslider + '%' || '0%' }"></div>
+    </div>
+    </div>
 
+  <label>Trees? <i class="fa fa-tree"></i> {{main.formData.trees}} </label>
+  <div class="form-group">
+      <label class="radio-inline">
+        <input type="radio" name="trees" value="yes" ng-model="main.formData.trees">
+        Show Me The Trees!
+      </label>
+      <label class="radio-inline">
+        <input type="radio" name="trees" value="no" ng-model="main.formData.trees">
+        Don't Display
+      </label>
+  </div>
 
       <label>Children? <i class="fa fa-child"></i> {{main.formData.children}} </label>
   <div class="form-group">
@@ -61,6 +79,8 @@
         Avoid
       </label>
   </div>
+
+
 
   </div>
 </div>
