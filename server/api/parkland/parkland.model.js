@@ -4,9 +4,16 @@ var mongoose = require('bluebird').promisifyAll(require('mongoose'));
 var Schema = mongoose.Schema;
 
 var ParklandSchema = new Schema({
-  name: String,
-  info: String,
-  active: Boolean
+  properties: {
+    common: String,
+    address: String,
+    official: String
+  },
+  
+  geometry: {
+    type: String,
+    coordinates: [[[[Number]]]]
+  }
 });
 
 module.exports = mongoose.model('Parkland', ParklandSchema);
