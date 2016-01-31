@@ -8,7 +8,11 @@
       this.$http = $http;
       this.awesomeThings = [];
       this.parks = [];
-      this.markers = [];
+      this.marker = {
+        id: 'me',
+        coords: {latitude: 53.5, longitude: -113.5},
+        options: {icon: '/assets/images/marker32.png'}
+      };
       this.options = {};
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
@@ -66,34 +70,15 @@
       geocoder.geocode({'address': address}, (results, status) => {
         if (status === google.maps.GeocoderStatus.OK) {
           resultsMap.setCenter(results[0].geometry.location);
-          var me_exists = false;
-          for (var i = 0; i < this.markers.length; i++) {
-            if (this.markers[i].id === 'me') {
-              this.markers[i].coords = {
+            if ('id' in this.marker) {
+              this.marker.coords = {
                 latitude: results[0].geometry.location.G,
                 longitude: results[0].geometry.location.K
               };
+              this.marker.options = {icon: '/assets/images/marker32.png'};
               this.circles[0].center.latitude = results[0].geometry.location.G;
               this.circles[0].center.longitude = results[0].geometry.location.K;
-              me_exists = true;
-              break;
             }
-          }
-          if (!me_exists) {
-            this.markers.push(
-              {
-                id: 'me',
-                coords: {
-                  latitude: results[0].geometry.location.G,
-                  longitude: results[0].geometry.location.K
-                },
-                options: {
-                  icon: '/assets/images/marker32.png'
-                }
-              });
-            this.circles[0].center.latitude = results[0].geometry.location.G;
-            this.circles[0].center.longitude = results[0].geometry.location.K;
-          }
           this.handleParks();
         } else {
           alert('Geocode was not successful for the following reason: ' + status);
@@ -111,13 +96,13 @@
         navigator.geolocation.getCurrentPosition(position => {
           this.initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
           this.g_map_obj.setCenter(this.initialLocation);
-          this.markers.push({
+          this.marker = {
             id: 'me',
             coords: {latitude: position.coords.latitude, longitude: position.coords.longitude},
             options: {
               icon: '/assets/images/marker32.png'
             }
-          });
+          };
           //Set Circle
           this.circles[0].center.latitude = position.coords.latitude;
           this.circles[0].center.longitude = position.coords.longitude;
@@ -168,7 +153,6 @@
 
     sliderChange() {
       this.circles[0].radius = Number(this.slider);
-      this.handleParks();
     }
 
     deleteThing(thing) {
