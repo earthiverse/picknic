@@ -31,7 +31,7 @@ for column in obj["meta"]["view"]["columns"]:
 
 # Set Up Mongo Connection
 mongo = pymongo.MongoClient()
-db = mongo.picknic
+db = mongo['picknic-dev']
 trees = db.trees
 
 # Clear all existing trees
