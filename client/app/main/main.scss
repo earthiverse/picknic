@@ -42,6 +42,11 @@ h3 {
     color: lighten(green,20%);
 }
 
+.input-group {
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
 .panel-default .panel-heading {
     background-color:  #ffcccc;
 }
@@ -66,7 +71,8 @@ h3 {
 
 .progress-box {
     width: 100%;
-    margin: 20px 0;
+    margin: 10px 0;
+    margin-bottom: 20px;
 }
 
 .progress-box .percentage-cur .num {
