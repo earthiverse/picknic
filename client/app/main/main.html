@@ -2,7 +2,7 @@
 <div id="spacer"></div>
 <ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
                     options="main.options">
-  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
 </ui-gmap-google-map>
 
 <div class="container">

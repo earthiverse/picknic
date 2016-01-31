@@ -17,7 +17,8 @@
       var self = this;
 
       // Markers go inside this array
-      this.markers = [{id: 1, coords: {latitude: 53.5333, longitude: -113.5000}}];
+      //this.markers = [{id: 1, coords: {latitude: 53.5333, longitude: -113.5000}}];
+      this.markers = [];
 
       $http.get('/api/things').then(response => {
         this.awesomeThings = response.data;
@@ -25,9 +26,10 @@
 
       uiGmapGoogleMapApi.then(function (maps) {
         var edmonton = new google.maps.LatLng(53.5333, -113.5000);
-        self.map = {center: {latitude: 53.5333, longitude: -113.5000}, zoom: 14,
+        self.map = {
+          center: {latitude: 53.5333, longitude: -113.5000}, zoom: 14,
           events: {
-            tilesloaded: function(map) {
+            tilesloaded: function (map) {
               self.g_map_obj = map;
             }
           }
@@ -40,6 +42,13 @@
           navigator.geolocation.getCurrentPosition(function (position) {
             self.initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             self.g_map_obj.setCenter(self.initialLocation);
+            self.markers.push({
+              id: 'me',
+              coords: {latitude: position.coords.latitude, longitude: position.coords.longitude},
+              options: {
+                icon: '/assets/images/logo/logo32.png'
+              }
+            });
           }, function () {
             handleNoGeolocation(self.browserSupportFlag);
           });
