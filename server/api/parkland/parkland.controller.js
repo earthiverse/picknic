@@ -121,11 +121,27 @@ exports.destroy = function (req, res) {
  * @param res
  */
 exports.location = function (req, res) {
+
+  var query_dict = req.query;
+  var radius = 0.001;
+  if ('radius' in query_dict) {
+    radius = Number(query_dict['radius']);
+  }
+
+  var deg_radius = radius * (1 / 110.574);
   var lat = Number(req.params.lat);
   var lng = Number(req.params.lng);
+  var searchSquare = [[
+    [lng - deg_radius, lat - deg_radius],
+    [lng - deg_radius, lat + deg_radius],
+    [lng + deg_radius, lat + deg_radius],
+    [lng + deg_radius, lat - deg_radius],
+    [lng - deg_radius, lat - deg_radius]
+  ]];
+  console.log(searchSquare);
   Parkland.find().where('geometry').intersects().geometry(
-    {type: 'Point', coordinates: [lng, lat]}
-  )
+    {type: 'Polygon', coordinates: searchSquare}
+    )
     .execAsync()
     .then(responseWithResult(res))
     .catch(handleError(res));
