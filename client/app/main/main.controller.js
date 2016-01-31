@@ -8,7 +8,15 @@
       this.$http = $http;
       this.awesomeThings = [];
       this.parks = [];
-      this.markers = [];
+      this.trees = [];
+      this.tree_options = {
+        icon: '/assets/images/tree16.png'
+      };
+      this.marker = {
+        id: 'me',
+        coords: {latitude: 53.5, longitude: -113.5},
+        options: {icon: '/assets/images/marker32.png'}
+      };
       this.options = {};
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
@@ -50,7 +58,6 @@
       });
 
       this.handleParks();
-      this.handleGeoLocation();
 
       uiGmapGoogleMapApi.then(maps => {
         // Initialize the geoencoder
@@ -58,6 +65,7 @@
         document.getElementById('submit').addEventListener('click', () => {
           this.geocodeAddress(geocoder, this.g_map_obj);
         });
+        this.handleGeoLocation();
       });
     }
 
@@ -123,7 +131,7 @@
           this.circles[0].center.longitude = position.coords.longitude;
           this.circles[0].radius = 1000;
           this.handleParks();
-        }, function () {
+        }, () => {
           this.handleNoGeolocation(this.browserSupportFlag);
         });
       }
@@ -146,17 +154,31 @@
       this.g_map_obj.setCenter(this.initialLocation);
     }
 
-    handleParks() {
+    handleEntities() {
       // TODO: LINE 1295 of angular-google-maps.js CHANGE TO ARROW NOTATION, read README
+      this.handleParks();
+      this.handleTrees();
+    }
+
+    handleParks() {
       var lat = this.circles[0].center.latitude;
       var lng = this.circles[0].center.longitude;
       var radius = Number(this.circles[0].radius) / 1000;
       this.parks = [];
       this.$http.get('/api/parklands/' + lng.toString() + '/' + lat.toString() + '?radius=' + radius.toString()).then(response => {
         this.parks = response.data;
-        console.log(this.parks);
-        //this.parks = response.data;
       });
+    }
+
+    handleTrees() {
+      var lat = this.circles[0].center.latitude;
+      var lng = this.circles[0].center.longitude;
+      var radius = Number(this.circles[0].radius) / 1000;
+      this.trees = [];
+      this.$http.get('/api/trees/' + lng.toString() + '/' + lat.toString() + '?radius=' + radius.toString()).then(response => {
+        this.trees = response.data;
+      });
+
     }
 
     addThing() {

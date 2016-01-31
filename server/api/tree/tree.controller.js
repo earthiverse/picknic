@@ -131,7 +131,6 @@ exports.location = function(req, res) {
     [lng + deg_radius, lat - deg_radius],
     [lng - deg_radius, lat - deg_radius]
   ]];
-  console.log(searchSquare);
   Tree.find().where('location').within().geometry(
     {type: 'Polygon', coordinates: searchSquare}
 //  Tree.find().where('coordinates').near(  // this isn't working..
