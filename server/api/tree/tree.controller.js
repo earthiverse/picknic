@@ -14,14 +14,14 @@ var Tree = require('./tree.model');
 
 function handleError(res, statusCode) {
   statusCode = statusCode || 500;
-  return function(err) {
+  return function (err) {
     res.status(statusCode).send(err);
   };
 }
 
 function responseWithResult(res, statusCode) {
   statusCode = statusCode || 200;
-  return function(entity) {
+  return function (entity) {
     if (entity) {
       res.status(statusCode).json(entity);
     }
@@ -29,7 +29,7 @@ function responseWithResult(res, statusCode) {
 }
 
 function handleEntityNotFound(res) {
-  return function(entity) {
+  return function (entity) {
     if (!entity) {
       res.status(404).end();
       return null;
@@ -39,20 +39,20 @@ function handleEntityNotFound(res) {
 }
 
 function saveUpdates(updates) {
-  return function(entity) {
+  return function (entity) {
     var updated = _.merge(entity, updates);
     return updated.saveAsync()
-      .spread(function(updated) {
+      .spread(function (updated) {
         return updated;
       });
   };
 }
 
 function removeEntity(res) {
-  return function(entity) {
+  return function (entity) {
     if (entity) {
       return entity.removeAsync()
-        .then(function() {
+        .then(function () {
           res.status(204).end();
         });
     }
@@ -60,14 +60,25 @@ function removeEntity(res) {
 }
 
 // Gets a list of Trees
-exports.index = function(req, res) {
-  Tree.findAsync()
+exports.index = function (req, res) {
+  function isInteger(value) {
+    return (!isNaN(value) && Math.floor(value) === value);
+  }
+  var query_dict = req.query;
+  var skip_num = 0;
+  if ('skip' in query_dict) {
+    if (isInteger(Number(query_dict['skip']))) {
+      skip_num = Number(query_dict['skip']);
+    }
+  }
+  Tree.find().skip(skip_num).limit(10)
+    .execAsync()
     .then(responseWithResult(res))
     .catch(handleError(res));
 };
 
 // Gets a single Tree from the DB
-exports.show = function(req, res) {
+exports.show = function (req, res) {
   Tree.findByIdAsync(req.params.id)
     .then(handleEntityNotFound(res))
     .then(responseWithResult(res))
@@ -75,14 +86,14 @@ exports.show = function(req, res) {
 };
 
 // Creates a new Tree in the DB
-exports.create = function(req, res) {
+exports.create = function (req, res) {
   Tree.createAsync(req.body)
     .then(responseWithResult(res, 201))
     .catch(handleError(res));
 };
 
 // Updates an existing Tree in the DB
-exports.update = function(req, res) {
+exports.update = function (req, res) {
   if (req.body._id) {
     delete req.body._id;
   }
@@ -94,7 +105,7 @@ exports.update = function(req, res) {
 };
 
 // Deletes a Tree from the DB
-exports.destroy = function(req, res) {
+exports.destroy = function (req, res) {
   Tree.findByIdAsync(req.params.id)
     .then(handleEntityNotFound(res))
     .then(removeEntity(res))
