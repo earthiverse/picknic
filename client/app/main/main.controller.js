@@ -147,7 +147,7 @@
     }
 
     handleParks() {
-      // TODO: LINE 1295 of angular-google-maps.js CHANGE TO ARROW NOTATION
+      // TODO: LINE 1295 of angular-google-maps.js CHANGE TO ARROW NOTATION, read README
       var lat = this.circles[0].center.latitude;
       var lng = this.circles[0].center.longitude;
       var radius = Number(this.circles[0].radius) / 1000;
