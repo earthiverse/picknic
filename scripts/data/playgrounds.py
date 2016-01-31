@@ -25,7 +25,6 @@ for column in obj["meta"]["view"]["columns"]:
   # DEBUG
   column_name = column["name"]
   if column_name in desired_columns:
-    print column_name
     columns[column_name] = column_number
   column_number += 1
 
