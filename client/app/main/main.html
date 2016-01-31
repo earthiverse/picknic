@@ -10,14 +10,15 @@
       <div class="inner" ng-style="{ width: main.slider / 50 + '%' || '0%' }"></div>
     </div>
     </div>
-
+  <form>
   <div class="input-group">
       <input id="address" type="text" class="form-control" placeholder="Find a picnic spot near..." value="">
       <span class="input-group-btn">
-        <button id="submit" class="btn btn-default" type="button">Go!</button>
+        <input id="submit" type="submit" class="btn btn-default" type="button">Go!</input>
       </span>
-    </div><!-- /input-group -->
-    </div>
+  </div><!-- /input-group -->
+  </form>
+</div>
 <ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
                     options="main.options">
   <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" options="m.options"
@@ -63,7 +64,6 @@
         Avoid
       </label>
   </div>
-
 
   </div>
 </div>

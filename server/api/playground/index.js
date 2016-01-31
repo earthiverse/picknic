@@ -1,11 +1,10 @@
 'use strict';
 
 var express = require('express');
-var controller = require('./tree.controller');
+var controller = require('./playground.controller');
 
 var router = express.Router();
 
-router.get('/:lng/:lat', controller.location);
 router.get('/', controller.index);
 router.get('/:id', controller.show);
 router.post('/', controller.create);

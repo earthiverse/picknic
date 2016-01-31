@@ -111,3 +111,33 @@ exports.destroy = function (req, res) {
     .then(removeEntity(res))
     .catch(handleError(res));
 };
+
+// Find all trees in the given lat lng
+exports.location = function(req, res) {
+
+  var query_dict = req.query;
+  var radius = 0.001;
+  if ('radius' in query_dict) {
+    radius = Number(query_dict['radius']);
+  }
+
+  var deg_radius = radius * (1 / 110.574);
+  var lat = Number(req.params.lat);
+  var lng = Number(req.params.lng);
+  var searchSquare = [[
+    [lng - deg_radius, lat - deg_radius],
+    [lng - deg_radius, lat + deg_radius],
+    [lng + deg_radius, lat + deg_radius],
+    [lng + deg_radius, lat - deg_radius],
+    [lng - deg_radius, lat - deg_radius]
+  ]];
+  console.log(searchSquare);
+  Tree.find().where('location').within().geometry(
+    {type: 'Polygon', coordinates: searchSquare}
+//  Tree.find().where('coordinates').near(  // this isn't working..
+//    { center: [lat, lng], maxDistance: 50 }
+    )
+    .execAsync()
+    .then(responseWithResult(res))
+    .catch(handleError(res));
+}

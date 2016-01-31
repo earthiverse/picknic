@@ -22,7 +22,6 @@
         events: {
           tilesloaded: (map) => {
             this.g_map_obj = map;
-            this.handleGeoLocation();
           }
         }
       };
@@ -51,6 +50,7 @@
       });
 
       this.handleParks();
+      this.handleGeoLocation();
 
       uiGmapGoogleMapApi.then(maps => {
         // Initialize the geoencoder
