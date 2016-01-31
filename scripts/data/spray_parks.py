@@ -50,7 +50,7 @@ for spray_park in obj["data"]:
     spray_park = {
       "name" : name,
       "address" : address,
-      "location" : [ float(latitude), float(longitude) ]
+      "location" : [ float(longitude), float(latitude) ]
     }
     spray_parks.insert(spray_park)
     num_spray_parks += 1

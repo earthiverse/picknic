@@ -52,7 +52,7 @@ for tree in obj["data"]:
   try:
     tree = {
       "location_type" : location_type,
-      "location" : [ float(latitude), float(longitude) ],
+      "location" : [ float(longitude), float(latitude) ],
       "condition_percent" : int(condition_percent),
       "diameter_breast_height" : int(diameter_breast_height),
       "species_common" : species_common

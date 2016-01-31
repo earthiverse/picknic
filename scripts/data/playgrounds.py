@@ -49,7 +49,7 @@ for playground in obj["data"]:
   try:
     playground = {
       "name" : name,
-      "location" : [ float(latitude), float(longitude) ]
+      "location" : [ float(longitude), float(latitude) ]
     }
     playgrounds.insert(playground)
     num_playgrounds += 1
