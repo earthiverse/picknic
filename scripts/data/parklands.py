@@ -23,7 +23,7 @@ column_number = 0
 # Set Up Mongo Connection
 mongo = pymongo.MongoClient()
 db = mongo.picknic
-parklands = db.parkland
+parklands = db.parklands
 
 # Clear all existing parkland
 print("Removing existing 'parkland' data...")
