@@ -3,6 +3,7 @@
 <ui-gmap-google-map id="map" center="main.map.center" zoom="main.map.zoom" events="main.map.events"
                     options="main.options">
   <ui-gmap-marker ng-repeat="m in main.markers" coords="m.coords" icon="m.icon" options="m.options" idkey="m.id"></ui-gmap-marker>
+  <ui-gmap-circle ng-repeat="c in main.circles track by c.id" center="c.center" stroke="c.stroke" fill="c.fill" radius="c.radius"></ui-gmap-circle>
 </ui-gmap-google-map>
 
 <div class="container">
@@ -31,17 +32,22 @@
 
   <div class="progress-box" ng-app>
     <div class="percentage-cur">
-      <span class="num">{{ main.slider }}%</span>
+      <span class="num">{{ main.slider }}m</span>
+      <span class="num">{{ main.circles[0].radius }}m</span>
     </div>
     <div class="progress-bar progress-bar-slider">
-      <input class="progress-slider" type="range" min="0" max="100" ng-model="main.slider">
-      <div class="inner" ng-style="{ width: main.slider + '%' || '0%' }"></div>
+      <input class="progress-slider" type="range" min="1000" max="20000" step="1000"ng-model="main.slider" ng-change="main.sliderChange()">
+      <div class="inner" ng-style="{ width: main.slider / 200 + '%' || '0%' }"></div>
     </div>
   </div>
 
-  <h4>The Current Weather is </h4>
+  <h4>The Current Weather: {{main.weather.weather[0].main}} / {{main.weather.weather[0].description}}</h4>
+  <h4>Sunset: {{main.weather.sys.sunset * 1000 | date:'shortTime'}}</h4>
+  <h4>Temp: {{main.weather.main.temp - 273.15 | number:0}}°C</h4>
+
+
   
-</div>
+
   <input id="address" type="textbox" placeholder="Where would you like your picnic?" value="">
   <input id="submit" type="button" value="Geocode">
 </div>

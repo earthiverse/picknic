@@ -12,7 +12,7 @@
       this.browserSupportFlag = Boolean();
       this.initialLocation = {};
       this.formData = {children : "no"};
-      this.slider = 50;
+      
       this.weather = {};
 
       // created after tiles loaded
@@ -23,8 +23,26 @@
       //this.markers = [{id: 1, coords: {latitude: 53.5333, longitude: -113.5000}}];
       this.markers = [];
 
+      //Range Slider
+      this.slider = 1000;
+      this.circles = [
+        {id: 1, 
+          center : {
+            latitude: 53.5, longitude:-113.5
+          }, 
+          radius: 1, stroke: { color: '#08B21F', weight: 2, opacity:0.5}, 
+          fill : { 
+            color: '#08B21F', opacity: 0.25
+          }
+        }
+      ];
+
       $http.get('/api/things').then(response => {
         this.awesomeThings = response.data;
+      });
+
+      $http.get('http://api.openweathermap.org/data/2.5/weather?lat=53.5333&lon=-113.5000&appid=ada399b22b7d2525b330e37f7be56bb5').then(response => {
+        this.weather = response.data;
       });
 
       uiGmapGoogleMapApi.then(function (maps) {
@@ -66,6 +84,10 @@
                   icon: '/assets/images/logo/logo32.png'
                 }
               });
+              //Set Circle
+              self.circles[0].center.latitude = position.coords.latitude;
+              self.circles[0].center.longitude = position.coords.longitude;
+              self.circles[0].radius = 1000;
             }, function () {
               handleNoGeolocation(self.browserSupportFlag);
             });
@@ -142,6 +164,10 @@
         this.$http.post('/api/things', {name: this.newThing});
         this.newThing = '';
       }
+    }
+
+    sliderChange() {
+      this.circles[0].radius = Number(this.slider);
     }
 
     deleteThing(thing) {
