@@ -1,22 +1,36 @@
 {
   "name": "picknic",
   "version": "1.0.0",
-  "description": "Picnic Site Recommendation Engine",
+  "description": "A picnic site recommendation engine",
   "main": "index.js",
+  "engines": {
+    "node": "~5.6"
+  },
   "scripts": {
-    "start": "sudo node index.js",
+    "grunt": "grunt",
+    "start": "cd build && node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "http://gitlab.earthiverse.ca/earthiverse/picknic.git"
+    "url": "git@omelette.earthiverse.ca:earthiverse/picknic.git"
   },
-  "author": "",
+  "keywords": [
+    "picknic"
+  ],
+  "author": "Kent Rasmussen",
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.1",
-    "config.json": "0.0.4",
-    "express": "^4.13.4",
-    "mongoose": "^4.4.19"
+    "express": "^4.13.4"
+  },
+  "devDependencies": {
+    "grunt": "^1.0.1",
+    "grunt-contrib-copy": "^1.0.0",
+    "grunt-contrib-watch": "^1.0.0",
+    "grunt-ts": "^5.5.1",
+    "grunt-tslint": "^3.1.0",
+    "tslint": "^3.11.0",
+    "typings": "^1.0.4"
   }
 }

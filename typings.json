@@ -1,0 +1,9 @@
+{
+  "globalDependencies": {
+    "body-parser": "registry:dt/body-parser#0.0.0+20160317120654",
+    "express": "registry:dt/express#4.0.0+20160317120654",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#0.0.0+20160602151406",
+    "node": "registry:dt/node#6.0.0+20160608110640",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160606155157"
+  }
+}
