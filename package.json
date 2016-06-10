@@ -7,8 +7,8 @@
     "node": "~5.6"
   },
   "scripts": {
-    "grunt": "grunt",
-    "start": "cd build && node index.js",
+    "build": "tsc",
+    "start": "node build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -26,12 +26,6 @@
     "mongoose": "^4.4.20"
   },
   "devDependencies": {
-    "grunt": "^1.0.1",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-ts": "^5.5.1",
-    "grunt-tslint": "^3.1.0",
-    "tslint": "^3.11.0",
     "typings": "^1.0.4"
   }
 }
