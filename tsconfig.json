@@ -1,0 +1,14 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "outDir": "build",
+        "removeComments": true,
+        "rootDir": "source",
+        "sourceMap": true
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

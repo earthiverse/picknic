@@ -1,0 +1,9 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  // Tabs
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "files.exclude": {
+    "node_modules/": true
+  }
+}
