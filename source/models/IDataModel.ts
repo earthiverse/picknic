@@ -1,15 +1,9 @@
 import Mongoose = require('mongoose');
 
-export interface IDataModel {
-  source: {
-    retrieved: Date;
-    name: string;
-    url: string;
-  };
-  license: {
-    name: string;
-    url: string;
-  };
+export interface DataSourceModel {
+  retrieved: Date;
+  name: string;
+  url: string;
 };
 
 export const DataSourceSchema = new Mongoose.Schema({
@@ -17,6 +11,11 @@ export const DataSourceSchema = new Mongoose.Schema({
   name: { type: String, required: true },
   url: { type: String, required: false }
 });
+
+export interface DataLicenseModel {
+  name: string;
+  url: string;
+};
 
 export const DataLicenseSchema = new Mongoose.Schema({
   name: { type: String, required: true },

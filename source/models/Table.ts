@@ -1,11 +1,15 @@
 /// <reference path="../../typings/index.d.ts" />
 import Mongoose = require('mongoose');
-import { IDataModel, DataSourceSchema, DataLicenseSchema } from './IDataModel';
+import { DataSourceModel, DataSourceSchema, DataLicenseModel, DataLicenseSchema } from './IDataModel';
 
-export interface ITable extends IDataModel, Mongoose.Document {
-  accessible: boolean;
-  sheltered: boolean;
-  comment: string;
+export interface ITable extends Mongoose.Document {
+  properties: {
+    source: DataSourceModel;
+    license: DataLicenseModel;
+    accessible: boolean;
+    sheltered: boolean;
+    comment: string;
+  }
 };
 
 export const TableSchema = new Mongoose.Schema({

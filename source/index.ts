@@ -11,15 +11,12 @@ Mongoose.connect('mongodb://localhost/picknic');
 
 // Setup Express
 let app = Express();
-app.use(BodyParser.urlencoded({ extended: false }));
+app.use(BodyParser.urlencoded({extended: false}));
 app.use(BodyParser.json());
 
 // Serve Static Files
 // NOTE: It is faster & more efficient to serve these directories through an nginx reverse proxy.
 app.use(Express.static(Path.join(__dirname, "../source/public")));
-app.get("/", function(req, res) {
-  res.send("LOLWUT");
-});
 
 // Load Modules
 import { DataModule } from "./modules/data/DataModule";
