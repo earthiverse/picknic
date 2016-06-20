@@ -6,7 +6,7 @@
         "outDir": "build",
         "removeComments": true,
         "rootDir": "source",
-        "sourceMap": true
+        "sourceMap": false
     },
     "exclude": [
         "node_modules"

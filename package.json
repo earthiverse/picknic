@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "tsc",
+    "watch": "tsc -w",
     "start": "node build/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -22,8 +23,10 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.1",
+    "csv-parse": "^1.1.1",
     "express": "^4.13.4",
-    "mongoose": "^4.4.20"
+    "mongoose": "^4.4.20",
+    "request": "^2.72.0"
   },
   "devDependencies": {
     "typings": "^1.0.4"
