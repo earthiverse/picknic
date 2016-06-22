@@ -11,5 +11,36 @@ export class DataModule extends Module {
         res.send(tables);
       });
     });
+    app.post('/data/tables/add', function(req:Express.Request, res:Express.Response) {
+      let fields = req.body;
+      Table.create({
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [ Number(fields.longitude), Number(fields.latitude) ]
+        },
+        "properties": {
+          "comment": "DEBUG, DELETE ME IF YOU SEE ME!",
+          "license": {
+            "url": fields.license_url,
+            "name": fields.license_name
+          },
+          "source": {
+            "url": fields.source_url,
+            "name": fields.source_name,
+            "retrieved": Date.now()
+          }
+        }
+      }, function(error:any, tables:string) {
+        if(error) {
+          res.send(error);
+          console.log(error);
+        } else {
+          console.log("----- Fields! -----");
+          console.log(fields);
+          res.send(fields);
+        }
+      });
+    });
   }
 }

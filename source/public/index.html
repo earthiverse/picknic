@@ -32,8 +32,7 @@
       </fieldset>
     </form>
     <div id="map"></div>
-    <form class="pure-form pure-form-stacked">
-      <fieldset>
+    <form class="pure-form pure-form-stacked" action="/data/tables/add" method="post">
         <div class="pure-g">
           <div class="pure-u-1">
             <legend>Location</legend>
@@ -44,11 +43,11 @@
           </div>
           <div class="pure-u-1 pure-u-md-9-24">
             <label for="latitude">Latitude</label>
-            <input id="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
+            <input id="latitude" name="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
           </div>
           <div class="pure-u-1 pure-u-md-9-24">
             <label for="longitude">Longitude</label>
-            <input id="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
+            <input id="longitude" name="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
           </div>
           <div class="pure-u-1">
             <legend>Attributes</legend>
@@ -60,7 +59,7 @@
             <div class="pure-g">
               <div class="pure-u-1 pure-u-md-12-24">
                 <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
-                  <select id="sheltered" class="pure-u-23-24">
+                  <select id="sheltered" name="sheltered" class="pure-u-23-24">
                     <option>Unknown</option>
                     <option>Yes</option>
                     <option>No</option>
@@ -69,7 +68,7 @@
               </div>
               <div class="pure-u-1 pure-u-md-12-24">
                 <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
-                  <select id="accessible" class="pure-u-23-24">
+                  <select id="accessible" name="accessible" class="pure-u-23-24">
                     <option>Unknown</option>
                     <option>Yes</option>
                     <option>No</option>
@@ -88,8 +87,8 @@
             </select>
           </div>
           <div class="pure-u-1 pure-u-md-3-4">
-            <input type="text" id="source_name" class="pure-u-23-24" placeholder="Source Name">
-            <input type="url" id="source_url" class="pure-u-23-24" placeholder="Source URL">
+            <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name">
+            <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL">
           </div>
           <div class="pure-u-1">
             <legend>License</legend>
@@ -101,14 +100,13 @@
             </select>
           </div>
           <div class="pure-u-1 pure-u-md-3-4">
-            <input type="text" id="license_name" class="pure-u-23-24" placeholder="License Name">
-            <input type="url" id="license_url" class="pure-u-23-24" placeholder="License URL">
+            <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name">
+            <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL">
           </div>
           <div class="pure-u-1">
             <button type="submit" class="pure-button pure-button-primary">Add Table</button>
           </div>
         </div>
-      </fieldset>
     </form>
     <script>
       // Inputs
