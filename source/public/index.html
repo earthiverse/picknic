@@ -16,6 +16,12 @@
         width: 100%;
         margin-bottom: 0.5em;
       }
+      .button-special {
+        background: rgb(66, 184, 221);
+        color: white;
+        font-size: 85%;
+        margin-bottom:0.25em;
+      }
     </style>
   </head>
   <body>
@@ -28,37 +34,146 @@
     <div id="map"></div>
     <form class="pure-form pure-form-stacked">
       <fieldset>
-        <legend>Location</legend>
         <div class="pure-g">
-          <div class="pure-u-1 pure-u-md-4-24">
-            <style scoped>
-              .button-special {
-                background: rgb(66, 184, 221);
-                color: white;
-                font-size: 85%;
-                margin-bottom:0.25em;
-              }
-            </style>
-            <a id="move_map_center" class="pure-button button-special pure-u-23-24"><i class="fa fa-map" aria-hidden="true"></i> Map Center</a>
-            <a id="move_current" class="pure-button button-special pure-u-23-24"><i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</a>
+          <div class="pure-u-1">
+            <legend>Location</legend>
           </div>
-          <div class="pure-u-1 pure-u-md-10-24">
+          <div class="pure-u-1 pure-u-md-6-24">
+            <a id="move_map_center" class="pure-button button-special pure-u-23-24"><i class="fa fa-map" aria-hidden="true"></i> Map Center</a>
+            <a id="move_current" class="pure-button button-special pure-button-disabled pure-u-23-24"><i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</a>
+          </div>
+          <div class="pure-u-1 pure-u-md-9-24">
             <label for="latitude">Latitude</label>
             <input id="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
           </div>
-          <div class="pure-u-1 pure-u-md-10-24">
+          <div class="pure-u-1 pure-u-md-9-24">
             <label for="longitude">Longitude</label>
             <input id="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
           </div>
+          <div class="pure-u-1">
+            <legend>Attributes</legend>
+          </div>
+          <div class="pure-u-1 pure-u-md-1-4">
+            <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-question-circle" aria-hidden="true"></i> Set All Unknown</a>
+          </div>
+          <div class="pure-u-1 pure-u-md-3-4">
+            <div class="pure-g">
+              <div class="pure-u-1 pure-u-md-12-24">
+                <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
+                  <select id="sheltered" class="pure-u-23-24">
+                    <option>Unknown</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                  </select>
+                </label>
+              </div>
+              <div class="pure-u-1 pure-u-md-12-24">
+                <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
+                  <select id="accessible" class="pure-u-23-24">
+                    <option>Unknown</option>
+                    <option>Yes</option>
+                    <option>No</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+          </div>
+          <div class="pure-u-1">
+            <legend>Source</legend>
+          </div>
+          <div class="pure-u-1 pure-u-md-1-4">
+            <select id="source" class="pure-u-23-24">
+              <option>Other</option>
+              <option>Picknic</option>
+            </select>
+          </div>
+          <div class="pure-u-1 pure-u-md-3-4">
+            <input type="text" id="source_name" class="pure-u-23-24" placeholder="Source Name">
+            <input type="url" id="source_url" class="pure-u-23-24" placeholder="Source URL">
+          </div>
+          <div class="pure-u-1">
+            <legend>License</legend>
+          </div>
+          <div class="pure-u-1 pure-u-md-1-4">
+            <select id="license" class="pure-u-23-24">
+              <option>Other</option>
+              <option>CC BY 4.0</option>
+            </select>
+          </div>
+          <div class="pure-u-1 pure-u-md-3-4">
+            <input type="text" id="license_name" class="pure-u-23-24" placeholder="License Name">
+            <input type="url" id="license_url" class="pure-u-23-24" placeholder="License URL">
+          </div>
+          <div class="pure-u-1">
+            <button type="submit" class="pure-button pure-button-primary">Add Table</button>
+          </div>
         </div>
-        <legend>Attributes</legend>
-        <button type="submit" class="pure-button pure-button-primary">Submit</button>
       </fieldset>
     </form>
     <script>
+      // Inputs
+      var addressInput = document.getElementById('address');
+      var latInput = document.getElementById("latitude");
+      var lngInput = document.getElementById("longitude");
+      var shelteredInput = document.getElementById("sheltered");
+      var accessibleInput = document.getElementById("accessible");
+      var licenseSelect = document.getElementById("license");
+      var licenseName = document.getElementById("license_name");
+      var licenseURL = document.getElementById("license_url");
+      var sourceSelect = document.getElementById("source");
+      var sourceName = document.getElementById("source_name");
+      var sourceURL = document.getElementById("source_url");
+
+      // Buttons
+      var moveCenter = document.getElementById("move_map_center");
+      var moveCurrent = document.getElementById("move_current");
+      var setUnknown = document.getElementById("reset_attributes");
+
       function trimPretty(number) {
         return parseFloat(parseFloat(number).toFixed(5))
       }
+
+      // Change the license text based on license chosen
+      licenseSelect.addEventListener("change", function() {
+        switch(licenseSelect.value) {
+          case "CC BY 4.0":
+            {
+              licenseURL.value = "https://creativecommons.org/licenses/by/4.0/";
+              licenseName.value = "Creative Commons Attribution 4.0 International";
+            }
+            break;
+          default:
+            {
+              licenseURL.value = "";
+              licenseName.value = "";
+            }
+            break;
+        }
+      });
+
+      // Change the source text based on source chosen
+      sourceSelect.addEventListener("change", function() {
+        switch(sourceSelect.value) {
+          case "Picknic":
+            {
+              sourceURL.value = "https://picknic.site";
+              sourceName.value = "Picknic";
+            }
+            break;
+          default:
+            {
+              sourceURL.value = "";
+              sourceName.value = "";
+            }
+            break;
+        }
+      });
+
+      // Set all attributes to unknown on reset button click
+      setUnknown.addEventListener("click", function() {
+        shelteredInput.value = "Unknown";
+        accessibleInput.value = "Unknown";
+      });
 
       // Render the map after Google Maps loads
       function initMap() {
@@ -94,8 +209,7 @@
         });
 
         // Setup Autocomplete
-        var input = document.getElementById('address');
-        var autocomplete = new google.maps.places.Autocomplete(input);
+        var autocomplete = new google.maps.places.Autocomplete(addressInput);
         autocomplete.bindTo('bounds', map);
         autocomplete.addListener('place_changed', function() {
           var place = autocomplete.getPlace();
@@ -114,25 +228,45 @@
         });
 
         // Try to get & track user location
+        var hasPosition = false;
         if(navigator.geolocation) {
+
           navigator.geolocation.watchPosition(function(position) {
-            // If the position is updated, move the dot
-            locationMarker.setPosition({lat: position.coords.latitude, lng: position.coords.longitude});
+            // Enable the button to move to location
+            moveCurrent.classList.remove("pure-button-disabled");
+
+            // Move the dot
+            var prettyLat = trimPretty(position.coords.latitude);
+            var prettyLng = trimPretty(position.coords.longitude);
+            locationMarker.setPosition({lat: prettyLat, lng: prettyLng});
+            latInput.value = prettyLat;
+            lngInput.value = prettyLng;
+
+            if(!hasPosition) {
+              // Move center of map on first position retrieval
+              map.setCenter({lat: prettyLat, lng: prettyLng});
+
+              // Move new picnic table on first position retrieval
+              tableMarker.setPosition({lat: prettyLat, lng: prettyLng});
+
+              hasPosition = true;
+            }
+          }, function(error) {
+            // Error setting position
+            moveCurrent.classList.add("pure-button-disabled");
+            consle.log("Failed setting location marker position");
           }, function() {
-            consle.log("failed following geolocation");
-          }, function() {
-            // TODO: On Error
+            // Error getting geolocation
+            console.log("Failed retrieving geolocation");
+            moveCurrent.classList.add("pure-button-disabled");
           }, {
             enableHighAccuracy: true
           });
         }
 
-        var lat_input = document.getElementById("latitude");
-        var lng_input = document.getElementById("longitude");
-
         // Initial Values
-        lat_input.value = initialPoint.lat;
-        lng_input.value = initialPoint.lng;
+        latInput.value = initialPoint.lat;
+        lngInput.value = initialPoint.lng;
 
         // Update input coordinates when tableMarker is dragged
         google.maps.event.addListener(tableMarker, 'dragend', function() {
@@ -141,18 +275,18 @@
           var prettyLat = trimPretty(position.lat());
           var prettyLng = trimPretty(position.lng());
           this.setPosition({lat: prettyLat, lng: prettyLng});
-          lat_input.value = prettyLat;
-          lng_input.value = prettyLng;
+          latInput.value = prettyLat;
+          lngInput.value = prettyLng;
         });
 
         // Update tableMarker when input coordinates are changed
-        lat_input.addEventListener("change", function() {
+        latInput.addEventListener("change", function() {
           var new_lat = trimPretty(this.value);
           this.value = new_lat;
           var old_lng = tableMarker.getPosition().lng();
           tableMarker.setPosition({lat: new_lat, lng: old_lng});
-        });        
-        lng_input.addEventListener("change", function() {
+        });
+        lngInput.addEventListener("change", function() {
           var new_lng = trimPretty(this.value);
           this.value = new_lng;
           var old_lat = tableMarker.getPosition().lat();
@@ -160,44 +294,39 @@
         });
 
         // Move the table marker when the buttons are clicked
-        var moveCenter = document.getElementById("move_map_center");
         moveCenter.addEventListener("click", function() {
           // Update Coordinate Inputs
           var position = map.getBounds().getCenter();
           var prettyLat = trimPretty(position.lat());
           var prettyLng = trimPretty(position.lng());
           tableMarker.setPosition({lat: prettyLat, lng: prettyLng});
-          lat_input.value = prettyLat;
-          lng_input.value = prettyLng;
+          latInput.value = prettyLat;
+          lngInput.value = prettyLng;
         });
-        var moveCurrent = document.getElementById("move_current");
         moveCurrent.addEventListener("click", function() {
           // Update Coordinate Inputs
           var position = locationMarker.getPosition();
           var prettyLat = trimPretty(position.lat());
           var prettyLng = trimPretty(position.lng());
           tableMarker.setPosition({lat: prettyLat, lng: prettyLng});
-          lat_input.value = prettyLat;
-          lng_input.value = prettyLng;
+          latInput.value = prettyLat;
+          lngInput.value = prettyLng;
           map.setCenter(locationMarker.getPosition())
         });
-        
+
         // Get picnic tables within the bounds
         allTables = {};
         google.maps.event.addListener(map, 'idle', function() {
           var ne = this.getBounds().getNorthEast();
           var ne_lat = ne.lat();
           var ne_lng = ne.lng();
-          
+
           var sw = this.getBounds().getSouthWest();
           var sw_lat = sw.lat();
           var sw_lng = sw.lng();
-          
+
           var box = {"box": [[sw_lng, sw_lat], [ne_lng, ne_lat]]}
-          console.log("NE: " + ne_lng + ", " + ne_lat);
-          console.log("SW: " + sw_lng + ", " + sw_lat);
-          console.log("Box: " + JSON.stringify(box));
-          
+
           $.ajax({
             type: 'POST',
             url: '/data/tables/find/within',

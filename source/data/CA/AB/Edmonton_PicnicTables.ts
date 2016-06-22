@@ -31,7 +31,7 @@ let success = 0;
 let fail = 0;
 console.log("Downloading...");
 Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
-  console.log("Parsing & Updating Database...");  
+  console.log("Parsing & Updating Database...");
   CSVParse(body, function(error:boolean, data:any) {
     // Columns
     lat_c = data[i].indexOf('Latitude');
@@ -64,7 +64,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
 
       // Insert or Update Table
       let table = new Table();
-      
+
       Table.findOneAndUpdate({
         "geometry.type": "Point",
         "geometry.coordinates": [lng, lat]
@@ -87,7 +87,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
         } else {
           success = success + 1;
         }
-        
+
         // Disconnect on last update
         i = i - 1;
         if(i == 1) {
@@ -96,7 +96,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
         }
       });
 
-      i = i + 1;      
+      i = i + 1;
     }
   });
 });
