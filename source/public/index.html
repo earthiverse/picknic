@@ -53,7 +53,7 @@
             <legend>Attributes</legend>
           </div>
           <div class="pure-u-1 pure-u-md-1-4">
-            <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-question-circle" aria-hidden="true"></i> Set All Unknown</a>
+            <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</a>
           </div>
           <div class="pure-u-1 pure-u-md-3-4">
             <div class="pure-g">
@@ -74,6 +74,9 @@
                     <option>No</option>
                   </select>
                 </label>
+              </div>
+              <div class="pure-u-1">
+                <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
               </div>
             </div>
           </div>
@@ -115,6 +118,7 @@
       var lngInput = document.getElementById("longitude");
       var shelteredInput = document.getElementById("sheltered");
       var accessibleInput = document.getElementById("accessible");
+      var commentInput = document.getElementById("comment");
       var licenseSelect = document.getElementById("license");
       var licenseName = document.getElementById("license_name");
       var licenseURL = document.getElementById("license_url");
@@ -171,6 +175,7 @@
       setUnknown.addEventListener("click", function() {
         shelteredInput.value = "Unknown";
         accessibleInput.value = "Unknown";
+        commentInput.value = "";
       });
 
       // Render the map after Google Maps loads

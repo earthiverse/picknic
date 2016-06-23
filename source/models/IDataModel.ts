@@ -10,7 +10,7 @@ export const DataSourceSchema = new Mongoose.Schema({
   retrieved: { type: Date, required: true },
   name: { type: String, required: true },
   url: { type: String, required: false }
-});
+}, { _id : false });
 
 export interface DataLicenseModel {
   name: string;
@@ -20,4 +20,4 @@ export interface DataLicenseModel {
 export const DataLicenseSchema = new Mongoose.Schema({
   name: { type: String, required: true },
   url: { type: String, required: false }
-});
+}, { _id : false });
