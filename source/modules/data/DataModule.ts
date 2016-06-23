@@ -13,7 +13,8 @@ export class DataModule extends Module {
     });
     app.post('/data/tables/add', function(req:Express.Request, res:Express.Response) {
       let fields = req.body;
-      Table.create({
+
+      let table = new Table({
         "type": "Feature",
         "geometry": {
           "type": "Point",
@@ -31,14 +32,33 @@ export class DataModule extends Module {
             "retrieved": Date.now()
           }
         }
-      }, function(error:any, tables:string) {
+      });
+
+      switch(fields.sheltered.toLowerCase()) {
+        case "yes":
+          table.properties.sheltered = true;
+          break;
+        case "no":
+          table.properties.sheltered = false;
+          break;
+      };
+      
+      switch(fields.accessible.toLowerCase()) {
+        case "yes":
+          table.properties.accessible = true;
+          break;
+        case "no":
+          table.properties.accessible = false;
+          break;
+      }
+
+      Table.create(table, function(error:any, tables:string) {
         if(error) {
-          res.send(error);
+          res.send("We had an error... " + error);
           console.log(error);
         } else {
-          console.log("----- Fields! -----");
-          console.log(fields);
-          res.send(fields);
+          console.log(tables);
+          res.redirect(req.header('Referer'));
         }
       });
     });

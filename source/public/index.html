@@ -87,8 +87,8 @@
             </select>
           </div>
           <div class="pure-u-1 pure-u-md-3-4">
-            <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name">
-            <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL">
+            <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name" required>
+            <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL" required>
           </div>
           <div class="pure-u-1">
             <legend>License</legend>
@@ -100,8 +100,8 @@
             </select>
           </div>
           <div class="pure-u-1 pure-u-md-3-4">
-            <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name">
-            <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL">
+            <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name" required>
+            <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
           </div>
           <div class="pure-u-1">
             <button type="submit" class="pure-button pure-button-primary">Add Table</button>
@@ -228,7 +228,6 @@
         // Try to get & track user location
         var hasPosition = false;
         if(navigator.geolocation) {
-
           navigator.geolocation.watchPosition(function(position) {
             // Enable the button to move to location
             moveCurrent.classList.remove("pure-button-disabled");
@@ -237,15 +236,15 @@
             var prettyLat = trimPretty(position.coords.latitude);
             var prettyLng = trimPretty(position.coords.longitude);
             locationMarker.setPosition({lat: prettyLat, lng: prettyLng});
-            latInput.value = prettyLat;
-            lngInput.value = prettyLng;
 
-            if(!hasPosition) {
+            if(hasPosition == false) {
               // Move center of map on first position retrieval
               map.setCenter({lat: prettyLat, lng: prettyLng});
 
               // Move new picnic table on first position retrieval
               tableMarker.setPosition({lat: prettyLat, lng: prettyLng});
+              latInput.value = prettyLat;
+              lngInput.value = prettyLng;
 
               hasPosition = true;
             }
