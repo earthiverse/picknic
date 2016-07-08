@@ -1,5 +1,6 @@
 <!DOCTYPE html>
   <head>
+    <meta name="theme-color" content="#a8d49f">
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <title>Picknic</title>
@@ -10,26 +11,25 @@
       @import 'https://fonts.googleapis.com/css?family=Pacifico';
       #map {
         display:block;
-        min-height:250px;
       }
       .header {
         background-color: #a8d49f;
         box-sizing: border-box;
-        display:table;
+        padding:6px 6px 2px 8px;
       }
       .header img {
         border-radius:8px;
-        display: table-cell;
-        margin: 6px 6px 2px 8px;
+        display:inline-block;
+        margin: 0 8px 0 0;
         width:45px;
       }
       .header span {
         color: #222;
-        display: table-cell;
+        display:inline-block;
         font-family: 'Pacifico', cursive;
         font-size: 180%;
-        vertical-align: middle;
-        width:100%;
+        line-height:45px;
+        vertical-align:top;
       }
       .sidebar {
         box-sizing: border-box;
@@ -38,31 +38,40 @@
     </style>
   </head>
   <body>
-    <form class="pure-form">
-      <div class="pure-g">
-        <div class="pure-u-1 header">
-          <img alt="" class="pure-img" src="/images/picknic.svg"><span>Picknic</span>
-        </div>
-        <div class="pure-u-md-18-24">
-          <div id="map" class="pure-u-1"></div>
-        </div>
-        <div class="pure-u-md-6-24 sidebar">
+    <div class="pure-g">
+      <div class="pure-u-1 header">
+        <img alt="" class="pure-img" src="/images/picknic.svg"><span>Picknic</span>
+      </div>
+      <div class="pure-u-23-24 pure-u-md-16-24">
+        <div id="map" class="pure-u-1"></div>
+      </div>
+      <div class="pure-u-1 pure-u-md-8-24 sidebar">
+        <form class="pure-form pure-form-aligned">
           <fieldset>
-            <legend>Where</legend>
-            <input id="address" type="text" class="pure-input-1" placeholder="Enter a Location">
+           <legend>Where</legend>
+            <div class="pure-control-group">
+              <label for="address">Address</label>
+              <input id="address" type="text" placeholder="Location" onkeypress="return event.keyCode != 13;">
+            </div>
+            <div class="pure-control-group">
+              <label id="range_label" for="range">Range (500m)</label>
+              <input id="range" type="range" min="100" max="2500" value="500" step="100">
+            </div>
           </fieldset>
           <fieldset>
             <legend>What</legend>
             
           </fieldset>
-        </div>
+        </form>
       </div>
-    </form>
+    </div>
     Hi mom!
     <script>
       // Inputs
       var addressInput = document.getElementById('address');
-      
+      var rangeInput = document.getElementById('range');
+      var rangeLabel = document.getElementById('range_label');
+
       var mapDiv = document.getElementById('map');
       
       // Resize map to fill page
@@ -70,7 +79,8 @@
         var mapRect = mapDiv.getBoundingClientRect();
         var bodyRect = document.body.getBoundingClientRect();
         // The following assumes that the margin-top == margin-bottom
-        mapDiv.style.height = (bodyRect.bottom - (2 * bodyRect.top) - mapRect.top) + "px";
+        mapDiv.style.height = (bodyRect.bottom - (2 * mapRect.top)) + "px";
+        console.log("#map height", mapDiv.style.height);
       }
       
       window.onresize = resizeMap;
@@ -82,13 +92,33 @@
         
         // Map Customization
         var map = new google.maps.Map(mapDiv, {
-          zoom: 17,
-          minZoom: 16,
+          zoom: 15,
+          minZoom: 13,
           center: initialPoint,
           scrollwheel: false,
           streetViewControl: true,
           streetViewControlOptions: {position: google.maps.ControlPosition.LEFT_TOP},
           styles: [{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#f2f2f2"}]},{"featureType":"landscape","elementType":"geometry.stroke","stylers":[{"color":"#cacaca"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"poi.park","elementType":"all","stylers":[{"visibility":"on"}]},{"featureType":"poi.park","elementType":"geometry.fill","stylers":[{"color":"#a8d49f"}]},{"featureType":"poi.school","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"poi.sports_complex","elementType":"geometry.fill","stylers":[{"visibility":"on"},{"color":"#ffd0b2"}]},{"featureType":"poi.sports_complex","elementType":"labels","stylers":[{"visibility":"on"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"geometry.fill","stylers":[{"color":"#b3e3f9"}]}]
+        });
+        map.data.setStyle({
+          icon:'/images/markers/table_brown.png'
+        });
+        
+        // Markers
+        var rangeCircle = new google.maps.Circle({
+          clickable: false,
+          strokeColor: "#b3e3f9",
+          fillColor: "#b3e3f9",
+          fillOpacity: 0.5,
+          map: map,
+          radius: 500
+        });
+        var locationMarker = new google.maps.Marker({
+          clickable: false,
+          icon: new google.maps.MarkerImage('https://maps.gstatic.com/mapfiles/mobile/mobileimgs2.png', new google.maps.Size(22,22), new google.maps.Point(0,18), new google.maps.Point(11,11)),
+          map: map,
+          shadow: null,
+          zIndex: 999
         });
 
         // Setup Autocomplete
@@ -106,11 +136,58 @@
             map.fitBounds(place.geometry.viewport);
           } else {
             map.setCenter(place.geometry.location);
-            map.setZoom(17);
           }
+          
+          // Move points
+          var newPosition = map.getCenter();
+          locationMarker.setPosition(newPosition);
+          rangeCircle.setCenter(newPosition);
         });
-  
-
+        
+        // Bind the range finder to the range circle
+        range.addEventListener("input", function() {
+          range_label.innerHTML = "Range (" + range.value + "m)";
+          rangeCircle.setRadius(parseInt(range.value));
+        });
+        
+        // Bind the range finder to submit the query for the tables
+        allTables = {};
+        range.addEventListener("change", function() {
+          var circlePosition = rangeCircle.getCenter();
+          var circleLat = circlePosition.lat();
+          var circleLng = circlePosition.lng();
+          var circleRadius = rangeCircle.getRadius()/6367444.7;
+          var circle = {"center": [circleLng, circleLat], "radius": circleRadius, "spherical": true};
+          console.log(circle);
+          $.ajax({
+            type: 'POST',
+            url: '/data/tables/find/within',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify(circle),
+            success: function(tables) {
+              for(var i = 0; i < tables.length; i++) {
+                var table = tables[i];
+                if(!allTables.hasOwnProperty(table._id)) {
+                  allTables[table._id] = true;
+                  map.data.addGeoJson(table);
+                }
+                console.log("hi mom");
+              }
+            }
+          });
+        });      
+        
+        // Try to get user location
+        if(navigator.geolocation) {
+          console.log("Geolocation Enabled!");
+          navigator.geolocation.getCurrentPosition(function(position) {
+            initialLocation = new google.maps.LatLng(position.coords.latitude,position.coords.longitude);
+            map.setCenter(initialLocation);
+            locationMarker.setPosition(initialLocation);
+            rangeCircle.setCenter(initialLocation);
+          });
+        }
       }
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDHm7qJ-_By08XAFZfK5xuqjnuLOlyXwbs&callback=initMap&libraries=places"></script>
