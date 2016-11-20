@@ -18,12 +18,6 @@ let license_url = "http://www.edmonton.ca/city_government/documents/Web-version2
 // Download & Parse!
 let parser = CSVParse();
 
-let lat_c = -1;
-let lng_c = -1;
-let type_c = -1;
-let surface_c = -1;
-let structural_c = -1;
-
 let retrieved = new Date();
 
 let i = 0;
@@ -32,24 +26,18 @@ let fail = 0;
 console.log("Downloading...");
 Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
   console.log("Parsing & Updating Database...");
-  CSVParse(body, function(error:boolean, data:any) {
-    // Columns
-    lat_c = data[i].indexOf('Latitude');
-    lng_c = data[i].indexOf('Longitude');
-    type_c = data[i].indexOf('Table Type');
-    surface_c = data[i].indexOf('Surface Material');
-    structural_c = data[i].indexOf('Structural Material');
+  CSVParse(body, {columns: true}, function(error:any, data:any) {
 
     // Data
     i = 1;
     for(;data[i];) {
-      let lat = parseFloat(data[i][lat_c]);
-      let lng = parseFloat(data[i][lng_c]);
+      let lat = parseFloat(data[i]["Latitude"]);
+      let lng = parseFloat(data[i]["Longitude"]);
 
       // Comments based on additional data
-      let type = data[i][type_c].toLowerCase();
-      let surface = data[i][surface_c].toLowerCase();
-      let structural = data[i][structural_c].toLowerCase();
+      let type = data[i]["Table Type"].toLowerCase();
+      let surface = data[i]["Surface Material"].toLowerCase();
+      let structural = data[i]["Structural Material"].toLowerCase();
       let comment:string;
       if(type == "other table") {
         comment = "A table";
