@@ -1,8 +1,13 @@
 // Place your settings in this file to overwrite default and user settings.
 {
+  // Typescript
+  "typescript.tsdk": "./node_modules/typescript/lib",
+  
   // Tabs
   "editor.tabSize": 2,
   "editor.insertSpaces": true,
+
+  // Clean Dev Environment (Appearance Only)
   "files.exclude": {
     "node_modules/": true
   }
