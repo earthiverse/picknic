@@ -4,6 +4,7 @@ import { DataSourceModel, DataSourceSchema, DataLicenseModel, DataLicenseSchema 
 export interface ITable extends Mongoose.Document {
   type:string;
   properties: {
+    type:string;
     source:DataSourceModel;
     license:DataLicenseModel;
     accessible:boolean;
@@ -19,6 +20,7 @@ export interface ITable extends Mongoose.Document {
 export const TableSchema = new Mongoose.Schema({
   type: { type: String, required: true },
   properties: {
+    type: { type: String, required: true, default: "table" },
     source: DataSourceSchema,
     license: DataLicenseSchema,
     accessible: { type: Boolean, required: false },

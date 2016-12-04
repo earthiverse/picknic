@@ -21,6 +21,7 @@ export class DataModule extends Module {
           "coordinates": [ Number(fields.longitude), Number(fields.latitude) ]
         },
         "properties": {
+          "type": "table",
           "comment": fields.comment,
           "license": {
             "url": fields.license_url,

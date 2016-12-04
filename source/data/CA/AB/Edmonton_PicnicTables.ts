@@ -58,6 +58,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
         "geometry.coordinates": [lng, lat]
       }, { $set: {
         "type": "Feature",
+        "properties.type": "table",
         "properties.source.retrieved": retrieved,
         "properties.source.name": dataset_name,
         "properties.source.url": dataset_url_human,
