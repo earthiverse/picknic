@@ -20,7 +20,7 @@ let parser = CSVParse();
 
 let retrieved = new Date();
 
-let i = 0;
+let j = 0;
 let success = 0;
 let fail = 0;
 console.log("Downloading...");
@@ -29,8 +29,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
   CSVParse(body, {columns: true}, function(error:any, data:any) {
 
     // Data
-    i = 1;
-    for(;data[i];) {
+    for(let i = 1;data[i];i++) {
       let lat = parseFloat(data[i]["Latitude"]);
       let lng = parseFloat(data[i]["Longitude"]);
 
@@ -51,8 +50,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
       comment += " materials.";
 
       // Insert or Update Table
-      let table = new Table();
-
+      j += 1;
       Table.findOneAndUpdate({
         "geometry.type": "Point",
         "geometry.coordinates": [lng, lat]
@@ -78,14 +76,12 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
         }
 
         // Disconnect on last update
-        i = i - 1;
-        if(i == 1) {
+        j -= 1;
+        if(j == 0) {
           console.log(success + "/" + (success + fail) + " updated/inserted.");
           Mongoose.disconnect();
         }
       });
-
-      i = i + 1;
     }
   });
 });
