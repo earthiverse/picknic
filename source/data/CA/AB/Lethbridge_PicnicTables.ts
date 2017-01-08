@@ -2,9 +2,10 @@ import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
 
-import { Table } from '../../../models/Table'
+import { Table } from '../../../models/Table';
 
 // Setup Mongoose
+Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
@@ -16,10 +17,7 @@ let license_name = "City of Lethbridge​ - Open Data License (Version 1.0)"
 let license_url = "http://www.lethbridge.ca/Pages/OpenDataLicense.aspx"
 
 // Download & Parse!
-let parser = CSVParse();
-
 let retrieved = new Date();
-
 let j = 0;
 let success = 0;
 let fail = 0;

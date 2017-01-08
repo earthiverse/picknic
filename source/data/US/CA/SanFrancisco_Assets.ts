@@ -2,9 +2,10 @@ import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
 
-import { Table } from '../../../models/Table'
+import { Table } from '../../../models/Table';
 
 // Setup Mongoose
+Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
@@ -19,10 +20,7 @@ let license_url = "http://opendatacommons.org/licenses/pddl/1.0/"
 let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
 
 // Download & Parse!
-let parser = CSVParse();
-
 let retrieved = new Date();
-
 let i = 1;
 let j = 0;
 let success = 0;
