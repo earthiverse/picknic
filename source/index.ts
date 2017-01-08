@@ -1,4 +1,3 @@
-/// <reference path="../typings/index.d.ts" />
 import BodyParser = require('body-parser');
 import Express = require('express');
 import ExpressStatic = require('express-serve-static-core');
@@ -7,6 +6,7 @@ import Mongoose = require("mongoose");
 import Path = require("path");
 
 // Setup Mongoose
+Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Setup Express

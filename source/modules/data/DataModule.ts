@@ -7,7 +7,7 @@ export class DataModule extends Module {
     // Tables
     app.post('/data/tables/find/within', function(req:Express.Request, res:Express.Response) {
       let bounds = req.body;
-      Table.find({}).where("geometry").within(bounds).lean().exec().then(function(tables) {
+      Table.find({}).where("geometry").within(bounds).lean().exec().then(function(tables:any) {
         res.send(tables);
       });
     });
