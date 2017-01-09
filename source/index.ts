@@ -20,7 +20,7 @@ app.use(Express.static(Path.join(__dirname, "../source/public")));
 
 // Load Modules
 import { DataModule } from "./modules/data/DataModule";
-let dataModule = new DataModule(app);
+new DataModule(app);
 
 // Start Serving Requests
 // TODO: Create config & set port in config
