@@ -23,7 +23,6 @@
   "license": "MIT",
   "dependencies": {
     "body-parser": "^1.15.1",
-    "csv-parse": "^1.1.1",
     "express": "^4.13.4",
     "mongoose": "^4.4.20",
     "request": "^2.72.0"
@@ -35,6 +34,9 @@
     "@types/mongoose": "^4.7.2",
     "@types/node": "^6.0.58",
     "@types/request": "0.0.39",
-    "typescript": "^2.0.9"
+    "@types/xlsx": "0.0.31",
+    "csv-parse": "^1.1.1",
+    "typescript": "^2.0.9",
+    "xlsx": "^0.8.1"
   }
 }

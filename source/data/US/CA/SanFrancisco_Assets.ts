@@ -58,6 +58,7 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
         // Insert or Update Table
         j += 1;
         Table.findOneAndUpdate({
+          "properties.source.url": dataset_url_human,
           "properties.source.id": asset_id
         }, { $set: {
           "type": "Feature",

@@ -4,6 +4,7 @@ import Request = require('request');
 import { Table } from '../../../models/Table';
 
 // Setup Mongoose
+Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
