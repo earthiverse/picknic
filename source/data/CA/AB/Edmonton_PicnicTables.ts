@@ -22,12 +22,12 @@ let j = 0;
 let success = 0;
 let fail = 0;
 console.log("Downloading...");
-Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
+Request(dataset_url_csv, function (error: boolean, response: any, body: string) {
   console.log("Parsing & Updating Database...");
-  CSVParse(body, {columns: true}, function(error:any, data:any) {
+  CSVParse(body, { columns: true }, function (error: any, data: any) {
 
     // Data
-    for(let i = 1;data[i];i++) {
+    for (let i = 1; data[i]; i++) {
       let lat = parseFloat(data[i]["Latitude"]);
       let lng = parseFloat(data[i]["Longitude"]);
 
@@ -35,14 +35,14 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
       let type = data[i]["Table Type"].toLowerCase();
       let surface = data[i]["Surface Material"].toLowerCase();
       let structural = data[i]["Structural Material"].toLowerCase();
-      let comment:string;
-      if(type == "other table") {
+      let comment: string;
+      if (type == "other table") {
         comment = "A table";
       } else {
         comment = "A " + type;
       }
       comment += " made from " + structural;
-      if(surface != structural) {
+      if (surface != structural) {
         comment += " and " + surface;
       }
       comment += " materials.";
@@ -52,34 +52,37 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
       Table.findOneAndUpdate({
         "geometry.type": "Point",
         "geometry.coordinates": [lng, lat]
-      }, { $set: {
-        "type": "Feature",
-        "properties.type": "table",
-        "properties.source.retrieved": retrieved,
-        "properties.source.name": dataset_name,
-        "properties.source.url": dataset_url_human,
-        "properties.license.name": license_name,
-        "properties.license.url": license_url,
-        "properties.comment": comment,
-        "geometry.type": "Point",
-        "geometry.coordinates": [lng, lat]
-      }}, {
-        "upsert": true
-      }).exec(function(err, doc) {
-        if(err) {
-          console.log(err);
-          fail = fail + 1;
-        } else {
-          success = success + 1;
+      }, {
+        $set: {
+          "type": "Feature",
+          "properties.type": "table",
+          "properties.source.retrieved": retrieved,
+          "properties.source.name": source_name,
+          "properties.source.dataset": dataset_name,
+          "properties.source.url": dataset_url_human,
+          "properties.license.name": license_name,
+          "properties.license.url": license_url,
+          "properties.comment": comment,
+          "geometry.type": "Point",
+          "geometry.coordinates": [lng, lat]
         }
+        }, {
+          "upsert": true
+        }).exec(function (err, doc) {
+          if (err) {
+            console.log(err);
+            fail = fail + 1;
+          } else {
+            success = success + 1;
+          }
 
-        // Disconnect on last update
-        j -= 1;
-        if(j == 0) {
-          console.log(success + "/" + (success + fail) + " updated/inserted.");
-          Mongoose.disconnect();
-        }
-      });
+          // Disconnect on last update
+          j -= 1;
+          if (j == 0) {
+            console.log(success + "/" + (success + fail) + " updated/inserted.");
+            Mongoose.disconnect();
+          }
+        });
     }
   });
 });

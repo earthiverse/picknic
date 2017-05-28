@@ -34,7 +34,7 @@ Request({url: dataset_url_xls, encoding: null}, function(error:boolean, response
       let type:string = row["Type"];
       let uniqueAsse:string = row["UniqueAsse"];
 
-      let comment:string;
+      let comment:string = "";
       if(type && type != "Unknown") {
         comment = "Type: " + type;
       }
@@ -48,7 +48,8 @@ Request({url: dataset_url_xls, encoding: null}, function(error:boolean, response
         "type": "Feature",
         "properties.type": "table",
         "properties.source.retrieved": retrieved,
-        "properties.source.name": dataset_name,
+        "properties.source.name": source_name,
+        "properties.source.dataset": dataset_name,
         "properties.source.url": dataset_url_human,
         "properties.source.id": uniqueAsse,
         "properties.license.name": license_name,

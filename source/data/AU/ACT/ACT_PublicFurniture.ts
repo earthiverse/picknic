@@ -9,19 +9,15 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "SF OpenData"
-let dataset_name = "Assets Maintained by the Recreation and Parks Department"
-let dataset_url_human = "https://data.sfgov.org/Culture-and-Recreation/Assets-Maintained-by-the-Recreation-and-Parks-Depa/ays8-rxxc"
-let dataset_url_csv = "https://data.sfgov.org/api/views/ays8-rxxc/rows.csv?accessType=DOWNLOAD"
-let license_name = "ODC Public Domain Dedication and Licence (PDDL)"
-let license_url = "http://opendatacommons.org/licenses/pddl/1.0/"
-
-// Regular Expression for Location
-let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+let source_name = "dataACT"
+let dataset_name = "Public Furniture in the ACT"
+let dataset_url_human = "https://www.data.act.gov.au/Infrastructure-and-Utilities/Public-Furniture-in-the-ACT/ch39-bukk"
+let dataset_url_csv = "https://www.data.act.gov.au/api/views/ch39-bukk/rows.csv?accessType=DOWNLOAD"
+let license_name = "Creative Commons Attribution 3.0 Australia"
+let license_url = "creativecommons.org/licenses/by/3.0/au/deed.en"
 
 // Download & Parse!
 let retrieved = new Date();
-
 let j = 0;
 let success = 0;
 let fail = 0;
@@ -33,33 +29,19 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
     // Data
     for(let i = 1;data[i];i++) {
       // Location is in the following format: (Latitude, Longitude)
-      let match:RegExpExecArray = regex.exec(data[i]["Geom"]);
-      let lat:number = parseFloat(match[1]);
-      let lng:number = parseFloat(match[2]);
+      let lat:number = parseFloat(data[i]["LATITUDE"]);
+      let lng:number = parseFloat(data[i]["LONGITUDE"]);
 
-      let type:string = data[i]["Asset Type"].toLowerCase();
-      let asset_id = data[i]["Asset ID"];
-      let subtype:string = data[i]["Asset Subtype"].toLowerCase();
-      let map_label:string = data[i]["Map Label"];
-      let asset_name:string = data[i]["Asset Name"];
-      let quantity = data[i]["Quantity"];
-
-      if(type == "table") {
-        let comment:string;
-        if(subtype == "picnic") {
-          comment = "A picnic table.";
-        } else if(subtype == "half table") {
-          comment = "A half table.";
-        } else {
-          comment = "A table."
-        }
-        comment += " The dataset which this table was obtained from has the following information: \"Label: " + map_label + ", Asset Name: " + asset_name + ", Quantity: " + quantity + "\"."
-
+      let assetID = data[i]["ASSET ID"];
+      let type:string = data[i]["FEATURE TYPE"];
+      
+      if(type == "TABLE") {
+        
         // Insert or Update Table
         j += 1;
         Table.findOneAndUpdate({
           "properties.source.url": dataset_url_human,
-          "properties.source.id": asset_id
+          "properties.source.id": assetID
         }, { $set: {
           "type": "Feature",
           "properties.type": "table",
@@ -67,10 +49,9 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
           "properties.source.url": dataset_url_human,
-          "properties.source.id": asset_id,
+          "properties.source.id": assetID,
           "properties.license.name": license_name,
           "properties.license.url": license_url,
-          "properties.comment": comment,
           "geometry.type": "Point",
           "geometry.coordinates": [lng, lat]
         }}, {

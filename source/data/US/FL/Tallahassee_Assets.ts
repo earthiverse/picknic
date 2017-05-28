@@ -1,3 +1,7 @@
+/*
+ Note: This dataset's data isn't the cleanest. It groups some tables together, and not others.
+       Some of the locations that I manually cross-checked with Google Maps were quite a bit off.
+*/
 import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
@@ -9,15 +13,12 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "Melbourne Data"
-let dataset_name = "Street furniture including bollards, bicycle rails, bins, drinking fountains, horse troughs, planter boxes, seats, barbecues"
-let dataset_url_human = "https://data.melbourne.vic.gov.au/Assets-Infrastructure/Street-furniture-including-bollards-bicycle-rails-/8fgn-5q6t"
-let dataset_url_csv = "https://data.melbourne.vic.gov.au/api/views/8fgn-5q6t/rows.csv?accessType=DOWNLOAD"
-let license_name = "Creative Commons Attribution 4.0 International Public License"
-let license_url = "https://creativecommons.org/licenses/by/4.0/legalcode"
-
-// Regular Expression for Location
-let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+let source_name = "Talgov City Infrastructure"
+let dataset_name = "Park Amenities"
+let dataset_url_human = "http://talgov.tlcgis.opendata.arcgis.com/datasets/5bff3a7ad4d14f3a92b2e0eeb3ca0c90_2"
+let dataset_url_csv = "http://talgov.tlcgis.opendata.arcgis.com/datasets/5bff3a7ad4d14f3a92b2e0eeb3ca0c90_2.csv"
+let license_name = "Creative Commons Attribution 3.0 United States"
+let license_url = "https://creativecommons.org/licenses/by/3.0/us/"
 
 // Download & Parse!
 let retrieved = new Date();
@@ -31,24 +32,29 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
 
     // Data
     for(let i = 1;data[i];i++) {
-      // Location is in the following format: (Latitude, Longitude)
-      let match:RegExpExecArray = regex.exec(data[i]["CoordinateLocation"]);
-      let lat:number = parseFloat(match[1]);
-      let lng:number = parseFloat(match[2]);
-
-      let gis_id = data[i]["GIS_ID"];
-      let type:string = data[i]["ASSET_TYPE"];
-      let description:string = data[i]["DESCRIPTION"];
-      let location_description:string = data[i]["LOCATION_DESC"];
+      let lng:number = parseFloat(data[i]["X"]);
+      let lat:number = parseFloat(data[i]["Y"]);
       
-      if(type == "Picnic Setting") {
-        let comment = description + ". " + location_description;
-        
+      let assetType:string = data[i]["TYPE"];
+      if(assetType == "Picnic Table" || assetType == "Picnic Shelter") {
+        let sheltered:boolean;
+        if(assetType == "Picnic Shelter") {
+          sheltered = true;
+        } else {
+          sheltered = undefined;
+        }
+        let objectID = data[i]["GLOBALID"];
+
+        let comments:string;
+        if(data[i]["NOTES"].trim()) {
+          comments = "Notes from dataset: \"" + data[i]["NOTES"].trim() + "\". ";
+        }
+
         // Insert or Update Table
         j += 1;
         Table.findOneAndUpdate({
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": gis_id
+          "geometry.type": "Point",
+          "properties.source.id": objectID
         }, { $set: {
           "type": "Feature",
           "properties.type": "table",
@@ -56,10 +62,11 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
           "properties.source.url": dataset_url_human,
-          "properties.source.id": gis_id,
+          "properties.source.id": objectID,
           "properties.license.name": license_name,
           "properties.license.url": license_url,
-          "properties.comment": comment,
+          "properties.sheltered": sheltered,
+          "properties.comment": comments,
           "geometry.type": "Point",
           "geometry.coordinates": [lng, lat]
         }}, {

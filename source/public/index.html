@@ -167,6 +167,23 @@
             "icon": icon
           }
         });
+
+        var assetInfoWindow = new google.maps.InfoWindow({
+          content: "Hello World!"
+        });
+        assetInfoWindow.setOptions({pixelOffset: new google.maps.Size(0,-30)});
+        // Display some stuff about the data if they click on it
+        map.data.addListener('mouseover', function(event) {
+          var comment = event.feature.getProperty("comment");
+          if(comment) {
+            assetInfoWindow.setContent(comment);
+            assetInfoWindow.setPosition(event.feature.getGeometry().get());
+            assetInfoWindow.open(map);
+          }
+        });
+        map.data.addListener('mouseout', function(event) {
+          assetInfoWindow.close();
+        });
         
         // Markers
         var rangeCircle = new google.maps.Circle({
@@ -178,16 +195,29 @@
           radius: 500
         });
         var locationMarker = new google.maps.Marker({
-          clickable: false,
+          clickable: true,
           icon: 'images/markers/picnic_basket.png',
           map: map,
           shadow: null,
           zIndex: 999
         });
 
+        // Clicking on the location marker brings up a menu where the use can alter the range of the search
+        var locationMarkerInfoWindow = new google.maps.InfoWindow({
+          content: "Hello World!"
+        });
+        locationMarker.addListener('mouseover', function() {
+          locationMarkerInfoWindow.open(map, locationMarker);
+        });
+        locationMarker.addListener('mouseout', function() {
+          locationMarkerInfoWindow.close(map, locationMarker);
+        });
+
+
         // When the user opens street view mode, bring the map to the front of the page so they can back out
         var thePanorama = map.getStreetView();
         google.maps.event.addListener(thePanorama, 'visible_changed', function() {
+          console.log("Visible?: " + thePanorama.getVisible());
           if (thePanorama.getVisible()) {
             // Display your street view visible UI
             mapDiv.style.zIndex = 1051;
@@ -207,9 +237,11 @@
             return;
           }
 
-          // Move rangeCircle & map
+          // Move Map
           map.setCenter(place.geometry.location);
+          // Move Range Circle & Marker
           rangeCircle.setCenter(place.geometry.location);
+          locationMarker.setPosition(place.geometry.location);
 
           // Get Tables
           populateTablesInRange(map, rangeCircle);

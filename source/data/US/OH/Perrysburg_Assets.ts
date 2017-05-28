@@ -9,15 +9,12 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "Melbourne Data"
-let dataset_name = "Street furniture including bollards, bicycle rails, bins, drinking fountains, horse troughs, planter boxes, seats, barbecues"
-let dataset_url_human = "https://data.melbourne.vic.gov.au/Assets-Infrastructure/Street-furniture-including-bollards-bicycle-rails-/8fgn-5q6t"
-let dataset_url_csv = "https://data.melbourne.vic.gov.au/api/views/8fgn-5q6t/rows.csv?accessType=DOWNLOAD"
-let license_name = "Creative Commons Attribution 4.0 International Public License"
-let license_url = "https://creativecommons.org/licenses/by/4.0/legalcode"
-
-// Regular Expression for Location
-let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+let source_name = "City of Perrysburg Open Data"
+let dataset_name = "Park Amenities"
+let dataset_url_human = "http://data.pburg.opendata.arcgis.com/datasets/3d438bf93d814588892d6192ebcaa800_0"
+let dataset_url_csv = "http://data.pburg.opendata.arcgis.com/datasets/3d438bf93d814588892d6192ebcaa800_0.csv"
+let license_name = "Creative Commons Attribution 3.0 United States"
+let license_url = "https://creativecommons.org/licenses/by/3.0/us/"
 
 // Download & Parse!
 let retrieved = new Date();
@@ -31,24 +28,24 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
 
     // Data
     for(let i = 1;data[i];i++) {
-      // Location is in the following format: (Latitude, Longitude)
-      let match:RegExpExecArray = regex.exec(data[i]["CoordinateLocation"]);
-      let lat:number = parseFloat(match[1]);
-      let lng:number = parseFloat(match[2]);
-
-      let gis_id = data[i]["GIS_ID"];
-      let type:string = data[i]["ASSET_TYPE"];
-      let description:string = data[i]["DESCRIPTION"];
-      let location_description:string = data[i]["LOCATION_DESC"];
+      let lng:number = parseFloat(data[i]["X"]);
+      let lat:number = parseFloat(data[i]["Y"]);
       
-      if(type == "Picnic Setting") {
-        let comment = description + ". " + location_description;
-        
+      let feature:string = data[i]["FEATURE"];
+      if(feature == "Picnic_Table") {
+        let sheltered:boolean;
+        if(data[i]["COMMENTS"].trim() == "Covered") {
+          sheltered = true;
+        } else {
+          sheltered = undefined;
+        }
+        let objectID = data[i]["OBJECTID"];
+
         // Insert or Update Table
         j += 1;
         Table.findOneAndUpdate({
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": gis_id
+          "geometry.type": "Point",
+          "properties.source.id": objectID
         }, { $set: {
           "type": "Feature",
           "properties.type": "table",
@@ -56,10 +53,10 @@ Request(dataset_url_csv, function(error:boolean, response:any, body:string) {
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
           "properties.source.url": dataset_url_human,
-          "properties.source.id": gis_id,
+          "properties.source.id": objectID,
           "properties.license.name": license_name,
           "properties.license.url": license_url,
-          "properties.comment": comment,
+          "properties.sheltered": sheltered,
           "geometry.type": "Point",
           "geometry.coordinates": [lng, lat]
         }}, {
