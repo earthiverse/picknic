@@ -1,7 +1,7 @@
 import Mongoose = require('mongoose');
 import { DataSourceModel, DataSourceSchema, DataLicenseModel, DataLicenseSchema } from './IDataModel';
 
-export interface ITable extends Mongoose.Document {
+export interface IPicnic extends Mongoose.Document {
   type: string;
   properties: {
     type: string;
@@ -18,7 +18,7 @@ export interface ITable extends Mongoose.Document {
   }
 };
 
-export const TableSchema = new Mongoose.Schema({
+export const PicnicSchema = new Mongoose.Schema({
   type: { type: String, required: true, default: "Point" },
   properties: {
     type: { type: String, required: true, default: "table" },
@@ -33,6 +33,6 @@ export const TableSchema = new Mongoose.Schema({
     type: { type: String, required: true },
     coordinates: { type: [Number], required: true }
   }
-}, { collection: 'tables' });
+}, { collection: 'picnic' });
 
-export const Table = Mongoose.model<ITable>('Table', TableSchema);
+export const Picnic = Mongoose.model<IPicnic>('Picnic', PicnicSchema);

@@ -2,6 +2,11 @@ import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
 
+// From https://stackoverflow.com/a/2332821
+function capitalize(s: string) {
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
+};
+
 import { Picnic } from '../../../models/Picnic';
 
 // Setup Mongoose
@@ -9,12 +14,12 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "Edmonton Open Data Portal"
-let dataset_name = "Public Picnic Table Locations"
-let dataset_url_human = "https://data.edmonton.ca/Facilities-and-Structures/Public-Picnic-Table-Locations/vk3s-q842"
-let dataset_url_csv = "https://data.edmonton.ca/api/views/vk3s-q842/rows.csv?accessType=DOWNLOAD"
-let license_name = "City of Edmonton Open Data Terms of Use (Version 2.1)"
-let license_url = "http://www.edmonton.ca/city_government/documents/Web-version2.1-OpenDataAgreement.pdf"
+let source_name = "City of Mississauga Open Data Catalogue"
+let dataset_name = "City Picnic Sites"
+let dataset_url_human = "http://data.mississauga.ca/datasets/e0d57e2389cd4d5cba73d9688d13548b_0"
+let dataset_url_csv = "http://data.mississauga.ca/datasets/e0d57e2389cd4d5cba73d9688d13548b_0.csv"
+let license_name = "City of Mississauga Open Data Terms of Use"
+let license_url = "http://www5.mississauga.ca/research_catalogue/CityofMississauga_TermsofUse.pdf"
 
 // Download & Parse!
 let retrieved = new Date();
@@ -28,24 +33,11 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
 
     // Data
     for (let i = 1; data[i]; i++) {
-      let lat = parseFloat(data[i]["Latitude"]);
-      let lng = parseFloat(data[i]["Longitude"]);
+      let lat = parseFloat(data[i]["Y"]);
+      let lng = parseFloat(data[i]["X"]);
 
       // Comments based on additional data
-      let type = data[i]["Table Type"].toLowerCase();
-      let surface = data[i]["Surface Material"].toLowerCase();
-      let structural = data[i]["Structural Material"].toLowerCase();
-      let comment: string;
-      if (type == "other table") {
-        comment = "A table";
-      } else {
-        comment = "A " + type;
-      }
-      comment += " made from " + structural;
-      if (surface != structural) {
-        comment += " and " + surface;
-      }
-      comment += " materials.";
+      let comment: string = capitalize(data[i]["LANDMARKNA"]);
 
       // Insert or Update Table
       j += 1;
@@ -55,7 +47,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
       }, {
           $set: {
             "type": "Feature",
-            "properties.type": "table",
+            "properties.type": "site",
             "properties.source.retrieved": retrieved,
             "properties.source.name": source_name,
             "properties.source.dataset": dataset_name,

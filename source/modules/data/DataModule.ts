@@ -1,24 +1,24 @@
 import Express = require('express');
 import { Module } from "../Module";
-import { Table } from "../../models/Table";
+import { Picnic } from "../../models/Picnic";
 
 export class DataModule extends Module {
-  addRoutes(app:Express.Application) {
+  addRoutes(app: Express.Application) {
     // Tables
-    app.post('/data/tables/find/within', function(req:Express.Request, res:Express.Response) {
+    app.post('/data/tables/find/within', function (req: Express.Request, res: Express.Response) {
       let bounds = req.body;
-      Table.find({}).where("geometry").within(bounds).lean().exec().then(function(tables:any) {
+      Picnic.find({}).where("geometry").within(bounds).lean().exec().then(function (tables: any) {
         res.send(tables);
       });
     });
-    app.post('/data/tables/add', function(req:Express.Request, res:Express.Response) {
+    app.post('/data/tables/add', function (req: Express.Request, res: Express.Response) {
       let fields = req.body;
 
-      let table = new Table({
+      let table = new Picnic({
         "type": "Feature",
         "geometry": {
           "type": "Point",
-          "coordinates": [ Number(fields.longitude), Number(fields.latitude) ]
+          "coordinates": [Number(fields.longitude), Number(fields.latitude)]
         },
         "properties": {
           "type": "table",
@@ -35,7 +35,7 @@ export class DataModule extends Module {
         }
       });
 
-      switch(fields.sheltered.toLowerCase()) {
+      switch (fields.sheltered.toLowerCase()) {
         case "yes":
           table.properties.sheltered = true;
           break;
@@ -43,8 +43,8 @@ export class DataModule extends Module {
           table.properties.sheltered = false;
           break;
       };
-      
-      switch(fields.accessible.toLowerCase()) {
+
+      switch (fields.accessible.toLowerCase()) {
         case "yes":
           table.properties.accessible = true;
           break;
@@ -53,8 +53,8 @@ export class DataModule extends Module {
           break;
       }
 
-      Table.create(table, function(error:any, tables:string) {
-        if(error) {
+      Picnic.create(table, function (error: any, tables: string) {
+        if (error) {
           res.send("We had an error... " + error);
           console.log(error);
         } else {

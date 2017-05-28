@@ -2,7 +2,7 @@
 import Mongoose = require('mongoose');
 import Request = require('request');
 
-import { Table } from '../../../models/Table';
+import { Picnic } from '../../../models/Picnic';
 
 // Setup Mongoose
 Mongoose.Promise = global.Promise;
