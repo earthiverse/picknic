@@ -1,11 +1,7 @@
 import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
-
-// From https://stackoverflow.com/a/2332821
-function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+import striptags from 'striptags';
 
 import { Picnic } from '../../../models/Picnic';
 
@@ -14,12 +10,12 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "City of Mississauga Open Data Catalogue"
-let dataset_name = "City Picnic Sites"
-let dataset_url_human = "http://data.mississauga.ca/datasets/e0d57e2389cd4d5cba73d9688d13548b_0"
-let dataset_url_csv = "http://data.mississauga.ca/datasets/e0d57e2389cd4d5cba73d9688d13548b_0.csv"
-let license_name = "City of Mississauga Open Data Terms of Use"
-let license_url = "http://www5.mississauga.ca/research_catalogue/CityofMississauga_TermsofUse.pdf"
+let source_name = "Los Angeles Geohub"
+let dataset_name = "Picnic Areas"
+let dataset_url_human = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9"
+let dataset_url_csv = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9.csv"
+let license_name = "Public Domain"
+let license_url = "https://creativecommons.org/publicdomain/mark/1.0/"
 
 // Download & Parse!
 let retrieved = new Date();
@@ -33,11 +29,14 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
 
     // Data
     for (let i = 1; data[i]; i++) {
-      let lat = parseFloat(data[i]["Y"]);
-      let lng = parseFloat(data[i]["X"]);
+      let lat = parseFloat(data[i]["latitude"]);
+      let lng = parseFloat(data[i]["longitude"]);
 
       // Comments based on additional data
-      let comment: string = capitalize(data[i]["LANDMARKNA"]);
+      let comment: string = data[i]["Name"].trim();
+      if (data[i]["hours"].trim()) {
+        comment += ". " + striptags(data[i]["hours"]).trim();
+      }
 
       // Insert or Update Table
       j += 1;

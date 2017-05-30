@@ -223,16 +223,16 @@
         zIndex: 999
       });
 
-      // Clicking on the location marker brings up a menu where the use can alter the range of the search
-      var locationMarkerInfoWindow = new google.maps.InfoWindow({
-        //content: "Hello World!"
-      });
-      locationMarker.addListener('mouseover', function () {
-        locationMarkerInfoWindow.open(map, locationMarker);
-      });
-      locationMarker.addListener('mouseout', function () {
-        locationMarkerInfoWindow.close(map, locationMarker);
-      });
+      // // Clicking on the location marker brings up a menu where the use can alter the range of the search
+      // var locationMarkerInfoWindow = new google.maps.InfoWindow({
+      //   //content: "Hello World!"
+      // });
+      // locationMarker.addListener('mouseover', function () {
+      //   locationMarkerInfoWindow.open(map, locationMarker);
+      // });
+      // locationMarker.addListener('mouseout', function () {
+      //   locationMarkerInfoWindow.close(map, locationMarker);
+      // });
 
 
       // When the user opens street view mode, bring the map to the front of the page so they can back out
