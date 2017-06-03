@@ -30,7 +30,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
   CSVParse(body, { columns: true }, function (error: any, data: any) {
 
     // Data
-    for (let i = 1; data[i]; i++) {
+    for (let i = 0; data[i]; i++) {
       let match: RegExpExecArray = regex.exec(data[i]["the_geom"]);
       let lng: number = parseFloat(match[1]);
       let lat: number = parseFloat(match[2]);

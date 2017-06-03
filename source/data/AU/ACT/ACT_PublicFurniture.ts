@@ -27,7 +27,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
   CSVParse(body, { columns: true }, function (error: any, data: any) {
 
     // Data
-    for (let i = 1; data[i]; i++) {
+    for (let i = 0; data[i]; i++) {
       // Location is in the following format: (Latitude, Longitude)
       let lat: number = parseFloat(data[i]["LATITUDE"]);
       let lng: number = parseFloat(data[i]["LONGITUDE"]);

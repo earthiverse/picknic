@@ -1,7 +1,7 @@
 import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
-import striptags from 'striptags';
+import * as striptags from 'striptags';
 
 import { Picnic } from '../../../models/Picnic';
 
@@ -28,7 +28,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
   CSVParse(body, { columns: true }, function (error: any, data: any) {
 
     // Data
-    for (let i = 1; data[i]; i++) {
+    for (let i = 0; data[i]; i++) {
       let lat = parseFloat(data[i]["latitude"]);
       let lng = parseFloat(data[i]["longitude"]);
 
