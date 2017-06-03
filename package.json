@@ -22,23 +22,23 @@
   "author": "Kent Rasmussen",
   "license": "MIT",
   "dependencies": {
-    "@types/body-parser": "1.16.3",
+    "@types/body-parser": "^1.16.3",
     "@types/csv-parse": "^1.1.8",
     "@types/express": "^4.0.35",
     "@types/inflection": "^1.5.28",
-    "@types/mongoose": "^4.7.13",
-    "@types/node": "^7.0.22",
-    "@types/request": "0.0.43",
-    "@types/striptags": "0.0.5",
-    "@types/xlsx": "0.0.34",
+    "@types/mongoose": "^4.7.14",
+    "@types/node": "^7.0.27",
+    "@types/request": "^0.0.43",
+    "@types/striptags": "^0.0.5",
+    "@types/xlsx": "^0.0.34",
     "body-parser": "^1.17.2",
     "csv-parse": "^1.2.0",
     "eslint": "^3.19.0",
     "express": "^4.15.3",
-    "mongoose": "^4.10.3",
+    "mongoose": "^4.10.4",
     "request": "^2.81.0",
     "striptags": "^3.0.1",
-    "typescript": "^2.3.3",
-    "xlsx": "^0.10.2"
+    "typescript": "^2.3.4",
+    "xlsx": "^0.10.4"
   }
 }
