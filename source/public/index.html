@@ -278,7 +278,9 @@
           populateTablesInRange(map, rangeCircle);
 
           map.fitBounds(rangeCircle.getBounds())
-        });
+        }, function () {
+          // TODO: On error
+        }, { enableHighAccuracy: "true" });
       }
     }
   </script>

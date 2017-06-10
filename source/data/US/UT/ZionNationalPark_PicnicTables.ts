@@ -9,7 +9,7 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "National Park Service IMR Open Data"
+let source_name = "National Park Service"
 let dataset_name = "Zion National Park - Picnic Tables"
 let dataset_url_human = "https://opendata.arcgis.com/datasets/b89ef7a7f234491a995dbaefb9f160ac_0"
 let dataset_url_csv = "https://opendata.arcgis.com/datasets/b89ef7a7f234491a995dbaefb9f160ac_0.csv"
@@ -43,7 +43,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
       }, {
           $set: {
             "type": "Feature",
-            "properties.type": "site",
+            "properties.type": "table",
             "properties.source.retrieved": retrieved,
             "properties.source.name": source_name,
             "properties.source.dataset": dataset_name,

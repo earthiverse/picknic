@@ -1,7 +1,6 @@
 import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
-import striptags from 'striptags';
 
 import { Picnic } from '../../../models/Picnic';
 
@@ -10,12 +9,12 @@ Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
-let source_name = "Los Angeles Geohub"
-let dataset_name = "Picnic Areas"
-let dataset_url_human = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9"
-let dataset_url_csv = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9.csv"
-let license_name = "Public Domain"
-let license_url = "https://creativecommons.org/publicdomain/mark/1.0/"
+let source_name = "National Park Service"
+let dataset_name = "Saguaro National Park - Picnic Area"
+let dataset_url_human = "https://opendata.arcgis.com/datasets/0e8688f5825d4c52a547876f1c00629d_0"
+let dataset_url_csv = "https://opendata.arcgis.com/datasets/0e8688f5825d4c52a547876f1c00629d_0.csv"
+let license_name = "Unspecified (Public Domain?)"
+let license_url = "https://en.wikipedia.org/wiki/Public_domain"
 
 // Download & Parse!
 let retrieved = new Date();
@@ -29,20 +28,18 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
 
     // Data
     for (let i = 0; data[i]; i++) {
-      let lat = parseFloat(data[i]["latitude"]);
-      let lng = parseFloat(data[i]["longitude"]);
+      let lat = parseFloat(data[i]["Y"]);
+      let lng = parseFloat(data[i]["X"]);
 
       // Comments based on additional data
-      let comment: string = data[i]["Name"].trim();
-      if (data[i]["hours"].trim()) {
-        comment += ". " + striptags(data[i]["hours"]).trim();
-      }
+      let comment: string = data[i]["NAME"];
+      let globalID: string = data[i]["GlobalID"];
 
       // Insert or Update Table
       j += 1;
       Picnic.findOneAndUpdate({
         "geometry.type": "Point",
-        "geometry.coordinates": [lng, lat]
+        "properties.source.id": globalID
       }, {
           $set: {
             "type": "Feature",
@@ -51,6 +48,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
             "properties.source.name": source_name,
             "properties.source.dataset": dataset_name,
             "properties.source.url": dataset_url_human,
+            "properties.source.id": globalID,
             "properties.license.name": license_name,
             "properties.license.url": license_url,
             "properties.comment": comment,
