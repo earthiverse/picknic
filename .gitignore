@@ -1,6 +1,7 @@
 # Extra
 .tscache
 .baseDir.js
+package-lock.json
 
 # Created by https://www.gitignore.io/api/linux,node,osx,typings,grunt,windows,python
 
