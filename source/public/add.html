@@ -30,7 +30,7 @@
     </fieldset>
   </form>
   <div id="map"></div>
-  <form class="pure-form pure-form-stacked" action="/data/tables/add" method="post">
+  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post">
     <div class="pure-g">
       <div class="pure-u-1">
         <legend>Location</legend>
@@ -103,11 +103,14 @@
         <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
       </div>
       <div class="pure-u-1">
-        <button type="submit" class="pure-button pure-button-primary">Add Table</button>
+        <button type="submit" id="add_table" class="pure-button pure-button-primary">Add Table</button>
       </div>
     </div>
   </form>
   <script>
+    // Form
+    var addTableForm = document.getElementById('add_table_form');
+
     // Inputs
     var addressInput = document.getElementById('address');
     var latInput = document.getElementById("latitude");
@@ -126,6 +129,7 @@
     var moveCenter = document.getElementById("move_map_center");
     var moveCurrent = document.getElementById("move_current");
     var setUnknown = document.getElementById("reset_attributes");
+    var addTable = document.getElementById("add_table");
 
     function trimPretty(number) {
       return parseFloat(parseFloat(number).toFixed(5))
@@ -342,10 +346,29 @@
           }
         });
       });
+
+      addTable.addEventListener("submit", function (e) {
+        $.ajax({
+          type: 'POST',
+          url: '/data/tables/add',
+          data: FormData(addTableForm),
+          success: function () {
+            $.notify(
+              "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
+              { position: "top center" }
+            );
+          }
+        });
+
+        e.preventDefault();
+      });
     }
   </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo&amp;callback=initMap&amp;libraries=places"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-rc1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js" integrity="sha256-tSRROoGfGWTveRpDHFiWVz+UXt+xKNe90wwGn25lpw8="
+    crossorigin="anonymous"></script>
 </body>
 
 </html>
