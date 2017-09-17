@@ -30,7 +30,7 @@
     </fieldset>
   </form>
   <div id="map"></div>
-  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post">
+  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post" onsubmit="event.preventDefault();">
     <div class="pure-g">
       <div class="pure-u-1">
         <legend>Location</legend>
@@ -169,6 +169,22 @@
           }
           break;
       }
+    });
+
+    addTableForm.on("submit", function () {
+      e.preventDefault();
+
+      $.ajax({
+        type: 'POST',
+        url: '/data/tables/add',
+        data: FormData(addTableForm),
+        success: function () {
+          $.notify(
+            "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
+            { position: "top center" }
+          );
+        }
+      });
     });
 
     // Set all attributes to unknown on reset button click
@@ -343,22 +359,6 @@
                 map.data.addGeoJson(table);
               }
             }
-          }
-        });
-      });
-
-      $("#add_table_form").on("submit", function () {
-        e.preventDefault();
-
-        $.ajax({
-          type: 'POST',
-          url: '/data/tables/add',
-          data: FormData(addTableForm),
-          success: function () {
-            $.notify(
-              "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
-              { position: "top center" }
-            );
           }
         });
       });
