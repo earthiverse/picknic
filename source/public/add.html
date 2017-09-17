@@ -175,6 +175,9 @@
       $.ajax({
         type: 'POST',
         url: '/data/tables/add',
+        processData: false,
+        contentType: false,
+        cache: false,
         data: new FormData(document.getElementById('add_table_form')),
         success: function () {
           $.notify(
@@ -348,6 +351,7 @@
           url: '/data/tables/find/within',
           dataType: 'json',
           contentType: 'application/json',
+          cache: false,
           data: JSON.stringify(box),
           success: function (tables) {
             for (var i = 0; i < tables.length; i++) {
