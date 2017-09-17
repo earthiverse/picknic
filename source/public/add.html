@@ -175,7 +175,7 @@
       $.ajax({
         type: 'POST',
         url: '/data/tables/add',
-        data: FormData(addTableForm),
+        data: new FormData(addTableForm),
         success: function () {
           $.notify(
             "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
