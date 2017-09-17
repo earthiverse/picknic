@@ -30,7 +30,7 @@
     </fieldset>
   </form>
   <div id="map"></div>
-  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post" onsubmit="event.preventDefault();">
+  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post" onsubmit="event.preventDefault(); addATable()">
     <div class="pure-g">
       <div class="pure-u-1">
         <legend>Location</legend>
@@ -171,9 +171,7 @@
       }
     });
 
-    addTableForm.addEventListener("submit", function (e) {
-      e.preventDefault();
-
+    function addATable() {
       $.ajax({
         type: 'POST',
         url: '/data/tables/add',
@@ -185,7 +183,7 @@
           );
         }
       });
-    });
+    };
 
     // Set all attributes to unknown on reset button click
     setUnknown.addEventListener("click", function () {
