@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+
+<head>
+  <meta name="theme-color" content="#a8d49f">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>Picknic</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0="
+    crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w="
+    crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+  <style>
+    body {
+      height: 100%;
+      width: 100%;
+    }
+
+    .map {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+    }
+
+    .logo {
+      display: inline-block;
+      margin-right: 5px;
+      width: 50px;
+      height: 50px;
+    }
+
+    .title {
+      color: #000;
+    }
+
+    #top {
+      background: rgba(255, 255, 255, 0.5);
+      width: 100%;
+      padding: 5px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+    }
+
+    #top span {
+      font-size: 25px;
+      margin-right: 15px;
+      vertical-align: top;
+    }
+
+    #top form {
+      display: inline-block;
+      vertical-align: top;
+    }
+
+    .navbar-default .navbar-brand::selection {
+      background-color: rgba(179, 227, 249, 0.5);
+    }
+
+    .navbar-default .navbar-brand::-moz-selection {
+      background-color: rgba(179, 227, 249, 0.5);
+    }
+
+    .navbar-default {
+      background-color: rgba(255, 255, 255, 0.8);
+      border: none;
+    }
+
+    .navbar-default .navbar-brand {
+      color: #000;
+      text-shadow: 1px 1px 0 #EEE;
+      font-family: 'Pacifico', cursive;
+      font-size: 24px;
+    }
+
+    .navbar .navbar-brand:hover {
+      color: #000;
+    }
+
+    .navbar img {
+      box-shadow: 1px 1px 0 #EEE;
+      border-radius: 5px;
+      display: inline-block;
+      width: 40px;
+      height: 40px;
+      margin: -10px 8px 0 0;
+    }
+    /* puts the google places autocomplete dropdown results above the bootstrap modal 1050 zindex. */
+
+    .pac-container {
+      z-index: 1051 !important;
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
+          aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+        <a href="#" class="navbar-brand"><img alt="" src="/images/picknic.svg">Picknic</a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+        <form class="navbar-form navbar-right" role="search">
+          <div class="input-group">
+            <input id="address" type="search" class="form-control" placeholder="Address Search" onkeypress="return event.keyCode != 13;">
+            <div class="input-group-btn">
+              <button class="btn btn-default" type="button"><i class="glyphicon glyphicon-search"></i></button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!--/.nav-collapse -->
+    </div>
+  </nav>
+
+  <!-- Google Map -->
+  <div class="map" id="map"></div>
+  <script>
+    // Map
+    var mapDiv = document.getElementById('map');
+    var addressInput = document.getElementById('address');
+
+    function initMap() {
+      var initialPoint = { lat: 53.5444, lng: -113.4904 };
+
+      allTables = {};
+      function populateTablesInRange(map, rangeCircle) {
+        var circlePosition = rangeCircle.getCenter();
+        var circleLat = circlePosition.lat();
+        var circleLng = circlePosition.lng();
+        var circleRadius = rangeCircle.getRadius() / 6367444.7;
+        var circle = { "center": [circleLng, circleLat], "radius": circleRadius, "spherical": true };
+        $.ajax({
+          type: 'POST',
+          url: '/data/tables/find/within',
+          dataType: 'json',
+          contentType: 'application/json',
+          data: JSON.stringify(circle),
+          success: function (tables) {
+            for (var i = 0; i < tables.length; i++) {
+              var table = tables[i];
+              if (!allTables.hasOwnProperty(table._id)) {
+                allTables[table._id] = true;
+                map.data.addGeoJson(table);
+              }
+            }
+          }
+        });
+      }
+
+      // Map Customization
+      var map = new google.maps.Map(mapDiv, {
+        zoom: 15,
+        minZoom: 13,
+        center: initialPoint,
+        scrollwheel: false,
+        mapTypeControl: true,
+        mapTypeControlOptions: { position: google.maps.ControlPosition.LEFT_BOTTOM },
+        streetViewControl: true,
+        scaleControl: true,
+        // Style created on Snazzymaps -- https://snazzymaps.com/style/58514/picknic-lightwater
+        styles: [{ "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#444444" }] }, { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#f2f2f2" }] }, { "featureType": "landscape", "elementType": "geometry.stroke", "stylers": [{ "color": "#cacaca" }] }, { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi.park", "elementType": "all", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.park", "elementType": "geometry.fill", "stylers": [{ "color": "#a8d49f" }] }, { "featureType": "poi.school", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.sports_complex", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#ffd0b2" }] }, { "featureType": "poi.sports_complex", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] }, { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#b3e3f9" }] }]
+      });
+      map.data.setStyle(function (feature) {
+        var icon = '';
+        if (feature.getProperty("type") == "table") {
+          icon = '/images/markers/table_brown.png'
+        } else if (feature.getProperty("type") == "site") {
+          icon = '/images/markers/site_grey.png'
+        } else {
+          // TODO: Create unknown marker
+        }
+        return {
+          "icon": icon
+        }
+      });
+
+      var assetInfoWindow = new google.maps.InfoWindow({
+        //content: "Hello World!"
+      });
+      assetInfoWindow.setOptions({ pixelOffset: new google.maps.Size(0, -30) });
+      // Display some stuff about the data if they click on it
+      map.data.addListener('mouseover', function (event) {
+        var comment = event.feature.getProperty("comment");
+        if (comment) {
+          assetInfoWindow.setContent(comment);
+          assetInfoWindow.setPosition(event.feature.getGeometry().get());
+          assetInfoWindow.open(map);
+        }
+      });
+      map.data.addListener('mouseout', function (event) {
+        assetInfoWindow.close();
+      });
+
+      // Markers
+      var rangeCircle = new google.maps.Circle({
+        clickable: false,
+        strokeColor: "#b3e3f9",
+        fillColor: "#b3e3f9",
+        fillOpacity: 0.5,
+        map: map,
+        radius: 500
+      });
+      var locationMarker = new google.maps.Marker({
+        clickable: true,
+        icon: 'images/markers/picnic_basket.png',
+        map: map,
+        shadow: null,
+        zIndex: 999
+      });
+
+      // // Clicking on the location marker brings up a menu where the use can alter the range of the search
+      // var locationMarkerInfoWindow = new google.maps.InfoWindow({
+      //   //content: "Hello World!"
+      // });
+      // locationMarker.addListener('mouseover', function () {
+      //   locationMarkerInfoWindow.open(map, locationMarker);
+      // });
+      // locationMarker.addListener('mouseout', function () {
+      //   locationMarkerInfoWindow.close(map, locationMarker);
+      // });
+
+
+      // When the user opens street view mode, bring the map to the front of the page so they can back out
+      var thePanorama = map.getStreetView();
+      google.maps.event.addListener(thePanorama, 'visible_changed', function () {
+        console.log("Visible?: " + thePanorama.getVisible());
+        if (thePanorama.getVisible()) {
+          // Display your street view visible UI
+          mapDiv.style.zIndex = 1051;
+        } else {
+          // Display your original UI
+          mapDiv.style.zIndex = 0;
+        }
+      });
+
+      // Setup Autocomplete
+      var autocomplete = new google.maps.places.Autocomplete(addressInput);
+      autocomplete.bindTo('bounds', map);
+      autocomplete.addListener('place_changed', function () {
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+          console.log("No geometry for place!");
+          return;
+        }
+
+        // Move Map
+        map.setCenter(place.geometry.location);
+        // Move Range Circle & Marker
+        rangeCircle.setCenter(place.geometry.location);
+        locationMarker.setPosition(place.geometry.location);
+
+        // Get Tables
+        populateTablesInRange(map, rangeCircle);
+      });
+
+      // Try to get user location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+          map.setCenter(initialLocation);
+          locationMarker.setPosition(initialLocation);
+          rangeCircle.setCenter(initialLocation);
+          populateTablesInRange(map, rangeCircle);
+
+          map.fitBounds(rangeCircle.getBounds())
+        }, function () {
+          // TODO: On error
+        }, { enableHighAccuracy: "true" });
+      }
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo&callback=initMap&libraries=places"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8="
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

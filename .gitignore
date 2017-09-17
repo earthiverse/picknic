@@ -1,5 +1,22 @@
+# Extra
+.tscache
+.baseDir.js
+package-lock.json
 
-# Created by https://www.gitignore.io/api/node,python,linux
+# Created by https://www.gitignore.io/api/linux,node,osx,typings,grunt,windows,python
+
+### Linux ###
+*~
+
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+
+# KDE directory preferences
+.directory
+
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+
 
 ### Node ###
 # Logs
@@ -39,6 +56,69 @@ jspm_packages
 
 # Optional REPL history
 .node_repl_history
+
+
+### OSX ###
+*.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+
+### Typings ###
+## Ignore downloaded typings
+typings
+
+
+### grunt ###
+# Grunt usually compiles files inside this directory
+dist/
+
+# Grunt usually preprocesses files such as coffeescript, compass... inside the .tmp directory
+.tmp/
+
+
+### Windows ###
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
 
 
 ### Python ###
@@ -132,16 +212,8 @@ ENV/
 # Rope project settings
 .ropeproject
 
-
-### Linux ###
-*~
-
-# temporary files which can be created if a process still has a handle open of a deleted file
-.fuse_hidden*
-
-# KDE directory preferences
-.directory
-
-# Linux trash folder which might appear on any partition or disk
-.Trash-*
-
+### VisualStudioCode ###
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json

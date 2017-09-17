@@ -1,0 +1,19 @@
+{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "lib": [
+            "es2015",
+            "dom"
+        ],
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "outDir": "build",
+        "removeComments": true,
+        "rootDir": "source",
+        "sourceMap": false,
+        "watch": false
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <title>Add a Picnic Table [test]</title>
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/grids-responsive-min.css">
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 4px;
+    }
+
+    #map {
+      height: 75%;
+      width: 100%;
+      margin-bottom: 0.5em;
+    }
+  </style>
+</head>
+
+<body>
+  <form class="pure-form">
+    <fieldset>
+      <legend>Map</legend>
+      <input id="address" type="text" class="pure-input-1" placeholder="Enter a Location">
+    </fieldset>
+  </form>
+  <div id="map"></div>
+  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post" onsubmit="event.preventDefault(); addATable()">
+    <div class="pure-g">
+      <div class="pure-u-1">
+        <legend>Location</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-6-24">
+        <a id="move_map_center" class="pure-button button-special pure-u-23-24"><i class="fa fa-map" aria-hidden="true"></i> Map Center</a>
+        <a id="move_current" class="pure-button button-special pure-button-disabled pure-u-23-24"><i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</a>
+      </div>
+      <div class="pure-u-1 pure-u-md-9-24">
+        <label for="latitude">Latitude</label>
+        <input id="latitude" name="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
+      </div>
+      <div class="pure-u-1 pure-u-md-9-24">
+        <label for="longitude">Longitude</label>
+        <input id="longitude" name="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
+      </div>
+      <div class="pure-u-1">
+        <legend>Attributes</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</a>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+          <div class="pure-u-1 pure-u-md-12-24">
+            <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
+            <select id="sheltered" name="sheltered" class="pure-u-23-24">
+                  <option>Unknown</option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+          </div>
+          <div class="pure-u-1 pure-u-md-12-24">
+            <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
+            <select id="accessible" name="accessible" class="pure-u-23-24">
+                  <option>Unknown</option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+          </div>
+          <div class="pure-u-1">
+            <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
+          </div>
+        </div>
+      </div>
+      <div class="pure-u-1">
+        <legend>Source</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <select id="source" class="pure-u-23-24">
+            <option>Other</option>
+            <option>Picknic</option>
+          </select>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name" required>
+        <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL" required>
+      </div>
+      <div class="pure-u-1">
+        <legend>License</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <select id="license" class="pure-u-23-24">
+            <option>Other</option>
+            <option>CC BY 4.0</option>
+          </select>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name" required>
+        <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
+      </div>
+      <div class="pure-u-1">
+        <button type="submit" id="add_table" class="pure-button pure-button-primary">Add Table</button>
+      </div>
+    </div>
+  </form>
+  <script>
+    // Form
+    var addTableForm = document.getElementById('add_table_form');
+
+    // Inputs
+    var addressInput = document.getElementById('address');
+    var latInput = document.getElementById("latitude");
+    var lngInput = document.getElementById("longitude");
+    var shelteredInput = document.getElementById("sheltered");
+    var accessibleInput = document.getElementById("accessible");
+    var commentInput = document.getElementById("comment");
+    var licenseSelect = document.getElementById("license");
+    var licenseName = document.getElementById("license_name");
+    var licenseURL = document.getElementById("license_url");
+    var sourceSelect = document.getElementById("source");
+    var sourceName = document.getElementById("source_name");
+    var sourceURL = document.getElementById("source_url");
+
+    // Buttons
+    var moveCenter = document.getElementById("move_map_center");
+    var moveCurrent = document.getElementById("move_current");
+    var setUnknown = document.getElementById("reset_attributes");
+    var addTable = document.getElementById("add_table");
+
+    function trimPretty(number) {
+      return parseFloat(parseFloat(number).toFixed(5))
+    }
+
+    // Change the license text based on license chosen
+    licenseSelect.addEventListener("change", function () {
+      switch (licenseSelect.value) {
+        case "CC BY 4.0":
+          {
+            licenseURL.value = "https://creativecommons.org/licenses/by/4.0/";
+            licenseName.value = "Creative Commons Attribution 4.0 International";
+          }
+          break;
+        default:
+          {
+            licenseURL.value = "";
+            licenseName.value = "";
+          }
+          break;
+      }
+    });
+
+    // Change the source text based on source chosen
+    sourceSelect.addEventListener("change", function () {
+      switch (sourceSelect.value) {
+        case "Picknic":
+          {
+            sourceURL.value = "https://picknic.site";
+            sourceName.value = "Picknic";
+          }
+          break;
+        default:
+          {
+            sourceURL.value = "";
+            sourceName.value = "";
+          }
+          break;
+      }
+    });
+
+    function addATable() {
+      $.ajax({
+        type: 'POST',
+        url: '/data/tables/add',
+        processData: false,
+        contentType: false,
+        cache: false,
+        data: new FormData(document.getElementById('add_table_form')),
+        success: function () {
+          $.notify(
+            "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
+            { position: "top center" }
+          );
+        }
+      });
+    };
+
+    // Set all attributes to unknown on reset button click
+    setUnknown.addEventListener("click", function () {
+      shelteredInput.value = "Unknown";
+      accessibleInput.value = "Unknown";
+      commentInput.value = "";
+    });
+
+    // Render the map after Google Maps loads
+    function initMap() {
+      var initialPoint = { lat: 53.5444, lng: -113.4904 };
+
+      // Map Customization
+      var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 17,
+        minZoom: 16,
+        center: initialPoint,
+        scrollwheel: false,
+        streetViewControl: true,
+        streetViewControlOptions: { position: google.maps.ControlPosition.LEFT_TOP },
+        styles: [{ "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#444444" }] }, { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#f2f2f2" }] }, { "featureType": "landscape", "elementType": "geometry.stroke", "stylers": [{ "color": "#cacaca" }] }, { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi.park", "elementType": "all", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.park", "elementType": "geometry.fill", "stylers": [{ "color": "#a8d49f" }] }, { "featureType": "poi.school", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.sports_complex", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#ffd0b2" }] }, { "featureType": "poi.sports_complex", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] }, { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#b3e3f9" }] }]
+      });
+      map.data.setStyle({
+        icon: '/images/markers/table_brown.png'
+      });
+
+      // Markers
+      var tableMarker = new google.maps.Marker({
+        draggable: true,
+        icon: '/images/markers/table_green.png',
+        map: map,
+        position: initialPoint
+      });
+      var locationMarker = new google.maps.Marker({
+        clickable: false,
+        icon: new google.maps.MarkerImage('https://maps.gstatic.com/mapfiles/mobile/mobileimgs2.png', new google.maps.Size(22, 22), new google.maps.Point(0, 18), new google.maps.Point(11, 11)),
+        map: map,
+        shadow: null,
+        zIndex: 999
+      });
+
+      // Setup Autocomplete
+      var autocomplete = new google.maps.places.Autocomplete(addressInput);
+      autocomplete.bindTo('bounds', map);
+      autocomplete.addListener('place_changed', function () {
+        var place = autocomplete.getPlace();
+        if (!place.geometry) {
+          console.log("No geometry for place!");
+          return;
+        }
+
+        // Re-center map
+        if (place.geometry.viewport) {
+          map.fitBounds(place.geometry.viewport);
+        } else {
+          map.setCenter(place.geometry.location);
+          map.setZoom(17);
+        }
+      });
+
+      // Try to get & track user location
+      var hasPosition = false;
+      if (navigator.geolocation) {
+        navigator.geolocation.watchPosition(function (position) {
+          // Enable the button to move to location
+          moveCurrent.classList.remove("pure-button-disabled");
+
+          // Move the dot
+          var prettyLat = trimPretty(position.coords.latitude);
+          var prettyLng = trimPretty(position.coords.longitude);
+          locationMarker.setPosition({ lat: prettyLat, lng: prettyLng });
+
+          if (hasPosition == false) {
+            // Move center of map on first position retrieval
+            map.setCenter({ lat: prettyLat, lng: prettyLng });
+
+            // Move new picnic table on first position retrieval
+            tableMarker.setPosition({ lat: prettyLat, lng: prettyLng });
+            latInput.value = prettyLat;
+            lngInput.value = prettyLng;
+
+            hasPosition = true;
+          }
+        }, function (error) {
+          // Error setting position
+          moveCurrent.classList.add("pure-button-disabled");
+          consle.log("Failed setting location marker position");
+        }, function () {
+          // Error getting geolocation
+          console.log("Failed retrieving geolocation");
+          moveCurrent.classList.add("pure-button-disabled");
+        }, {
+            enableHighAccuracy: true
+          });
+      }
+
+      // Initial Values
+      latInput.value = initialPoint.lat;
+      lngInput.value = initialPoint.lng;
+
+      // Update input coordinates when tableMarker is dragged
+      google.maps.event.addListener(tableMarker, 'dragend', function () {
+        // Update Coordinate Inputs
+        var position = this.getPosition();
+        var prettyLat = trimPretty(position.lat());
+        var prettyLng = trimPretty(position.lng());
+        this.setPosition({ lat: prettyLat, lng: prettyLng });
+        latInput.value = prettyLat;
+        lngInput.value = prettyLng;
+      });
+
+      // Update tableMarker when input coordinates are changed
+      latInput.addEventListener("change", function () {
+        var new_lat = trimPretty(this.value);
+        this.value = new_lat;
+        var old_lng = tableMarker.getPosition().lng();
+        tableMarker.setPosition({ lat: new_lat, lng: old_lng });
+      });
+      lngInput.addEventListener("change", function () {
+        var new_lng = trimPretty(this.value);
+        this.value = new_lng;
+        var old_lat = tableMarker.getPosition().lat();
+        tableMarker.setPosition({ lat: old_lat, lng: new_lng });
+      });
+
+      // Move the table marker when the buttons are clicked
+      moveCenter.addEventListener("click", function () {
+        // Update Coordinate Inputs
+        var position = map.getBounds().getCenter();
+        var prettyLat = trimPretty(position.lat());
+        var prettyLng = trimPretty(position.lng());
+        tableMarker.setPosition({ lat: prettyLat, lng: prettyLng });
+        latInput.value = prettyLat;
+        lngInput.value = prettyLng;
+      });
+      moveCurrent.addEventListener("click", function () {
+        // Update Coordinate Inputs
+        var position = locationMarker.getPosition();
+        var prettyLat = trimPretty(position.lat());
+        var prettyLng = trimPretty(position.lng());
+        tableMarker.setPosition({ lat: prettyLat, lng: prettyLng });
+        latInput.value = prettyLat;
+        lngInput.value = prettyLng;
+        map.setCenter(locationMarker.getPosition())
+      });
+
+      // Get picnic tables within the bounds
+      allTables = {};
+      google.maps.event.addListener(map, 'idle', function () {
+        var ne = this.getBounds().getNorthEast();
+        var ne_lat = ne.lat();
+        var ne_lng = ne.lng();
+
+        var sw = this.getBounds().getSouthWest();
+        var sw_lat = sw.lat();
+        var sw_lng = sw.lng();
+
+        var box = { "box": [[sw_lng, sw_lat], [ne_lng, ne_lat]] }
+
+        $.ajax({
+          type: 'POST',
+          url: '/data/tables/find/within',
+          dataType: 'json',
+          contentType: 'application/json',
+          cache: false,
+          data: JSON.stringify(box),
+          success: function (tables) {
+            for (var i = 0; i < tables.length; i++) {
+              var table = tables[i];
+              if (!allTables.hasOwnProperty(table._id)) {
+                allTables[table._id] = true;
+                map.data.addGeoJson(table);
+              }
+            }
+          }
+        });
+      });
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo&amp;callback=initMap&amp;libraries=places"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js" integrity="sha256-tSRROoGfGWTveRpDHFiWVz+UXt+xKNe90wwGn25lpw8="
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
