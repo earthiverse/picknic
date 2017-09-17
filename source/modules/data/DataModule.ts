@@ -6,13 +6,13 @@ import { Picnic } from "../../models/Picnic";
 export class DataModule extends Module {
   addRoutes(app: Express.Application) {
     // Tables
-    app.post('/data/tables/find/within', multer().single(), function (req: Express.Request, res: Express.Response) {
+    app.post('/data/tables/find/within', function (req: Express.Request, res: Express.Response) {
       let bounds = req.body;
       Picnic.find({}).where("geometry").within(bounds).lean().exec().then(function (tables: any) {
         res.send(tables);
       });
     });
-    app.post('/data/tables/add', function (req: Express.Request, res: Express.Response) {
+    app.post('/data/tables/add', multer().single(), function (req: Express.Request, res: Express.Response) {
       let fields = req.body;
 
       let table = new Picnic({
