@@ -32,61 +32,79 @@
   <div id="map"></div>
   <form class="pure-form pure-form-stacked" action="/data/tables/add" method="post">
     <div class="pure-g">
-      <div class="pure-u-1 pure-u-md-12-24">
-        <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
-        <select id="sheltered" name="sheltered" class="pure-u-23-24">
-                    <option>Unknown</option>
-                    <option>Yes</option>
-                    <option>No</option>
-                  </select>
+      <div class="pure-u-1">
+        <legend>Location</legend>
       </div>
-      <div class="pure-u-1 pure-u-md-12-24">
-        <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
-        <select id="accessible" name="accessible" class="pure-u-23-24">
-                    <option>Unknown</option>
-                    <option>Yes</option>
-                    <option>No</option>
-                  </select>
+      <div class="pure-u-1 pure-u-md-6-24">
+        <a id="move_map_center" class="pure-button button-special pure-u-23-24"><i class="fa fa-map" aria-hidden="true"></i> Map Center</a>
+        <a id="move_current" class="pure-button button-special pure-button-disabled pure-u-23-24"><i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</a>
+      </div>
+      <div class="pure-u-1 pure-u-md-9-24">
+        <label for="latitude">Latitude</label>
+        <input id="latitude" name="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
+      </div>
+      <div class="pure-u-1 pure-u-md-9-24">
+        <label for="longitude">Longitude</label>
+        <input id="longitude" name="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
       </div>
       <div class="pure-u-1">
-        <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
+        <legend>Attributes</legend>
       </div>
-    </div>
-    </div>
-    <div class="pure-u-1">
-      <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
-    </div>
-    </div>
-    </div>
-    <div class="pure-u-1">
-      <legend>Source</legend>
-    </div>
-    <div class="pure-u-1 pure-u-md-1-4">
-      <select id="source" class="pure-u-23-24">
-              <option>Other</option>
-              <option>Picknic</option>
-            </select>
-    </div>
-    <div class="pure-u-1 pure-u-md-3-4">
-      <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name" required>
-      <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL" required>
-    </div>
-    <div class="pure-u-1">
-      <legend>License</legend>
-    </div>
-    <div class="pure-u-1 pure-u-md-1-4">
-      <select id="license" class="pure-u-23-24">
-              <option>Other</option>
-              <option>CC BY 4.0</option>
-            </select>
-    </div>
-    <div class="pure-u-1 pure-u-md-3-4">
-      <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name" required>
-      <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
-    </div>
-    <div class="pure-u-1">
-      <button type="submit" class="pure-button pure-button-primary">Add Table</button>
-    </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</a>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <div class="pure-g">
+          <div class="pure-u-1 pure-u-md-12-24">
+            <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
+            <select id="sheltered" name="sheltered" class="pure-u-23-24">
+                  <option>Unknown</option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+          </div>
+          <div class="pure-u-1 pure-u-md-12-24">
+            <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
+            <select id="accessible" name="accessible" class="pure-u-23-24">
+                  <option>Unknown</option>
+                  <option>Yes</option>
+                  <option>No</option>
+                </select>
+          </div>
+          <div class="pure-u-1">
+            <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
+          </div>
+        </div>
+      </div>
+      <div class="pure-u-1">
+        <legend>Source</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <select id="source" class="pure-u-23-24">
+            <option>Other</option>
+            <option>Picknic</option>
+          </select>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name" required>
+        <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL" required>
+      </div>
+      <div class="pure-u-1">
+        <legend>License</legend>
+      </div>
+      <div class="pure-u-1 pure-u-md-1-4">
+        <select id="license" class="pure-u-23-24">
+            <option>Other</option>
+            <option>CC BY 4.0</option>
+          </select>
+      </div>
+      <div class="pure-u-1 pure-u-md-3-4">
+        <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name" required>
+        <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
+      </div>
+      <div class="pure-u-1">
+        <button type="submit" class="pure-button pure-button-primary">Add Table</button>
+      </div>
     </div>
   </form>
   <script>
