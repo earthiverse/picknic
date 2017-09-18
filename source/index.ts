@@ -7,7 +7,7 @@ import Path = require("path");
 
 // Setup Mongoose
 Mongoose.Promise = global.Promise;
-Mongoose.connect('mongodb://localhost/picknic');
+Mongoose.connect('mongodb://localhost/picknic', { useMongoClient: true });
 
 // Setup Express
 let app = Express();
