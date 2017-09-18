@@ -11,7 +11,7 @@ Mongoose.connect('mongodb://localhost/picknic');
 
 // Setup Express
 let app = Express();
-app.use(BodyParser.urlencoded({extended: false}));
+app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());
 
 // Serve Static Files
@@ -21,6 +21,8 @@ app.use(Express.static(Path.join(__dirname, "../source/public")));
 // Load Modules
 import { DataModule } from "./modules/data/DataModule";
 new DataModule(app);
+import { UserModule } from "./modules/user/UserModule";
+new UserModule(app);
 
 // Start Serving Requests
 // TODO: Create config & set port in config

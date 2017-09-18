@@ -1,5 +1,5 @@
 import Express = require('express');
-import * as multer from 'multer'
+import * as multer from 'multer';
 import { Module } from "../Module";
 import { Picnic } from "../../models/Picnic";
 
