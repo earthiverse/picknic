@@ -7,112 +7,113 @@
   <title>Picknic Registration</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0="
     crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha256-916EbMg70RQy9LHiGkXzG8hSg9EdNy97GazNG/aiY1w="
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha256-m/h/cUDAhf6/iBRixTbuc8+Rg2cIETQtPcH9D3p2Kg0="
     crossorigin="anonymous" />
   <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
   <style>
     body {
       background: url('images/background.png');
+      margin: 0;
+      padding: 0;
       height: 100%;
       width: 100%;
-      padding-top: 50px;
     }
 
-    .logo {
-      display: inline-block;
-      margin-right: 5px;
-      width: 50px;
-      height: 50px;
-    }
-
-    .title {
-      color: #000;
-    }
-
-    #top {
-      background: rgba(255, 255, 255, 0.5);
-      width: 100%;
-      padding: 5px;
-      position: absolute;
-      top: 0;
-      left: 0;
-      z-index: 2;
-    }
-
-    #top span {
-      font-size: 25px;
-      margin-right: 15px;
-      vertical-align: top;
-    }
-
-    .navbar-default .navbar-brand::selection {
-      background-color: rgba(179, 227, 249, 0.5);
-    }
-
-    .navbar-default .navbar-brand::-moz-selection {
-      background-color: rgba(179, 227, 249, 0.5);
-    }
-
-    .navbar-default {
+    nav.navbar {
       background-color: rgba(255, 255, 255, 0.8);
-      border: none;
+      height: 3em;
+      z-index: 1;
     }
 
-    .navbar-default .navbar-brand {
+    nav.navbar img {
+      border-radius: 5px;
+      display: inline-block;
+      width: 1.6em;
+      height: 1.6em;
+      margin: -0.4em 0.25em 0 0;
+    }
+
+    .navbar-brand {
       color: #000;
       text-shadow: 1px 1px 0 #EEE;
       font-family: 'Pacifico', cursive;
       font-size: 24px;
     }
 
-    .navbar .navbar-brand:hover {
+    .navbar-brand:hover {
       color: #000;
     }
 
-    .navbar img {
-      box-shadow: 1px 1px 0 #EEE;
-      border-radius: 5px;
-      display: inline-block;
-      width: 40px;
-      height: 40px;
-      margin: -10px 8px 0 0;
+    .navbar-nav .nav-link {
+      color: #333;
+      line-height: 2em;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #111;
+    }
+
+    .navbar-nav .active {
+      background-color: #cacaca;
+      height: 100%;
     }
   </style>
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
-  <nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false"
-          aria-controls="navbar">
-              <span class="sr-only">Toggle navigation</span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-              <span class="icon-bar"></span>
-            </button>
-        <a href="#" class="navbar-brand"><img alt="" src="/images/picknic.svg">Picknic</a>
-      </div>
-      <div id="navbar" class="navbar-collapse collapse">
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="#">Home</a></li>
-          <li><a href="#about">About</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </div>
-      <!--/.nav-collapse -->
+  <nav class="navbar navbar-expand-md navbar-fixed-top navbar-custom">
+    <a class="navbar-brand" href="#"><img alt="" src="/images/picknic.svg">Picknic</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false"
+      aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+    <div class="collapse navbar-collapse" id="navbar">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Login <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">About</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Contact</a>
+        </li>
+      </ul>
     </div>
   </nav>
+
+  <!-- Registration -->
   <div class="container">
-    <h1>Test</h1>
-    Test
+    <h1>Registration</h1>
+    <p>Registering for Picknic allows you to add picnic tables to the map!</p>
+
+    <form data-toggle="validator">
+      <div class="form-group">
+        <label for="email">Email address</label>
+        <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+      </div>
+      <div class="form-group">
+        <div class="g-recaptcha" data-sitekey="6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Register</button>
+    </form>
   </div>
+
   <script>
-    // TODO: Form scripts
+    // Future registration scripts
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8="
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha256-DiWJXXyq81WlPRnDfGmgYZj2aOVCKyEdJ1l+2TmDuAs="
     crossorigin="anonymous"></script>
 </body>
 
