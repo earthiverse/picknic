@@ -12,9 +12,9 @@
   <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
   <style>
     body {
-      background: url('images/background.png');
+      background: url('/images/background.png');
       margin: 0;
-      padding: 0;
+      padding-top: 5rem;
       height: 100%;
       width: 100%;
     }
@@ -23,6 +23,7 @@
       background-color: rgba(255, 255, 255, 0.8);
       height: 3em;
       z-index: 1;
+      border-bottom: 1px solid #CCC;
     }
 
     nav.navbar img {
@@ -62,19 +63,25 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-fixed-top navbar-custom">
+  <nav class="navbar navbar-expand-md fixed-top">
     <a class="navbar-brand" href="#"><img alt="" src="/images/picknic.svg">Picknic</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false"
-      aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
+      aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-    <div class="collapse navbar-collapse" id="navbar">
+
+    <!-- Things after here will be collapsed on smaller screens -->
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
       <ul class="navbar-nav mr-auto">
         <li class="nav-item">
           <a class="nav-link" href="#">Home</a>
         </li>
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Login <span class="sr-only">(current)</span></a>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Login</a>
+          <div class="dropdown-menu" aria-labelledby="loginDropdown">
+            <a class="dropdown-item" href="login.html">Login</a>
+            <a class="dropdown-item" href="register.html">Register</a>
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">About</a>
@@ -87,19 +94,18 @@
   </nav>
 
   <!-- Registration -->
-  <div class="container">
+  <div class="container ">
     <h1>Registration</h1>
     <p>Registering for Picknic allows you to add picnic tables to the map!</p>
-
-    <form data-toggle="validator">
+    <form data-toggle="validator" method="POST" action="/user/register">
       <div class="form-group">
         <label for="email">Email address</label>
-        <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" placeholder="Enter email">
+        <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" placeholder="Enter email" required>
         <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
       </div>
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" class="form-control" name="password" id="password" placeholder="Password">
+        <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
       </div>
       <div class="form-group">
         <div class="g-recaptcha" data-sitekey="6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"></div>
@@ -112,6 +118,8 @@
     // Future registration scripts
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha256-DiWJXXyq81WlPRnDfGmgYZj2aOVCKyEdJ1l+2TmDuAs="
     crossorigin="anonymous"></script>

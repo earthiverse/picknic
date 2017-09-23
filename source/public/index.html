@@ -30,6 +30,7 @@
       background-color: rgba(255, 255, 255, 0.8);
       height: 3em;
       z-index: 1;
+      border-bottom: 1px solid #CCC;
     }
 
     nav.navbar img {
@@ -73,16 +74,25 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-fixed-top navbar-custom">
+  <nav class="navbar navbar-expand-md fixed-top">
     <a class="navbar-brand" href="#"><img alt="" src="/images/picknic.svg">Picknic</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false"
-      aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
+      aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
-    <div class="collapse navbar-collapse" id="navbar">
+
+    <!-- Things after here will be collapsed on smaller screens -->
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
       <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Home</a>
+        </li>
+        <li class="nav-item dropdown active">
+          <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Login</a>
+          <div class="dropdown-menu" aria-labelledby="loginDropdown">
+            <a class="dropdown-item" href="login.html">Login</a>
+            <a class="dropdown-item" href="register.html">Register</a>
+          </div>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="#">About</a>
@@ -91,12 +101,6 @@
           <a class="nav-link" href="#">Contact</a>
         </li>
       </ul>
-      <form class="form-inline my-2 my-md-0" role="search">
-        <div class="input-group mb-2 mb-sm-0">
-          <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
-          <input id="address" type="search" class="form-control" placeholder="Address Search" onkeypress="return event.keyCode != 13;">
-        </div>
-      </form>
     </div>
   </nav>
 
@@ -191,7 +195,7 @@
       });
       var locationMarker = new google.maps.Marker({
         clickable: true,
-        icon: 'images/markers/picnic_basket.png',
+        icon: '/images/markers/picnic_basket.png',
         map: map,
         shadow: null,
         zIndex: 999
@@ -288,6 +292,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha256-DiWJXXyq81WlPRnDfGmgYZj2aOVCKyEdJ1l+2TmDuAs="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.5/esm/popper.min.js" integrity="sha256-KLtP3dHangu39xHpe/GulhmvfvAy+Iuh9LneCuSyRcs="
     crossorigin="anonymous"></script>
 </body>
 

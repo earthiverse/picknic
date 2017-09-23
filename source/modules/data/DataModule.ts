@@ -36,6 +36,7 @@ export class DataModule extends Module {
         }
       });
 
+      // Switch form text (yes/no) to boolean
       switch (fields.sheltered.toLowerCase()) {
         case "yes":
           table.properties.sheltered = true;
@@ -44,7 +45,6 @@ export class DataModule extends Module {
           table.properties.sheltered = false;
           break;
       };
-
       switch (fields.accessible.toLowerCase()) {
         case "yes":
           table.properties.accessible = true;
@@ -54,12 +54,12 @@ export class DataModule extends Module {
           break;
       }
 
+      // Add picnic table to database
       Picnic.create(table, function (error: any, tables: string) {
         if (error) {
           res.send("We had an error... " + error);
           console.log(error);
         } else {
-          console.log(tables);
           res.redirect(req.header('Referer'));
         }
       });

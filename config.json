@@ -1,6 +1,15 @@
 {
   "port": 80,
   "keys": {
-    "googleMaps": "AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo"
+    "public": {
+      "googleMaps": "AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo",
+      "recaptcha": "6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"
+    },
+    "private": {
+      "recaptcha": "REPLACE_ME_WITH_PRIVATE_RECAPTCHA_KEY_IN_/config.json"
+    }
+  },
+  "bcrypt": {
+    "cost": 10
   }
 }
