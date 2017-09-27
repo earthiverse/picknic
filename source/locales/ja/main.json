@@ -1,0 +1,11 @@
+{
+  "picknic": "ピクニック",
+  "nav": {
+    "font": "Rounded Mplus 1c",
+    "font-weight": "700",
+    "letter-spacing": "-6px",
+    "login": "ログイン",
+    "register": "レジスター",
+    "user": "ユーザー"
+  }
+}

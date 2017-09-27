@@ -1,0 +1,11 @@
+{
+  "picknic": "Picknic",
+  "nav": {
+    "font": "Pacifico",
+    "font-weight": "400",
+    "letter-spacing": "none",
+    "login": "Login",
+    "register": "Register",
+    "user": "User"
+  }
+}

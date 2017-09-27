@@ -14,12 +14,10 @@ var bcryptConfig = Nconf.get("bcrypt");
 export class UserModule extends Module {
   addRoutes(app: Express.Application) {
     app.post("/user/login", function (req: Express.Request, res: Express.Response) {
-      console.log(req.body);  // DEBUG
+      // TODO: Implement login
+      res.redirect('/');
     });
     app.post("/user/register", function (req: Express.Request, res: Express.Response) {
-      console.log("----- Form -----"); // DEBUG
-      console.log(req.body); // DEBUG
-
       let captcha: string = req.body["g-recaptcha-response"];
       let email: string = req.body["email"];
       let plaintextPassword: string = req.body["password"];
@@ -60,9 +58,6 @@ export class UserModule extends Module {
             return;
           }
 
-          console.log("----- Captcha -----"); // DEBUG
-          console.log(response.body);
-
           // Register user
           Bcrypt.hash(plaintextPassword, bcryptConfig.cost).then(function (passwordHash) {
             let user = new User({
@@ -75,9 +70,8 @@ export class UserModule extends Module {
               if (error) {
                 res.send("We had an error... " + error);
                 console.log(error);
+                return;
               } else {
-                console.log("----- New User -----");
-                console.log(newUser);
                 // TODO: Cookies for login
                 res.redirect('/');
               }

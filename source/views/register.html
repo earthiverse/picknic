@@ -14,7 +14,6 @@
     body {
       background: url('/images/background.png');
       margin: 0;
-      padding-top: 5rem;
       height: 100%;
       width: 100%;
     }
@@ -63,35 +62,7 @@
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md fixed-top">
-    <a class="navbar-brand" href="#"><img alt="" src="/images/picknic.svg">Picknic</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault"
-      aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-    <!-- Things after here will be collapsed on smaller screens -->
-    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item">
-          <a class="nav-link" href="#">Home</a>
-        </li>
-        <li class="nav-item dropdown active">
-          <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Login</a>
-          <div class="dropdown-menu" aria-labelledby="loginDropdown">
-            <a class="dropdown-item" href="login.html">Login</a>
-            <a class="dropdown-item" href="register.html">Register</a>
-          </div>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
-        </li>
-      </ul>
-    </div>
-  </nav>
+  {{> nav}}
 
   <!-- Registration -->
   <div class="container ">

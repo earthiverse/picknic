@@ -1,0 +1,63 @@
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    .map {
+      display: block;
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+    }
+
+    nav.navbar {
+      background-color: rgba(255, 255, 255, 0.8);
+      height: 3em;
+      z-index: 1;
+      border-bottom: 1px solid #CCC;
+    }
+
+    nav.navbar img {
+      border-radius: 5px;
+      display: inline-block;
+      width: 1.6em;
+      height: 1.6em;
+      margin: -0.4em 0.25em 0 0;
+    }
+
+    .navbar-brand {
+      color: #000;
+      text-shadow: 1px 1px 0 #EEE;
+      font-family: "{{#i18n}}nav.font{{/i18n}}", cursive;
+      font-weight: {{#i18n}}nav.font-weight{{/i18n}};
+      letter-spacing: {{#i18n}}nav.letter-spacing{{/i18n}};
+      font-size: 24px;
+    }
+
+    .navbar-brand:hover {
+      color: #000;
+    }
+
+    .navbar-nav .nav-link {
+      color: #333;
+      line-height: 2em;
+    }
+
+    .navbar-nav .nav-link:hover {
+      color: #111;
+    }
+
+    .navbar-nav .active {
+      background-color: #cacaca;
+      height: 100%;
+    }
+
+    .pac-container {
+      /* puts the google places autocomplete dropdown results above the bootstrap modal 1050 zindex. */
+      z-index: 1051 !important;
+    }
+  </style>
