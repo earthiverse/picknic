@@ -2,10 +2,21 @@
   "picknic": "Picknic",
   "nav": {
     "font": "Pacifico",
-    "font-weight": "400",
+    "font-weight": "500",
     "letter-spacing": "none",
     "login": "Login",
     "register": "Register",
+    "about": "About",
+    "contact": "Contact",
+    "addressSearch": "Address Search"
+  },
+  "form": {
+    "email": "Email Address",
+    "email-hint": "example@domain.com",
+    "register": "Register",
+    "password": "Password"
+  },
+  "unused": {
     "user": "User"
   }
 }

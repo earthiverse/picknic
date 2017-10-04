@@ -38,9 +38,10 @@ export class TemplatingModule extends Module {
       res.redirect("index.html");
     });
 
-    app.get('/*.html', function (req: any, res: Express.Response) {
+    app.get('/*.html', function (req: Express.Request, res: Express.Response) {
       // Serve the requested language
-      TemplatingModule.mi18n.changeLanguage(req.language);
+      // NOTE: req's "language" property is only available due to the 'express-request-language' package
+      TemplatingModule.mi18n.changeLanguage((req as any).language);
 
       // Get the index.html from the views folder
       let fileLocation = Path.join(viewsPath, req.path);
@@ -57,7 +58,7 @@ export class TemplatingModule extends Module {
               return render(TemplatingModule.mi18n.t(text));
             }
           },
-          language: req.language
+          show_map_search: (req.path.endsWith("index.html"))
         }, partials));
       });
     });

@@ -1,11 +1,22 @@
 {
-  "picknic": "ピクニック",
+  "picknic": "Picknic",
   "nav": {
-    "font": "Rounded Mplus 1c",
-    "font-weight": "700",
-    "letter-spacing": "-6px",
+    "font": "Pacifico",
+    "font-weight": "500",
+    "letter-spacing": "none",
     "login": "ログイン",
-    "register": "レジスター",
+    "register": "サインアップ",
+    "about": "Picknicとは",
+    "contact": "お問い合わせ",
+    "addressSearch": "場所を検索する"
+  },
+  "form": {
+    "email": "メールアドレス",
+    "email-hint": "例) example@domain.com",
+    "register": "サインアップ",
+    "password": "パスワード"
+  },
+  "unused": {
     "user": "ユーザー"
   }
 }
