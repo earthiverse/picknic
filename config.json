@@ -14,5 +14,8 @@
   },
   "mongo": {
     "picknic": "mongodb://localhost/picknic"
+  },
+  "session": {
+    "secret": "REPLACE_ME_WITH_A_BETTER_SECRET_IN_/config.json"
   }
 }

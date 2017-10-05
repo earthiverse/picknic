@@ -2,6 +2,8 @@ import BodyParser = require('body-parser');
 import Express = require('express');
 const requestLanguage = require('express-request-language');
 import ExpressStatic = require('express-serve-static-core');
+import ExpressSession = require('express-session');
+const MongoStore = require('connect-mongo')(ExpressSession);
 import Http = require('http');
 import I18next = require('i18next');
 const i18nextBackend = require('i18next-sync-fs-backend');
@@ -11,8 +13,9 @@ import Path = require("path");
 
 // Load Configuration
 Nconf.file(Path.join(__dirname, "../config.json"));
-let portConfig = Nconf.get("port");
+let portConfig: Number = Nconf.get("port");
 let mongoConfig = Nconf.get("mongo");
+let sessionConfig = Nconf.get("session");
 
 // Setup Mongoose
 Mongoose.Promise = global.Promise;
@@ -40,6 +43,14 @@ I18next
 let app = Express();
 app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());
+app.use(ExpressSession({
+  "secret": sessionConfig.secret,
+  "resave": true,
+  "saveUninitialized": false,
+  "store": new MongoStore({
+    mongooseConnection: Mongoose.connection
+  })
+}));
 app.use(requestLanguage({
   languages: ['en', 'ja']
 }));

@@ -4,9 +4,8 @@
   <meta name="theme-color" content="#a8d49f">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
-  <title>Picknic Registration</title>
+  <title>Picknic Login</title>
   <!-- style.mustache -->{{> style}}
-  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
@@ -14,28 +13,23 @@
 
   <!-- Registration -->
   <div class="container ">
-    <h1>Registration</h1>
-    <p>Registering for Picknic allows you to add picnic tables to the map!</p>
-    <form data-toggle="validator" method="POST" action="/user/register">
+    <h1>Login</h1>
+    <form data-toggle="validator" method="POST" action="/user/login">
       <div class="form-group">
         <label for="email">{{#i18n}}form.email{{/i18n}}</label>
         <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" placeholder="{{#i18n}}form.email-hint{{/i18n}}"
           required>
-        <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
       </div>
       <div class="form-group">
         <label for="password">Password</label>
         <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
       </div>
-      <div class="form-group">
-        <div class="g-recaptcha" data-sitekey="6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"></div>
-      </div>
-      <button type="submit" class="btn btn-primary">Register</button>
+      <button type="submit" class="btn btn-primary">Login</button>
     </form>
   </div>
 
   <script>
-    // Future registration scripts
+    // Future login scripts
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>

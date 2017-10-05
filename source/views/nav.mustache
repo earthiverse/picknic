@@ -9,23 +9,23 @@
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item dropdown">
-{{# user_is_logged_in }}
-        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{username}}</a>
+{{# session.user }}
+        <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{session.user}}</a>
         <div class="dropdown-menu" aria-labelledby="loginDropdown">
           <a class="dropdown-item" href="#">Thanks for</a>
           <a class="dropdown-item" href="#">signing up</a>
           <a class="dropdown-item" href="#">&amp; logging in!</a>
         </div>
       </li>
-{{/ user_is_logged_in }}
-{{^ user_is_logged_in }}
+{{/ session.user }}
+{{^ session.user }}
         <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{#i18n}}nav.login{{/i18n}}</a>
         <div class="dropdown-menu" aria-labelledby="loginDropdown">
           <a class="dropdown-item" href="login.html">{{#i18n}}nav.login{{/i18n}}</a>
           <a class="dropdown-item" href="register.html">{{#i18n}}nav.register{{/i18n}}</a>
         </div>
       </li>
-{{/ user_is_logged_in }}
+{{/ session.user }}
       <li class="nav-item">
         <a class="nav-link disabled" href="#">{{#i18n}}nav.about{{/i18n}}</a>
       </li>

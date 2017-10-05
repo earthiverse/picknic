@@ -58,7 +58,8 @@ export class TemplatingModule extends Module {
               return render(TemplatingModule.mi18n.t(text));
             }
           },
-          show_map_search: (req.path.endsWith("index.html"))
+          show_map_search: (req.path.endsWith("index.html")),
+          session: req.session
         }, partials));
       });
     });

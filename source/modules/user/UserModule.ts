@@ -14,10 +14,38 @@ var bcryptConfig = Nconf.get("bcrypt");
 export class UserModule extends Module {
   addRoutes(app: Express.Application) {
     app.post("/user/login", function (req: Express.Request, res: Express.Response) {
-      // TODO: Implement login
-      res.redirect('/');
+      // TODO: Error messages
+      let email: string = req.body["email"];
+      let plaintextPassword: string = req.body["password"];
+      let ipAddress: string = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      let now: number = Date.now();
+
+      // Find email
+      let user = User.findOne({
+        "email": email
+      }).exec().then(function (user: any) {
+        if (!user) {
+          // No username was found, try again
+          res.redirect("/login.html");
+        } else {
+          // Verify password
+          Bcrypt.compare(plaintextPassword, user.password, function (err, same) {
+            if (err) {
+              console.log(err);
+              res.redirect('/login.html');
+            }
+            if (same) {
+              req.session.user = email;
+              res.redirect('/');
+            } else {
+              res.redirect("/login.html");
+            }
+          })
+        }
+      })
     });
     app.post("/user/register", function (req: Express.Request, res: Express.Response) {
+      // TODO: Error messages
       let captcha: string = req.body["g-recaptcha-response"];
       let email: string = req.body["email"];
       let plaintextPassword: string = req.body["password"];

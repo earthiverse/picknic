@@ -1,59 +1,64 @@
-  <style>
-    body {
-      background: url('/images/background.png');
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-    }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0="
+  crossorigin="anonymous" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha256-m/h/cUDAhf6/iBRixTbuc8+Rg2cIETQtPcH9D3p2Kg0="
+  crossorigin="anonymous" />
+<link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+<style>
+  body {
+    background: url('/images/background.png');
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
 
-    .map {
-      display: block;
-      width: 100%;
-      height: 100%;
-      position: absolute;
-      top: 0;
-    }
+  .map {
+    display: block;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+  }
 
-    .navbar {
-      background-color: rgba(255, 255, 255, 0.8);
-      z-index: 1;
-      padding:0 0.25em 0 0.25em;
-    }
+  .navbar {
+    background-color: rgba(255, 255, 255, 0.8);
+    z-index: 1;
+    padding:0 0.25em 0 0.25em;
+  }
 
-    .navbar img {
-      border-radius:5px;
-      height:2em;
-      width:2em;
-      margin:-0.25em 0.25em 0 0;
-    }
+  .navbar img {
+    border-radius:5px;
+    height:2em;
+    width:2em;
+    margin:-0.25em 0.25em 0 0;
+  }
 
-    .navbar-brand {
-      color:#000;
-      font-family: "{{#i18n}}nav.font{{/i18n}}", cursive;
-      font-weight: {{#i18n}}nav.font-weight{{/i18n}};
-      letter-spacing: {{#i18n}}nav.letter-spacing{{/i18n}};
-      line-height:2em;
-    }
+  .navbar-brand {
+    color:#000;
+    font-family: "{{#i18n}}nav.font{{/i18n}}", cursive;
+    font-weight: {{#i18n}}nav.font-weight{{/i18n}};
+    letter-spacing: {{#i18n}}nav.letter-spacing{{/i18n}};
+    line-height:2em;
+  }
 
-    .navbar-brand:hover {
-      color: #000;
-    }
+  .navbar-brand:hover {
+    color: #000;
+  }
 
-    .navbar-nav .nav-link {
-      color: #333;
-    }
+  .navbar-nav .nav-link {
+    color: #333;
+  }
 
-    .navbar-nav .nav-link:hover {
-      color: #111;
-    }
+  .navbar-nav .nav-link:hover {
+    color: #111;
+  }
 
-    .pac-container {
-      /* puts the google places autocomplete dropdown results above the bootstrap modal 1050 zindex. */
-      z-index: 1051 !important;
-    }
+  .pac-container {
+    /* puts the google places autocomplete dropdown results above the bootstrap modal 1050 zindex. */
+    z-index: 1051 !important;
+  }
 
-    body .container {
-      margin-top:0.5em;
-    }
-  </style>
+  body .container {
+    margin-top:0.5em;
+  }
+</style>
