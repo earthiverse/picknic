@@ -1,10 +1,11 @@
 import Bcrypt = require('bcrypt');
 import Express = require('express');
+import Mongoose = require('mongoose');
 import Nconf = require('nconf');
 import Path = require("path");
 import Request = require('request');
 import { Module } from "../Module";
-import { User } from "../../models/User";
+import { User, IUser } from "../../models/User";
 
 // Load Settings
 Nconf.file(Path.join(__dirname, "../../../config.json"));
@@ -23,7 +24,7 @@ export class UserModule extends Module {
       // Find email
       let user = User.findOne({
         "email": email
-      }).exec().then(function (user: any) {
+      }).exec().then(function (user: IUser) {
         if (!user) {
           // No username was found, try again
           res.redirect("/login.html");
@@ -35,7 +36,7 @@ export class UserModule extends Module {
               res.redirect('/login.html');
             }
             if (same) {
-              req.session.user = email;
+              UserModule.setLoggedIn(req, user);
               res.redirect('/');
             } else {
               res.redirect("/login.html");
@@ -94,18 +95,37 @@ export class UserModule extends Module {
               "joined": Date.now()
             });
 
-            User.create(user, function (error: any, newUser: string) {
+            User.create(user, function (error: any, newUser: IUser) {
               if (error) {
                 res.send("We had an error... " + error);
                 console.log(error);
                 return;
               } else {
-                // TODO: Cookies for login
+                UserModule.setLoggedIn(req, newUser);
                 res.redirect('/');
               }
             });
           });
         });
     });
+    app.get("/user/logout", function (req: Express.Request, res: Express.Response) {
+      req.session.destroy(function (err) {
+        if (err) {
+          console.log(err);
+        }
+        res.redirect('/');
+      })
+    });
+  }
+
+  static getLoggedInUser(req: Express.Request) {
+    if (!req.session.user) {
+      return undefined;
+    }
+    return req.session.user as string;
+  }
+
+  static setLoggedIn(req: Express.Request, user: IUser) {
+    req.session.user = user.email;
   }
 }

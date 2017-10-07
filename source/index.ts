@@ -15,7 +15,7 @@ import Path = require("path");
 Nconf.file(Path.join(__dirname, "../config.json"));
 let portConfig: Number = Nconf.get("port");
 let mongoConfig = Nconf.get("mongo");
-let sessionConfig = Nconf.get("session");
+let keysConfig = Nconf.get("keys");
 
 // Setup Mongoose
 Mongoose.Promise = global.Promise;
@@ -44,7 +44,7 @@ let app = Express();
 app.use(BodyParser.urlencoded({ extended: false }));
 app.use(BodyParser.json());
 app.use(ExpressSession({
-  "secret": sessionConfig.secret,
+  "secret": keysConfig.private.session,
   "resave": true,
   "saveUninitialized": false,
   "store": new MongoStore({

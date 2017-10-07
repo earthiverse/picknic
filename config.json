@@ -6,7 +6,8 @@
       "recaptcha": "6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"
     },
     "private": {
-      "recaptcha": "REPLACE_ME_WITH_PRIVATE_RECAPTCHA_KEY_IN_/config.json"
+      "recaptcha": "REPLACE_ME_WITH_PRIVATE_RECAPTCHA_KEY_IN_/config.json",
+      "session": "REPLACE_ME_WITH_YOUR_OWN_SECRET_IN_/config.json"
     }
   },
   "bcrypt": {
@@ -14,8 +15,5 @@
   },
   "mongo": {
     "picknic": "mongodb://localhost/picknic"
-  },
-  "session": {
-    "secret": "REPLACE_ME_WITH_A_BETTER_SECRET_IN_/config.json"
   }
 }

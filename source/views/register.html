@@ -4,8 +4,9 @@
   <meta name="theme-color" content="#a8d49f">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
-  <title>Picknic Registration</title>
-  <!-- style.mustache -->{{> style}}
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <title>Registration</title>
+  <!-- Site-wide style -->{{> style}}
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
@@ -13,7 +14,7 @@
   <!-- nav.mustache -->{{> nav}}
 
   <!-- Registration -->
-  <div class="container ">
+  <div class="container">
     <h1>Registration</h1>
     <p>Registering for Picknic allows you to add picnic tables to the map!</p>
     <form data-toggle="validator" method="POST" action="/user/register">
