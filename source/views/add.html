@@ -1,21 +1,15 @@
 <!DOCTYPE html>
 
 <head>
+  <meta name="theme-color" content="#a8d49f">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
-  <title>Add a Picnic Table [test]</title>
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css">
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/pure-min.css">
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/pure/0.6.0/grids-responsive-min.css">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <title>Add a Table</title>
+  <!-- Site-wide style -->{{> style}}
   <style>
-    html,
-    body {
-      height: 100%;
-      margin: 4px;
-    }
-
-    #map {
-      height: 75%;
+    .map {
+      height: 400px;
       width: 100%;
       margin-bottom: 0.5em;
     }
@@ -23,90 +17,109 @@
 </head>
 
 <body>
-  <form class="pure-form">
-    <fieldset>
+  <!-- Navigation -->{{> nav}}
+  <!-- User is logged in -->{{# session.user }}
+  <div class="container">
+    <h1>Add a Table</h1>
+    <form>
       <legend>Map</legend>
-      <input id="address" type="text" class="pure-input-1" placeholder="Enter a Location">
-    </fieldset>
-  </form>
-  <div id="map"></div>
-  <form id="add_table_form" class="pure-form pure-form-stacked" action="/data/tables/add" method="post" onsubmit="event.preventDefault(); addATable()">
-    <div class="pure-g">
-      <div class="pure-u-1">
-        <legend>Location</legend>
+      <div class="form-group row">
+        <input id="address" class="form-control" type="text" placeholder="Enter a Location">
       </div>
-      <div class="pure-u-1 pure-u-md-6-24">
-        <a id="move_map_center" class="pure-button button-special pure-u-23-24"><i class="fa fa-map" aria-hidden="true"></i> Map Center</a>
-        <a id="move_current" class="pure-button button-special pure-button-disabled pure-u-23-24"><i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</a>
+    </form>
+    <div class="map" id="map"></div>
+    <form id="add_table_form" action="/data/tables/add" method="post" onsubmit="event.preventDefault(); addATable()">
+
+      <legend>Location</legend>
+      <div class="form-group row">
+        <button id="move_map_center" type="button" class="btn btn-secondary">
+          <i class="fa fa-map" aria-hidden="true"></i> Map Center</button>&nbsp;
+        <button id="move_current" type="button" class="btn btn-secondary" disabled>
+          <i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</button>
       </div>
-      <div class="pure-u-1 pure-u-md-9-24">
-        <label for="latitude">Latitude</label>
-        <input id="latitude" name="latitude" class="pure-u-23-24" type="number" placeholder="Latitude" min="-90" max="90" step="0.00001">
+      <div class="form-group row">
+        <label for="latitude" class="col-sm-3 col-form-label">Latitude</label>
+        <input id="latitude" name="latitude" class="form-control col-sm-9" type="number" placeholder="Latitude" min="-90" max="90"
+          step="0.00001">
       </div>
-      <div class="pure-u-1 pure-u-md-9-24">
-        <label for="longitude">Longitude</label>
-        <input id="longitude" name="longitude" class="pure-u-23-24" type="number" placeholder="Longitude" min="-180" max="180" step="0.00001">
+      <div class="form-group row">
+        <label for="longitude" class="col-sm-3 col-form-label">Longitude</label>
+        <input id="longitude" name="longitude" class="form-control col-sm-9" type="number" placeholder="Longitude" min="-180" max="180"
+          step="0.00001">
       </div>
-      <div class="pure-u-1">
-        <legend>Attributes</legend>
+
+      <legend>Attributes</legend>
+      <div class="form-group row">
+        <button id="reset_attributes" type="button" class="btn btn-warning">
+          <i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</button>
       </div>
-      <div class="pure-u-1 pure-u-md-1-4">
-        <a id="reset_attributes" class="pure-button button-special pure-u-23-24"><i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</a>
+      <div class="form-group row">
+        <label for="sheltered" class="col-sm-3 col-form-label">
+          <i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
+        <select id="sheltered" name="sheltered" class="form-control col-sm-9">
+          <option>Unknown</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
       </div>
-      <div class="pure-u-1 pure-u-md-3-4">
-        <div class="pure-g">
-          <div class="pure-u-1 pure-u-md-12-24">
-            <label for="sheltered"><i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
-            <select id="sheltered" name="sheltered" class="pure-u-23-24">
-                  <option>Unknown</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </select>
-          </div>
-          <div class="pure-u-1 pure-u-md-12-24">
-            <label for="accessible"><i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
-            <select id="accessible" name="accessible" class="pure-u-23-24">
-                  <option>Unknown</option>
-                  <option>Yes</option>
-                  <option>No</option>
-                </select>
-          </div>
-          <div class="pure-u-1">
-            <input type="text" id="comment" name="comment" class="pure-u-23-24" placeholder="Comment">
-          </div>
-        </div>
+      <div class="form-group row">
+        <label for="accessible" class="col-sm-3 col-form-label">
+          <i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
+        <select id="accessible" name="accessible" class="form-control col-sm-9">
+          <option>Unknown</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
       </div>
-      <div class="pure-u-1">
-        <legend>Source</legend>
+      <div class="form-group row">
+        <input type="text" id="comment" name="comment" class="form-control" placeholder="Comment">
       </div>
-      <div class="pure-u-1 pure-u-md-1-4">
-        <select id="source" class="pure-u-23-24">
+
+      <legend>Source</legend>
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <select id="source" class="form-control">
             <option>Other</option>
             <option>Picknic</option>
+            <option disabled>{{ session.user }}</option>
           </select>
+        </div>
+        <div class="col-sm-4">
+          <input type="text" name="source_name" id="source_name" class="form-control" placeholder="Source Name" required>
+        </div>
+        <div class="col-sm-4">
+          <input type="url" name="source_url" id="source_url" class="form-control" placeholder="Source URL" required>
+        </div>
       </div>
-      <div class="pure-u-1 pure-u-md-3-4">
-        <input type="text" name="source_name" id="source_name" class="pure-u-23-24" placeholder="Source Name" required>
-        <input type="url" name="source_url" id="source_url" class="pure-u-23-24" placeholder="Source URL" required>
-      </div>
-      <div class="pure-u-1">
-        <legend>License</legend>
-      </div>
-      <div class="pure-u-1 pure-u-md-1-4">
-        <select id="license" class="pure-u-23-24">
+
+      <!-- -->
+      <legend>License</legend>
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <select id="license" class="form-control">
             <option>Other</option>
             <option>CC BY 4.0</option>
           </select>
+        </div>
+        <div class="col-sm-4">
+          <input type="text" name="license_name" id="license_name" class="form-control" placeholder="License Name" required>
+        </div>
+        <div class="col-sm-4">
+          <input type="url" name="license_url" id="license_url" class="form-control" placeholder="License URL" required>
+        </div>
       </div>
-      <div class="pure-u-1 pure-u-md-3-4">
-        <input type="text" name="license_name" id="license_name" class="pure-u-23-24" placeholder="License Name" required>
-        <input type="url" name="license_url" id="license_url" class="pure-u-23-24" placeholder="License URL" required>
+
+      <div class="form-group row">
+        <button type="submit" id="add_table" class="btn btn-primary">Add Table</button>
       </div>
-      <div class="pure-u-1">
-        <button type="submit" id="add_table" class="pure-button pure-button-primary">Add Table</button>
-      </div>
-    </div>
+  </div>
   </form>
+  </div>
+  {{/ session.user }}
+  <!-- User is not logged in -->{{^ session.user }}
+  <div class="container">Please log in!</div>
+  {{/ session.user }}
+
   <script>
     // Form
     var addTableForm = document.getElementById('add_table_form');
@@ -252,7 +265,7 @@
       if (navigator.geolocation) {
         navigator.geolocation.watchPosition(function (position) {
           // Enable the button to move to location
-          moveCurrent.classList.remove("pure-button-disabled");
+          moveCurrent.disabled = false;
 
           // Move the dot
           var prettyLat = trimPretty(position.coords.latitude);
@@ -369,7 +382,9 @@
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo&amp;callback=initMap&amp;libraries=places"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
-  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js" integrity="sha256-tSRROoGfGWTveRpDHFiWVz+UXt+xKNe90wwGn25lpw8="
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha256-DiWJXXyq81WlPRnDfGmgYZj2aOVCKyEdJ1l+2TmDuAs="
     crossorigin="anonymous"></script>
 </body>
 

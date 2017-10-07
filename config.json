@@ -1,0 +1,19 @@
+{
+  "port": 3000,
+  "keys": {
+    "public": {
+      "googleMaps": "AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo",
+      "recaptcha": "6Le1ZTEUAAAAAJwQ4FCsdrgfaDyVZmFRtUzZ1HmH"
+    },
+    "private": {
+      "recaptcha": "REPLACE_ME_WITH_PRIVATE_RECAPTCHA_KEY_IN_/config.json",
+      "session": "REPLACE_ME_WITH_YOUR_OWN_SECRET_IN_/config.json"
+    }
+  },
+  "bcrypt": {
+    "cost": 10
+  },
+  "mongo": {
+    "picknic": "mongodb://localhost/picknic"
+  }
+}

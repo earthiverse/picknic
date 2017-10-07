@@ -4,20 +4,10 @@
   <meta name="theme-color" content="#a8d49f">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
   <title>Picknic</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha256-eZrrJcwDc/3uDhsdt61sL2oOBY362qM3lon1gyExkL0="
-    crossorigin="anonymous" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha256-m/h/cUDAhf6/iBRixTbuc8+Rg2cIETQtPcH9D3p2Kg0="
-    crossorigin="anonymous" />
-  <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+  <!-- Site-wide style -->{{> style}}
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      width: 100%;
-    }
-
     .map {
       display: block;
       width: 100%;
@@ -25,80 +15,11 @@
       position: absolute;
       top: 0;
     }
-
-    nav.navbar {
-      background-color: rgba(255, 255, 255, 0.8);
-      height: 3em;
-      z-index: 1;
-    }
-
-    nav.navbar img {
-      border-radius: 5px;
-      display: inline-block;
-      width: 1.6em;
-      height: 1.6em;
-      margin: -0.4em 0.25em 0 0;
-    }
-
-    .navbar-brand {
-      color: #000;
-      text-shadow: 1px 1px 0 #EEE;
-      font-family: 'Pacifico', cursive;
-      font-size: 24px;
-    }
-
-    .navbar-brand:hover {
-      color: #000;
-    }
-
-    .navbar-nav .nav-link {
-      color: #333;
-      line-height: 2em;
-    }
-
-    .navbar-nav .nav-link:hover {
-      color: #111;
-    }
-
-    .navbar-nav .active {
-      background-color: #cacaca;
-      height: 100%;
-    }
-    /* puts the google places autocomplete dropdown results above the bootstrap modal 1050 zindex. */
-
-    .pac-container {
-      z-index: 1051 !important;
-    }
   </style>
 </head>
 
 <body>
-  <nav class="navbar navbar-expand-md navbar-fixed-top navbar-custom">
-    <a class="navbar-brand" href="#"><img alt="" src="/images/picknic.svg">Picknic</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false"
-      aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-    <div class="collapse navbar-collapse" id="navbar">
-      <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
-          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
-        </li>
-      </ul>
-      <form class="form-inline my-2 my-md-0" role="search">
-        <div class="input-group mb-2 mb-sm-0">
-          <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
-          <input id="address" type="search" class="form-control" placeholder="Address Search" onkeypress="return event.keyCode != 13;">
-        </div>
-      </form>
-    </div>
-  </nav>
+  <!-- nav.mustache -->{{> nav}}
 
   <!-- Google Map -->
   <div class="map" id="map"></div>
@@ -191,7 +112,7 @@
       });
       var locationMarker = new google.maps.Marker({
         clickable: true,
-        icon: 'images/markers/picnic_basket.png',
+        icon: '/images/markers/picnic_basket.png',
         map: map,
         shadow: null,
         zIndex: 999
@@ -212,7 +133,6 @@
       // When the user opens street view mode, bring the map to the front of the page so they can back out
       var thePanorama = map.getStreetView();
       google.maps.event.addListener(thePanorama, 'visible_changed', function () {
-        console.log("Visible?: " + thePanorama.getVisible());
         if (thePanorama.getVisible()) {
           // Display your street view visible UI
           mapDiv.style.zIndex = 1051;
@@ -259,6 +179,7 @@
           populateTablesInRange(map, rangeCircle);
         } catch (e) {
           console.log(e);
+          return;
         }
 
         // Zoom
@@ -267,6 +188,7 @@
             map.setZoom(parseInt(searchParams.get('zoom')));
           } catch (e) {
             console.log(e);
+            return;
           }
         }
       } else if (navigator.geolocation) {
@@ -286,6 +208,8 @@
   </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo&amp;callback=initMap&amp;libraries=places"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
     crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha256-DiWJXXyq81WlPRnDfGmgYZj2aOVCKyEdJ1l+2TmDuAs="
     crossorigin="anonymous"></script>
