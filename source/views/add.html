@@ -13,6 +13,16 @@
       width: 100%;
       margin-bottom: 0.5em;
     }
+
+    .alert-fixed {
+      position: fixed;
+      top: 0px;
+      left: 0px;
+      width: 100%;
+      z-index: 9999;
+      border-radius: 0px;
+      height: 3.5em;
+    }
   </style>
 </head>
 
@@ -185,18 +195,17 @@
     });
 
     function addATable() {
+      var tabledata = new FormData(document.getElementById('add_table_form'));
       $.ajax({
         type: 'POST',
         url: '/data/tables/add',
         processData: false,
         contentType: false,
         cache: false,
-        data: new FormData(document.getElementById('add_table_form')),
+        data: tabledata,
         success: function () {
-          $.notify(
-            "Table Added @ " + latInput.value + ", " + lngInput.value + "!",
-            { position: "top center" }
-          );
+          // Create alert
+          $("body").append('<div class="alert-fixed alert alert-success alert-dismissible fade show" role="alert"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>A table was successfully added!</div>');
         }
       });
     };
@@ -292,7 +301,8 @@
           console.log("Failed retrieving geolocation");
           moveCurrent.classList.add("pure-button-disabled");
         }, {
-            enableHighAccuracy: true
+            "enableHighAccuracy": true,
+            "maximumAge": 0
           });
       }
 

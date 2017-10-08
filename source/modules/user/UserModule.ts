@@ -19,6 +19,7 @@ export class UserModule extends Module {
       let email: string = req.body["email"];
       let plaintextPassword: string = req.body["password"];
       let ipAddress: string = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      let rememberMe: boolean = req.body["rememberMe"] != undefined;
       let now: number = Date.now();
 
       // Find email
@@ -36,7 +37,7 @@ export class UserModule extends Module {
               res.redirect('/login.html');
             }
             if (same) {
-              UserModule.setLoggedIn(req, user);
+              UserModule.setLoggedIn(req, user, rememberMe);
               res.redirect('/');
             } else {
               res.redirect("/login.html");
@@ -125,7 +126,10 @@ export class UserModule extends Module {
     return req.session.user as string;
   }
 
-  static setLoggedIn(req: Express.Request, user: IUser) {
+  static setLoggedIn(req: Express.Request, user: IUser, rememberMe?: boolean) {
+    if (rememberMe) {
+      req.session.cookie.expires = new Date(Date.now() + 2592000000)
+    }
     req.session.user = user.email;
   }
 }
