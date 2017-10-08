@@ -292,14 +292,10 @@
 
             hasPosition = true;
           }
-        }, function (error) {
-          // Error setting position
-          moveCurrent.classList.add("pure-button-disabled");
-          consle.log("Failed setting location marker position");
-        }, function () {
+        }, function (err) {
           // Error getting geolocation
-          console.log("Failed retrieving geolocation");
-          moveCurrent.classList.add("pure-button-disabled");
+          console.log(err);
+          moveCurrent.disabled = true;
         }, {
             "enableHighAccuracy": true,
             "maximumAge": 0
