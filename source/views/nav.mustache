@@ -9,22 +9,22 @@
   <div class="collapse navbar-collapse" id="navbarsExampleDefault">
     <ul class="navbar-nav mr-auto">
       <li class="nav-item dropdown">
-{{# session.user }}
+{{# session.user}}
         <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{session.user}}</a>
         <div class="dropdown-menu" aria-labelledby="loginDropdown">
           <a class="dropdown-item" href="/add.html">Add a Table</a>
           <a class="dropdown-item" href="/user/logout">Logout</a>
         </div>
       </li>
-{{/ session.user }}
-{{^ session.user }}
+{{/ session.user}}
+{{^ session.user}}
         <a class="nav-link dropdown-toggle" href="#" id="loginDropdown" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{#i18n}}nav.login{{/i18n}}</a>
         <div class="dropdown-menu" aria-labelledby="loginDropdown">
           <a class="dropdown-item" href="/login.html">{{#i18n}}nav.login{{/i18n}}</a>
           <a class="dropdown-item" href="/register.html">{{#i18n}}nav.register{{/i18n}}</a>
         </div>
       </li>
-{{/ session.user }}
+{{/ session.user}}
       <li class="nav-item">
         <a class="nav-link disabled" href="/about.html">{{#i18n}}nav.about{{/i18n}}</a>
       </li>
