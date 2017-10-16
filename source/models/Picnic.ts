@@ -11,6 +11,7 @@ export interface IPicnic extends Mongoose.Document {
     accessible: boolean;
     sheltered: boolean;
     comment: string;
+    user: string;
   };
   geometry: {
     type: string;
@@ -27,7 +28,8 @@ export const PicnicSchema = new Mongoose.Schema({
     license: DataLicenseSchema,
     accessible: { type: Boolean, required: false },
     sheltered: { type: Boolean, required: false },
-    comment: { type: String, required: false }
+    comment: { type: String, required: false },
+    user: { type: String, required: true }
   },
   geometry: {
     type: { type: String, required: true },

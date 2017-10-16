@@ -15,8 +15,8 @@ export class DataModule extends Module {
     });
     app.post('/data/tables/add', multer().single(), function (req: Express.Request, res: Express.Response) {
       // Authenticate
-      let username = UserModule.getLoggedInUser(req);
-      if (!username) {
+      let user = UserModule.getLoggedInUser(req);
+      if (!user) {
         res.send("Error: No user authentication.");
         return;
       }
@@ -40,7 +40,8 @@ export class DataModule extends Module {
             "url": fields.source_url,
             "name": fields.source_name,
             "retrieved": Date.now()
-          }
+          },
+          "user": user
         }
       });
 
