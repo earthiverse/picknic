@@ -5,37 +5,36 @@
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
   <meta charset="utf-8">
   <link rel="icon" type="image/png" href="/images/favicon.png">
-  <title>Login to Picknic</title>
+  <title>Contact Picknic</title>
   <!-- Site-wide style -->{{> style}}
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
 <body>
   <!-- nav.mustache -->{{> nav}}
 
   <!-- Registration -->
-  <div class="container ">
-    <h1>Login</h1>
-    <form data-toggle="validator" method="POST" action="/user/login">
-      <div class="form-group">
-        <label for="email">{{#i18n}}form.email{{/i18n}}</label>
-        <input type="email" class="form-control" name="email" id="email" aria-describedby="emailHelp" placeholder="{{#i18n}}form.email-hint{{/i18n}}"
-          required>
-      </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
-      </div>
-      <div class="form-group">
-        <label for="rememberMe" class="form-check-label">
-          <input type="checkbox" class="form-check-input" value="yes" id="rememberMe" name="rememberMe"> Remember me
-        </label>
-      </div>
-      <button type="submit" class="btn btn-primary">Login</button>
-    </form>
+  <div class="container">
+    <h1>Contact Picknic</h1>
+    <p>If you wish to get in touch with us directly, please email
+      <a href="mailto:picknic.site@gmail.com">picknic.site@gmail.com</a>.
+    </p>
+    <h3>Social Media</h3>
+    <p>
+      <span style="line-height:3em">
+        <a href="https://www.facebook.com/picknic.site/">
+          <img src="/images/facebook.svg" style="width:3em;height:3em"> @picknic.site</a>
+      </span>
+      <span style="line-height:3em;margin-left:3em;">
+        <a href="https://twitter.com/picknic_site/">
+          <img src="/images/twitter.svg" style="width:3em;height:3em"> @picknic_site</a>
+      </span>
+
+    </p>
   </div>
 
   <script>
-    // Future login scripts
+    // Future registration scripts
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
     crossorigin="anonymous"></script>
