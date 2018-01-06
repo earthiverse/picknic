@@ -1,9 +1,14 @@
 import Express = require('express');
 import Fs = require('fs');
 import I18next = require('i18next');
-import Mustache = require('mustache')
+import Mustache = require('mustache');
+import Nconf = require('nconf');
 import Path = require('path');
 import { Module } from "../Module";
+
+// Load Settings
+Nconf.file(Path.join(__dirname, "../../../config.json"));
+var keys = Nconf.get("keys");
 
 // Load all partials (Mustache templates) into a list
 let partials: any = {};
@@ -58,6 +63,7 @@ export class TemplatingModule extends Module {
               return render(TemplatingModule.mi18n.t(text));
             }
           },
+          keys: keys,
           show_map_search: (req.path.endsWith("index.html")),
           session: req.session
         }, partials));
