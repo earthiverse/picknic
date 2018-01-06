@@ -18,7 +18,7 @@ export class UserModule extends Module {
       // TODO: Error messages
       let email: string = req.body["email"];
       let plaintextPassword: string = req.body["password"];
-      let ipAddress: string = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      let ipAddress: string = req.ip;
       let rememberMe: boolean = req.body["rememberMe"] != undefined;
       let now: number = Date.now();
 
@@ -51,7 +51,7 @@ export class UserModule extends Module {
       let captcha: string = req.body["g-recaptcha-response"];
       let email: string = req.body["email"];
       let plaintextPassword: string = req.body["password"];
-      let ipAddress: string = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+      let ipAddress: string = req.ip;
       let now: number = Date.now();
 
       // Verify fields are filled out

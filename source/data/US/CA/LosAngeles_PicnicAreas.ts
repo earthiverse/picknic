@@ -1,7 +1,7 @@
 import CSVParse = require('csv-parse');
 import Mongoose = require('mongoose');
 import Request = require('request');
-import striptags from 'striptags';
+import Striptags = require('striptags');
 
 import { Picnic } from '../../../models/Picnic';
 
@@ -35,7 +35,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
       // Comments based on additional data
       let comment: string = data[i]["Name"].trim();
       if (data[i]["hours"].trim()) {
-        comment += ". " + striptags(data[i]["hours"]).trim();
+        comment += ". " + Striptags(data[i]["hours"]).trim();
       }
 
       // Insert or Update Table
