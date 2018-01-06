@@ -19,7 +19,7 @@ let keysConfig = Nconf.get("keys");
 
 // Setup Mongoose
 Mongoose.Promise = global.Promise;
-Mongoose.connect(mongoConfig.picknic, { useMongoClient: true });
+Mongoose.connect(mongoConfig.picknic);
 
 // Setup i18next
 I18next
