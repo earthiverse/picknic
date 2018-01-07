@@ -35,6 +35,7 @@
 {{# show_map_search}}
     <form class="form-inline my-2 my-md-0" role="search">
       <div class="input-group mb-2 mb-sm-0">
+        <div class="input-group-addon current-location-button" id="locationButton"><i class="fa fa-location-arrow" aria-hidden="true"></i></div>
         <div class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></div>
         <input id="address" type="search" class="form-control" placeholder="{{#i18n}}nav.addressSearch{{/i18n}}" onkeypress="return event.keyCode != 13;">
       </div>

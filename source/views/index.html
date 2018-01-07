@@ -207,19 +207,24 @@
             return;
           }
         }
-      } else if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-          initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-          map.setCenter(initialLocation);
-          locationMarker.setPosition(initialLocation);
-          rangeCircle.setCenter(initialLocation);
-          populateTablesInRange(map, rangeCircle);
-
-          map.fitBounds(rangeCircle.getBounds())
-        }, function () {
-          // TODO: On error
-        }, { enableHighAccuracy: "true" });
       }
+
+      var locationButton = document.getElementById("locationButton");
+      locationButton.addEventListener("click", () => {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (position) {
+            initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(initialLocation);
+            locationMarker.setPosition(initialLocation);
+            rangeCircle.setCenter(initialLocation);
+            populateTablesInRange(map, rangeCircle);
+
+            map.fitBounds(rangeCircle.getBounds())
+          }, function () {
+            // TODO: On error
+          }, { enableHighAccuracy: "true" });
+        }
+      });
     }
   </script>
   <script async defer src="https://maps.googleapis.com/maps/api/js?key={{keys.public.googleMaps}}&amp;callback=initMap&amp;libraries=places"></script>
