@@ -107,7 +107,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
         comment += " Remaining life: " + remainingLife + ".";
       }
       let equalAccess: any = data[i]["EqualAccess"];
-      if (equalAccess == null) {
+      if (equalAccess == null || equalAccess == "") {
         equalAccess = undefined;
       } else if (equalAccess == "No") {
         equalAccess = false;
@@ -115,7 +115,7 @@ Request(dataset_url_csv, function (error: boolean, response: any, body: string) 
         equalAccess = true;
       }
       let sheltered: any = data[i]["Sheltered"];
-      if (sheltered == null) {
+      if (sheltered == null || sheltered == "") {
         sheltered = undefined;
       } else if (sheltered == "No") {
         sheltered = false;

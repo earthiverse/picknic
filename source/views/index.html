@@ -224,9 +224,7 @@
           }
         }
       } else {
-        console.log("dickutt");
         navigator.permissions.query({ 'name': 'geolocation' }).then(function (result) {
-          console.log("butts");
           console.log(result);
           if (result.state == 'granted') {
             getUserLocation();
