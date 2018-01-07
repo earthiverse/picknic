@@ -178,6 +178,22 @@
         populateTablesInRange(map, rangeCircle);
       });
 
+      function getUserLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function (position) {
+            initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(initialLocation);
+            locationMarker.setPosition(initialLocation);
+            rangeCircle.setCenter(initialLocation);
+            populateTablesInRange(map, rangeCircle);
+
+            map.fitBounds(rangeCircle.getBounds())
+          }, function () {
+            // TODO: On error
+          }, { enableHighAccuracy: "true" });
+        }
+      }
+
       // Try to get user location
       var searchParams = new URLSearchParams(window.location.search);
       if (searchParams.has('lng') && searchParams.has('lat')) {
@@ -207,23 +223,20 @@
             return;
           }
         }
+      } else {
+        console.log("dickutt");
+        navigator.permissions.query({ 'name': 'geolocation' }).then(function (result) {
+          console.log("butts");
+          console.log(result);
+          if (result.state == 'granted') {
+            getUserLocation();
+          }
+        });
       }
 
       var locationButton = document.getElementById("locationButton");
       locationButton.addEventListener("click", () => {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(function (position) {
-            initialLocation = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            map.setCenter(initialLocation);
-            locationMarker.setPosition(initialLocation);
-            rangeCircle.setCenter(initialLocation);
-            populateTablesInRange(map, rangeCircle);
-
-            map.fitBounds(rangeCircle.getBounds())
-          }, function () {
-            // TODO: On error
-          }, { enableHighAccuracy: "true" });
-        }
+        getUserLocation();
       });
     }
   </script>
