@@ -1,4 +1,3 @@
-
 // http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/find?searchText=Picnic+Area&contains=true&searchFields=poitype&sr=&layers=Points_Of_Interest&layerDefs=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&dynamicLayers=&returnZ=false&returnM=false&gdbVersion=&f=pjson
 import Mongoose = require('mongoose');
 import Request = require('request');
