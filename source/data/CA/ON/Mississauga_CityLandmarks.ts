@@ -9,8 +9,6 @@ function capitalize(s: string) {
 
 import { Picnic } from '../../../models/Picnic';
 
-// Setup Mongoose
-Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields

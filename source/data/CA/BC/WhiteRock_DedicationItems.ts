@@ -1,12 +1,9 @@
-// http://wroms.whiterockcity.ca/opendata/GIS/Data/Spatial/Parks/JSON/ParkItem.json
 import Mongoose = require('mongoose');
 import Request = require('request');
 import Proj4 = require('proj4');
 
 import { Picnic } from '../../../models/Picnic';
 
-// Setup Mongoose
-Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
@@ -34,6 +31,7 @@ Request(dataset_url_geojson, function (error: boolean, response: any, body: any)
     // The data for this dataset is in EPSG:26910.
     // See: http://spatialreference.org/ref/epsg/nad83-utm-zone-10n/
     let coordinates: any = Proj4("+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs", "WGS84", result.geometry.coordinates);
+    let park_name: string = result.properties.Park_Name;
 
     j += 1;
     Picnic.findOneAndUpdate({

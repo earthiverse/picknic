@@ -17,8 +17,6 @@ let portConfig: Number = Nconf.get("port");
 let mongoConfig = Nconf.get("mongo");
 let keysConfig = Nconf.get("keys");
 
-// Setup Mongoose
-Mongoose.Promise = global.Promise;
 Mongoose.connect(mongoConfig.picknic);
 
 // Setup i18next

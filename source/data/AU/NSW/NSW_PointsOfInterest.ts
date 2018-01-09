@@ -9,8 +9,6 @@ function capitalize(s: string) {
   return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
 };
 
-// Setup Mongoose
-Mongoose.Promise = global.Promise;
 Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
