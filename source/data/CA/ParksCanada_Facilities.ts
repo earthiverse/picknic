@@ -12,18 +12,13 @@ let dataset_url_json = "http://opendata.arcgis.com/datasets/90d9d985c73545ff9c6b
 let license_name = "Open Government License - Canada (Version 2.0)"
 let license_url = "http://open.canada.ca/en/open-government-licence-canada"
 
-// Statistics
-let successes = 0;
-let failures = 0;
-let total = 0;
-
 // Connect to database
 console.log("Connecting to MongoDB...");
 Mongoose.connect('mongodb://localhost/picknic').then(function () {
   // Download data
   let retrieved = new Date();
   console.log("Downloading " + dataset_url_json + "...");
-  let y: Array<any> = Array<any>(0);
+  let database_updates: Array<any> = Array<any>(0);
   Request({
     uri: dataset_url_json,
     json: true
@@ -53,9 +48,9 @@ Mongoose.connect('mongodb://localhost/picknic').then(function () {
           comment = undefined;
         }
 
-        total += 1;
-        y.push(Picnic.findOneAndUpdate({
-          "properties.source.url": dataset_url_human,
+        database_updates.push(Picnic.findOneAndUpdate({
+          "properties.source.name": source_name,
+          "properties.source.dataset": dataset_name,
           "properties.source.id": object_id
         }, {
             $set: {
@@ -87,8 +82,8 @@ Mongoose.connect('mongodb://localhost/picknic').then(function () {
     })
     .then(() => {
       // Disconnect from database
-      Promise.all(y).then((values) => {
-        console.log("Updated " + y.length + " data points.")
+      Promise.all(database_updates).then(() => {
+        console.log("Updated " + database_updates.length + " data points.")
         console.log("Disconnecting...");
         Mongoose.disconnect();
       })
