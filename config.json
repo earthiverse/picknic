@@ -14,6 +14,9 @@
     "cost": 10
   },
   "mongo": {
-    "picknic": "mongodb://localhost/picknic"
+    "picknic": "mongodb://localhost/picknic",
+    "collections": {
+      "picnic": "picnic"
+    }
   }
 }

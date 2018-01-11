@@ -8,7 +8,7 @@ import { Module } from "../Module";
 
 // Load Settings
 Nconf.file(Path.join(__dirname, "../../../config.json"));
-var keys = Nconf.get("keys");
+let keys = Nconf.get("keys");
 
 // Load all partials (Mustache templates) into a list
 let partials: any = {};

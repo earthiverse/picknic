@@ -1,5 +1,11 @@
 import Mongoose = require('mongoose');
+import Nconf = require("nconf");
+import Path = require("path");
 import { DataSourceModel, DataSourceSchema, DataLicenseModel, DataLicenseSchema } from './IDataModel';
+
+// Load Configuration
+Nconf.file(Path.join(__dirname, "../../config.json"));
+let mongo = Nconf.get("mongo");
 
 export interface IPicnic extends Mongoose.Document {
   type: string;
@@ -35,6 +41,7 @@ export const PicnicSchema = new Mongoose.Schema({
     type: { type: String, required: true },
     coordinates: { type: [Number], required: true }
   }
-}, { collection: 'picnic' });
+}, { collection: mongo.collections.picnic });
+PicnicSchema.index({ geometry: '2dsphere' });
 
 export const Picnic = Mongoose.model<IPicnic>('Picnic', PicnicSchema);
