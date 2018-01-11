@@ -37,6 +37,7 @@
         var circleLat = circlePosition.lat();
         var circleLng = circlePosition.lng();
         var circleRadius = rangeCircle.getRadius() / 6367444.7;
+        var point = { "center": [circleLng, circleLat], "spherical": true };
         var circle = { "center": [circleLng, circleLat], "radius": circleRadius, "spherical": true };
         $.ajax({
           type: 'POST',
@@ -45,12 +46,32 @@
           contentType: 'application/json',
           data: JSON.stringify(circle),
           success: function (tables) {
-            for (var i = 0; i < tables.length; i++) {
-              var table = tables[i];
-              if (!allTables.hasOwnProperty(table._id)) {
-                allTables[table._id] = true;
-                map.data.addGeoJson(table);
+            if (tables.length > 0) {
+              for (var i = 0; i < tables.length; i++) {
+                var table = tables[i];
+                if (!allTables.hasOwnProperty(table._id)) {
+                  allTables[table._id] = true;
+                  map.data.addGeoJson(table);
+                }
               }
+            } else {
+              // Nothing within, find nearest instead
+              $.ajax({
+                type: 'POST',
+                url: '/data/tables/find/near',
+                dataType: 'json',
+                contentType: 'application/json',
+                data: JSON.stringify(point),
+                success: function (tables) {
+                  for (var i = 0; i < tables.length; i++) {
+                    var table = tables[i];
+                    if (!allTables.hasOwnProperty(table._id)) {
+                      allTables[table._id] = true;
+                      map.data.addGeoJson(table);
+                    }
+                  }
+                }
+              });
             }
           }
         });

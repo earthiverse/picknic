@@ -13,6 +13,13 @@ export class DataModule extends Module {
         res.send(tables);
       });
     });
+    app.post('/data/tables/find/near', function (req: Express.Request, res: Express.Response) {
+      let bounds = req.body;
+      // TODO: Move this limit in to the config.
+      Picnic.find({}).limit(10).where("geometry").near(bounds).lean().exec().then(function (tables: any) {
+        res.send(tables);
+      });
+    })
     app.post('/data/tables/add', multer().single(), function (req: Express.Request, res: Express.Response) {
       // Authenticate
       let user = UserModule.getLoggedInUser(req);
