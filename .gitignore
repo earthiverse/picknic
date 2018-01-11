@@ -2,6 +2,7 @@
 .tscache
 .baseDir.js
 package-lock.json
+tslint.json
 
 # Created by https://www.gitignore.io/api/linux,node,osx,typings,grunt,windows,python
 
