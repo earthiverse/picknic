@@ -50,7 +50,7 @@ app.use(ExpressSession({
   })
 }));
 app.use(requestLanguage({
-  languages: ['en', 'ja']
+  languages: ['en', 'ja', 'fr']
 }));
 
 // Load Modules

@@ -1,0 +1,22 @@
+{
+  "picknic": "Picknic",
+  "nav": {
+    "font": "Pacifico",
+    "font-weight": "500",
+    "letter-spacing": "none",
+    "login": "Login",
+    "register": "Registre",
+    "about": "About",
+    "contact": "Contact",
+    "addressSearch": "Recherche d'adresse"
+  },
+  "form": {
+    "email": "Adresse e-mail",
+    "email-hint": "exemple@domaine.com",
+    "register": "Registre",
+    "password": "Mot de passe"
+  },
+  "unused": {
+    "user": "User"
+  }
+}
