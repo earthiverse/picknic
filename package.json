@@ -1,0 +1,22 @@
+{
+  "name": "picknic-twitterbot",
+  "version": "0.0.1",
+  "description": "A bot to tweet on behalf of Picknic",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.earthiverse.ca/earthiverse/picknic.git"
+  },
+  "keywords": [
+    "picknic",
+    "twitter"
+  ],
+  "author": "Kent Rasmussen",
+  "license": "MIT",
+  "dependencies": {
+    "twitter": "^1.7.1"
+  }
+}
