@@ -1,6 +1,8 @@
+# Extra
+build
+
 
 # Created by https://www.gitignore.io/api/node,windows,visualstudiocode
-
 ### Node ###
 # Logs
 logs
@@ -90,6 +92,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-
 # End of https://www.gitignore.io/api/node,windows,visualstudiocode
