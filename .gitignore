@@ -1,6 +1,9 @@
+# Security
+# Note: This file needs to be committed, but one needs to make sure that there are no secret keys in it before commiting
+config.json
+
 # Extra
 build
-
 
 # Created by https://www.gitignore.io/api/node,windows,visualstudiocode
 ### Node ###
