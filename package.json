@@ -4,7 +4,9 @@
   "description": "A bot to tweet on behalf of Picknic",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "watch": "tsc -w",
+    "start": "node build/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +19,18 @@
   "author": "Kent Rasmussen",
   "license": "MIT",
   "dependencies": {
+    "@types/cheerio": "^0.22.7",
+    "@types/mongoose": "^5.0.1",
+    "@types/nconf": "0.0.37",
+    "@types/request": "^2.47.0",
+    "@types/request-promise-native": "^1.0.13",
+    "@types/twitter": "0.0.28",
+    "cheerio": "^1.0.0-rc.2",
+    "limiter": "^1.1.2",
+    "mongoose": "^5.0.3",
+    "nconf": "^0.10.0",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
     "twitter": "^1.7.1"
   }
 }
