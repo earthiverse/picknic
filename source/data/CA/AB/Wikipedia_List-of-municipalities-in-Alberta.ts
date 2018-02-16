@@ -66,8 +66,6 @@ Mongoose.connect('mongodb://localhost/picknic').then(function () {
           properties: {
             population: population,
             status: status
-          },
-          twitter: {
           }
         });
       })

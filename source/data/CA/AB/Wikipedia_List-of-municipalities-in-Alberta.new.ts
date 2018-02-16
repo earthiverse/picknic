@@ -8,6 +8,7 @@ import Querystring = require('querystring');
 var Twitter = require('twitter');
 var RateLimiter = require('limiter').RateLimiter;
 
+
 // Load Config
 Nconf.file(Path.join(__dirname, "../../../../config.json"));
 let twitterConfig = Nconf.get("twitter");
@@ -100,7 +101,7 @@ Mongoose.connect('mongodb://localhost/picknic').then(function () {
                     let m = twitter_url_regex.exec(body);
                     if (m) {
                       // We may have found a twitter URL on the page
-                      console.log("found potential twitter for " + municipality.name + " : " + m[5]);
+                      console.log("found potential twitter for " + municipality.name + " : " + m[4]);
                       data[i]["twitter"] = {
                         "official": {
                           "username": m[4]
