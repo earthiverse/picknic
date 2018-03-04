@@ -9,15 +9,14 @@ let dataset_url_json = "http://opendata.arcgis.com/datasets/c2bd1dec9aee44ad9403
 let license_name = "Open Government License - Canada (Version 2.0)"
 let license_url = "http://open.canada.ca/en/open-government-licence-canada"
 
-Download.parseData(dataset_name, dataset_url_json, function (res: string) {
+Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
   let database_updates: Array<any> = Array<any>(0);
   let retrieved = new Date();
-  let body = JSON.parse(res);
 
-  for (let feature of body.features) {
+  res.features.forEach(function (feature: any) {
     // Check if it's a picnic table first
     if (feature.properties.Component_Type_Composante == null || feature.properties.Component_Type_Composante.search(/Picnic/i) == -1) {
-      continue;
+      return;
     }
     let coordinates = feature.geometry.coordinates;
     let object_id = feature.properties.OBJECTID;
@@ -60,7 +59,7 @@ Download.parseData(dataset_name, dataset_url_json, function (res: string) {
         "upsert": true,
         "new": true
       }).exec());
-  }
+  });
 
   return database_updates;
 });

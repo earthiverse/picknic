@@ -68,6 +68,7 @@ export class TemplatingModule extends Module {
           keys: keys,
           show_map_search: (req.path.endsWith("index.html")),
           session: req.session,
+          // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
           geoip2: TemplatingModule.geoip2.lookupSimpleSync((req as any).clientIp)
         }, partials));
       });

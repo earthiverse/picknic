@@ -1,10 +1,7 @@
-import Mongoose = require('mongoose');
-import Request = require('request');
 import Proj4 = require('proj4');
 
+import { Download } from '../../Download'
 import { Picnic } from '../../../models/Picnic';
-
-Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
 let source_name = "City of White Rock Open Data Portal"
@@ -14,16 +11,11 @@ let dataset_url_geojson = "http://wroms.whiterockcity.ca/opendata/GIS/Data/Spati
 let license_name = "Open Government License - British Columbia"
 let license_url = "https://www2.gov.bc.ca/gov/content/data/open-data/open-government-license-bc"
 
-// Download & Parse!
-let retrieved = new Date();
-let j = 0;
-let success = 0;
-let fail = 0;
-console.log("Downloading...");
-Request(dataset_url_geojson, function (error: boolean, response: any, body: any) {
-  console.log("Parsing & Updating Database...");
-  let geojson_data = JSON.parse(response.body).features;
-  geojson_data.forEach(function (result: any) {
+Download.parseDataJSON(dataset_name, dataset_url_geojson, function (res: any) {
+  let database_updates: Array<any> = Array<any>(0);
+  let retrieved = new Date();
+
+  res.features.forEach(function (result: any) {
     let type: string = result.properties.Item_Type;
     if (type != "PICNIC TABLE") {
       return;
@@ -33,8 +25,7 @@ Request(dataset_url_geojson, function (error: boolean, response: any, body: any)
     let coordinates: any = Proj4("+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs", "WGS84", result.geometry.coordinates);
     let park_name: string = result.properties.Park_Name;
 
-    j += 1;
-    Picnic.findOneAndUpdate({
+    database_updates.push(Picnic.findOneAndUpdate({
       "geometry.type": "Point",
       "geometry.coordinates": coordinates
     }, {
@@ -51,21 +42,10 @@ Request(dataset_url_geojson, function (error: boolean, response: any, body: any)
           "geometry.coordinates": coordinates
         }
       }, {
-        "upsert": true
-      }).exec(function (err, doc) {
-        if (err) {
-          console.log(err);
-          fail = fail + 1;
-        } else {
-          success = success + 1;
-        }
-
-        // Disconnect on last update
-        j -= 1;
-        if (j == 0) {
-          console.log(success + "/" + (success + fail) + " updated/inserted.");
-          Mongoose.disconnect();
-        }
-      });
+        "upsert": true,
+        "new": true
+      }).exec());
   });
+
+  return database_updates;
 });

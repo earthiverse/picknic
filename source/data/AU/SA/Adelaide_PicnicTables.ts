@@ -1,10 +1,7 @@
 import XLSX = require('xlsx');
-import Mongoose = require('mongoose');
-import Request = require('request');
 
+import { Download } from '../../Download'
 import { Picnic } from '../../../models/Picnic';
-
-Mongoose.connect('mongodb://localhost/picknic');
 
 // Important Fields
 let source_name = "Adelaide City Council"
@@ -14,16 +11,12 @@ let dataset_url_xls = "https://opendata.adelaidecitycouncil.com/PicnicTables/Pic
 let license_name = "Creative Commons Attribution 4.0 International Public License"
 let license_url = "https://creativecommons.org/licenses/by/4.0/legalcode"
 
-// Download & Parse!
-let retrieved = new Date();
-let j = 0;
-let success = 0;
-let fail = 0;
-console.log("Downloading...");
-Request({ url: dataset_url_xls, encoding: null }, function (error: boolean, response: any, body: Uint8Array) {
-  let workbook = XLSX.read(body);
-  let sheets = workbook.SheetNames;
-  sheets.forEach(function (sheetName) {
+Download.parseDataBinary(dataset_name, dataset_url_xls, function (res: Uint8Array) {
+  let database_updates: Array<any> = Array<any>(0);
+  let retrieved = new Date();
+
+  let workbook = XLSX.read(res);
+  workbook.SheetNames.forEach(function (sheetName) {
     let data: any = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
     data.forEach(function (row: any) {
       let lat: number = parseFloat(row["POINT_Y"]);
@@ -37,9 +30,7 @@ Request({ url: dataset_url_xls, encoding: null }, function (error: boolean, resp
         comment = "Type: " + type;
       }
 
-      // Insert or Update Table
-      j += 1;
-      Picnic.findOneAndUpdate({
+      database_updates.push(Picnic.findOneAndUpdate({
         "properties.source.url": dataset_url_human,
         "properties.source.id": uniqueAsse
       }, {
@@ -58,22 +49,11 @@ Request({ url: dataset_url_xls, encoding: null }, function (error: boolean, resp
             "geometry.coordinates": [lng, lat]
           }
         }, {
-          "upsert": true
-        }).exec(function (err, doc) {
-          if (err) {
-            console.log(err);
-            fail = fail + 1;
-          } else {
-            success = success + 1;
-          }
-
-          // Disconnect on last update
-          j -= 1;
-          if (j == 0) {
-            console.log(success + "/" + (success + fail) + " updated/inserted.");
-            Mongoose.disconnect();
-          }
-        });
+          "upsert": true,
+          "new": true
+        }).exec());
     });
   });
+
+  return database_updates;
 });
