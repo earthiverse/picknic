@@ -51,7 +51,7 @@ export class TemplatingModule extends Module {
       TemplatingModule.mi18n.changeLanguage((req as any).language);
 
       // DEBUG
-      console.log(TemplatingModule.geoip2.lookupSimpleSync(req.ip))
+      console.log(TemplatingModule.geoip2.lookupSimpleSync(req.clientIp))
 
       // Get the index.html from the views folder
       let fileLocation = Path.join(viewsPath, req.path);
@@ -71,7 +71,7 @@ export class TemplatingModule extends Module {
           keys: keys,
           show_map_search: (req.path.endsWith("index.html")),
           session: req.session,
-          geoip2: TemplatingModule.geoip2.lookupSimpleSync(req.ip)
+          geoip2: TemplatingModule.geoip2.lookupSimpleSync(req.clientIp)
         }, partials));
       });
     });

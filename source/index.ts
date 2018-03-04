@@ -4,13 +4,14 @@ const requestLanguage = require('express-request-language');
 import ExpressStatic = require('express-serve-static-core');
 import ExpressSession = require('express-session');
 const MongoStore = require('connect-mongo')(ExpressSession);
+const geoip2 = require('geoip2');
 import Http = require('http');
 import I18next = require('i18next');
 const i18nextBackend = require('i18next-sync-fs-backend');
 import Mongoose = require("mongoose");
 import Nconf = require("nconf");
 import Path = require("path");
-var geoip2 = require('geoip2');
+const requestIp = require('request-ip');
 
 // Load Configuration
 Nconf.file(Path.join(__dirname, "../config.json"));
@@ -57,6 +58,7 @@ app.use(ExpressSession({
 app.use(requestLanguage({
   languages: ['en', 'ja', 'fr']
 }));
+app.use(requestIp.mw())
 
 // Load Modules
 import { DataModule } from "./modules/data/DataModule";
