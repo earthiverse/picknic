@@ -29,7 +29,12 @@
     var addressInput = document.getElementById('address');
 
     function initMap() {
+      {{# geoip2}}
+      var initialPoint = { lat: {{ geoip2.location.latitude }}, lng: {{ geoip2.location.longitude }} };
+      {{/ geoip2}}
+      {{^ geoip2}}
       var initialPoint = { lat: 53.5444, lng: -113.4904 };
+      {{/ geoip2}}
 
       allTables = {};
       function populateTablesInRange(map, rangeCircle) {
