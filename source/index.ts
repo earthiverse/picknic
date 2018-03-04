@@ -10,6 +10,7 @@ const i18nextBackend = require('i18next-sync-fs-backend');
 import Mongoose = require("mongoose");
 import Nconf = require("nconf");
 import Path = require("path");
+var geoip2 = require('geoip2');
 
 // Load Configuration
 Nconf.file(Path.join(__dirname, "../config.json"));
@@ -17,6 +18,7 @@ let portConfig: Number = Nconf.get("port");
 let mongoConfig = Nconf.get("mongo");
 let keysConfig = Nconf.get("keys");
 
+// Setup Mongo
 Mongoose.connect(mongoConfig.picknic);
 
 // Setup i18next
@@ -36,6 +38,9 @@ I18next
       addPath: Path.join(__dirname, '../source/locales/{{lng}}/{{ns}}.missing.json')
     },
   });
+
+// Setup Geoip2
+geoip2.init();
 
 // Setup Express
 let app = Express();
@@ -59,7 +64,7 @@ new DataModule(app);
 import { UserModule } from "./modules/user/UserModule";
 new UserModule(app);
 import { TemplatingModule } from "./modules/templating/TemplatingModule";
-new TemplatingModule(app, I18next);
+new TemplatingModule(app, I18next, geoip2);
 
 // Serve static files
 app.use(Express.static(Path.join(__dirname, "../source/public")));

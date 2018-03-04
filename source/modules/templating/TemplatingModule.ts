@@ -33,10 +33,12 @@ Fs.readdir(viewsPath, (err, files) => {
 
 export class TemplatingModule extends Module {
   static mi18n: I18next.i18n;
+  static geoip2: any;
 
-  constructor(app: Express.Application, i18n: I18next.i18n) {
+  constructor(app: Express.Application, i18n: I18next.i18n, geoip2: any) {
     super(app);
     TemplatingModule.mi18n = i18n;
+    TemplatingModule.geoip2 = geoip2;
   }
   addRoutes(app: Express.Application) {
     app.get('/', (req: Express.Request, res: Express.Response) => {
@@ -47,6 +49,9 @@ export class TemplatingModule extends Module {
       // Serve the requested language
       // NOTE: req's "language" property is only available due to the 'express-request-language' package
       TemplatingModule.mi18n.changeLanguage((req as any).language);
+
+      // DEBUG
+      console.log(TemplatingModule.geoip2.lookupSimpleSync(req.ip))
 
       // Get the index.html from the views folder
       let fileLocation = Path.join(viewsPath, req.path);
@@ -65,7 +70,8 @@ export class TemplatingModule extends Module {
           },
           keys: keys,
           show_map_search: (req.path.endsWith("index.html")),
-          session: req.session
+          session: req.session,
+          geoip2: TemplatingModule.geoip2.lookupSimpleSync(req.ip)
         }, partials));
       });
     });
