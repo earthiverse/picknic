@@ -1,8 +1,16 @@
 import Express = require('express');
+import Nconf = require("nconf");
+import Path = require("path");
+
 import * as multer from 'multer';
+
 import { Module } from "../Module";
 import { Picnic } from "../../models/Picnic";
 import { UserModule } from "../user/UserModule";
+
+// Load Configuration
+Nconf.file(Path.join(__dirname, "../config.json"));
+let picknicConfig = Nconf.get("picknic");
 
 export class DataModule extends Module {
   addRoutes(app: Express.Application) {
@@ -15,8 +23,7 @@ export class DataModule extends Module {
     });
     app.post('/data/tables/find/near', function (req: Express.Request, res: Express.Response) {
       let bounds = req.body;
-      // TODO: Move this limit in to the config.
-      Picnic.find({}).limit(10).where("geometry").near(bounds).lean().exec().then(function (tables: any) {
+      Picnic.find({}).limit(picknicConfig.data.near.default).where("geometry").near(bounds).lean().exec().then(function (tables: any) {
         res.send(tables);
       });
     })

@@ -1,5 +1,12 @@
 {
   "port": 3000,
+  "picknic": {
+    "data": {
+      "near": {
+        "default": 10
+      }
+    }
+  },
   "keys": {
     "public": {
       "googleMaps": "AIzaSyAXjoe051ln4ZzllnDDgCBca0mcyidFtMo",
