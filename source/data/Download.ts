@@ -12,6 +12,7 @@ let mongoConfig = Nconf.get("mongo");
 export namespace Download {
   function parse(requestSettings: any, dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => any) {
     console.log("Connecting to MongoDB...");
+    // TODO: Add failure to connect
     Mongoose.connect(mongoConfig.picknic).then(function () {
       let database_updates: Array<Promise<any>> = Array<Promise<any>>(0);
 
