@@ -20,17 +20,21 @@
   "license": "MIT",
   "dependencies": {
     "@types/cheerio": "^0.22.7",
-    "@types/mongoose": "^5.0.1",
+    "@types/html-entities": "^1.2.16",
+    "@types/mongoose": "^5.0.7",
     "@types/nconf": "0.0.37",
     "@types/request": "^2.47.0",
-    "@types/request-promise-native": "^1.0.13",
+    "@types/request-promise-native": "^1.0.14",
     "@types/twitter": "0.0.28",
     "cheerio": "^1.0.0-rc.2",
+    "html-entities": "^1.2.1",
     "limiter": "^1.1.2",
-    "mongoose": "^5.0.3",
+    "moment": "^2.21.0",
+    "mongoose": "^5.0.9",
     "nconf": "^0.10.0",
     "request": "^2.83.0",
     "request-promise-native": "^1.0.5",
-    "twitter": "^1.7.1"
+    "twitter": "^1.7.1",
+    "wikijs": "^4.5.2"
   }
 }
