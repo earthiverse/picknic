@@ -39,6 +39,9 @@ export namespace Download {
             Mongoose.disconnect();
           })
         })
+    }).catch(function (error) {
+      console.log(error)
+      process.exit()
     })
   }
   // Used for CSV based files and Raw HTML
