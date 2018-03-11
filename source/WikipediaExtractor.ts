@@ -21,50 +21,106 @@ export namespace WikipediaExtractor {
     })
   }
 
+  export function FindWebsite(html: string) {
+    let $ = Cheerio.load(html)
+    let e = $(".official-website")
+    if (e.length) {
+      return e.find("a").attr("href")
+    }
+
+    e = $("th[scope=row]:contains('Website')")
+    if (e.length) {
+      return e.next().find("a").attr('href')
+    }
+  }
+
   export function FindTable(html: string, tableName: string) {
     return new Promise(function (resolve, reject) {
       let $ = Cheerio.load(html)
 
-      let table = $("th:contains('" + tableName + "')").parent().parent()
-      // Remove all supplementary data
-      table.find("sup").remove()
-      // Remove all sortkeys
-      table.find(".sortkey").remove()
-      // Remove all linebreaks
-      table.find("br").replaceWith(" ")
+      function cleanTable(table: Cheerio) {
+        // Remove all supplementary data
+        table.find("sup").remove()
+        // Remove all sortkeys
+        table.find(".sortkey").remove()
+        // Remove all linebreaks
+        table.find("br").replaceWith(" ")
+      }
+
+      // METHOD 1: Table has a top row with the text
+      let table = $("th:contains('" + tableName + "')")
+
+      if (table.length && (table.text().trim() == tableName)) {
+        table = table.parent().parent()
+        cleanTable(table);
+      } else {
+        // METHOD 2: Look for the table in a section with the name
+        table = $("h2:contains('" + tableName + "')").nextUntil("h2", ".wikitable")
+        if (table.length == 1) {
+          cleanTable(table);
+        } else {
+          // We're out of options (for now...)
+          reject("Couldn't find the table '" + tableName + "'...")
+        }
+      }
+
+      function cleanColumn(column: string) {
+        // Combine all multiple spaces to one space
+        // Decode entities (e.g. &amp; -> &)
+        return htmlEntities.decode(column.replace(/\s+/g, ' ').trim());
+      }
 
       // Create columns list
-      var columns: string[] = [];
-      table.find("th[scope=col]").each(function (i) {
-        // Skip colspan'd columns (these just describe other columns)
-        if ($(this).attr('colspan'))
-          return;
+      let columns: string[] = [];
+      let e = table.find("th[scope=col]")
+      if (e.length > 0) {
+        e.each(function (i) {
+          // Skip colspan'd columns (these just describe other columns)
+          if ($(this).attr('colspan'))
+            return;
 
-        let column: string = $(this).html()
-        // Combine all multiple spaces to one space
-        column = column.replace(/\s+/g, ' ').trim();
-        // Decode entities (e.g. &amp; -> &)
-        column = htmlEntities.decode(column);
+          columns.push(cleanColumn($(this).html()))
+        })
+      } else {
+        table.find("th").each(function (i) {
+          // Skip colspan'd columns (these just describe other columns)
+          if ($(this).attr('colspan'))
+            return;
 
-        columns.push(column)
-      })
+          columns.push(cleanColumn($(this).html()))
+        })
+      }
 
       // Create data list
       let rows: any[][] = []
-      table.find("td[scope=row]").parent().each(function (i) {
-        let row: any[] = []
-        $(this).children("td").each(function (i) {
-          let e = $(this).html().trim()
+      e = table.find("td[scope=row]")
+      if (e.length > 0) {
+        e.parent().each(function (i) {
+          let row: any[] = []
+          $(this).children("td").each(function (i) {
+            let e = $(this).html().trim()
 
-          if (i == 0) {
-            // Remove the anchor
-            e = e.replace(/^<span id="."><\/span>/, '')
-          }
+            if (i == 0) {
+              // Remove the anchor
+              e = e.replace(/^<span id="."><\/span>/, '')
+            }
 
-          row.push(e)
+            row.push(e)
+          })
+          rows.push(row)
         })
-        rows.push(row)
-      })
+      } else {
+        table.find("tr").each(function (i) {
+          let row: any[] = []
+          $(this).children("td").each(function (i) {
+            row.push($(this).html().trim())
+          })
+          if (row.length > 0) {
+            console.log(row.length)
+            rows.push(row)
+          }
+        })
+      }
 
       resolve({
         columns: columns,
