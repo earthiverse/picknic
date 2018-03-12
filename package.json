@@ -27,6 +27,7 @@
     "@types/request-promise-native": "^1.0.14",
     "@types/twitter": "0.0.28",
     "cheerio": "^1.0.0-rc.2",
+    "geolib": "^2.0.24",
     "html-entities": "^1.2.1",
     "limiter": "^1.1.2",
     "moment": "^2.21.0",

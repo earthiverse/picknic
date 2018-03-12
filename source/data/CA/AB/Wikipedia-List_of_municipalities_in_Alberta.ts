@@ -8,22 +8,18 @@ WikipediaExtractor.GetPage("List of municipalities in Alberta").then(function (h
   WikipediaExtractor.FindTable(html, "Urban municipalities of Alberta").then(function (table: any) {
     table.rows.forEach(function (row: string[]) {
       // Get the page title from the link in the first column
-      let name = row[0]
-      let $ = Cheerio.load(name)
-      let cityPage = $("a").attr("title")
-      name = $("a").text()
+      let $ = Cheerio.load(row[0])
+      let cityWikiPage = $("a").attr("title")
+      let cityName = $("a").text()
 
       // Scrape the city's wiki
-      WikipediaExtractor.GetPage(cityPage).then(function (html: any) {
-        // Get the official website URL
-        let $ = Cheerio.load(html)
-        let external_url = $(".official-website").find("a").attr("href")
+      WikipediaExtractor.GetPage(cityWikiPage).then(function (html: any) {
+        let cityWebsite = WikipediaExtractor.FindWebsite(html)
+        if (cityWebsite) {
+          TwitterExtractor.scrapeHTMLForTwitterUsers(cityWebsite).then(function (users: string[]) {
 
-        if (external_url) {
-          TwitterExtractor.scrapeHTMLForTwitterUsers(external_url).then(function (users: string[]) {
-
-            console.log(name)
-            console.log("  " + external_url)
+            console.log(cityName)
+            console.log("  " + cityWebsite)
             users.forEach(function (user) {
               console.log("  " + user)
             })
