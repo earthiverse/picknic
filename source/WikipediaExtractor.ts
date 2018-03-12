@@ -1,4 +1,5 @@
 import Cheerio = require('cheerio')
+import Geolib = require('geolib')
 import HtmlEntities = require('html-entities')
 const Wiki = require('wikijs').default
 const RateLimiter = require('limiter').RateLimiter
@@ -32,6 +33,15 @@ export namespace WikipediaExtractor {
     if (e.length) {
       return e.next().find("a").attr('href')
     }
+  }
+
+  export function FindCoordinates(html: string) {
+    let $ = Cheerio.load(html)
+    // The replaces and the trims are because Geolib's regex isn't the greatest...
+    let lat = $(".latitude").first().text().replace('′', '\'').replace('″', '"').trim()
+    let lng = $(".longitude").first().text().replace('′', '\'').replace('″', '"').trim()
+
+    return [Geolib.sexagesimal2decimal(lng), Geolib.sexagesimal2decimal(lat)]
   }
 
   export function FindTable(html: string, tableName: string) {
@@ -116,7 +126,6 @@ export namespace WikipediaExtractor {
             row.push($(this).html().trim())
           })
           if (row.length > 0) {
-            console.log(row.length)
             rows.push(row)
           }
         })

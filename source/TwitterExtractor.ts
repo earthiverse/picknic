@@ -108,12 +108,15 @@ export namespace TwitterExtractor {
           $(html).find("a").each(function (i) {
             let url = $(this).attr("href")
             let result
-            if ((result = /^(http[s]:\/\/)?(www\.)?twitter\.com\/(#!\/)?@?(?!(twitterapi|intent|share|search))([A-Za-z0-9_]+)/.exec(url)) !== null) {
-              users.add(result[5])
+            if ((result = /^(https?:\/\/)?(www\.)?twitter\.com\/(#!\/)?@?(?!(twitterapi|intent|share|search|hashtag|\d+\/))([A-Za-z0-9_]+)/.exec(url)) !== null) {
+              // Twitter usernames aren't case sensitive, so lowercase to avoid duplicates
+              users.add(result[5].toLowerCase())
             }
           })
 
           // TODO: Grab users from URLs like "https://twitter.com/search?q=from%3Acityofedmonton%2C%20OR%20from%3AEdmontonPrepare%2C%20OR%20from%3AEdmontonClerk%2C%20OR%20from%3AtakeETSalert
+
+          // TODO: Grab users from URLs like "http://www.salmonarm.ca/Twitter" which redirect to the twitter account.
 
           resolve(Array.from(users));
         })

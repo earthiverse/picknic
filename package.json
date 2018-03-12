@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/cheerio": "^0.22.7",
+    "@types/geolib": "^2.0.23",
     "@types/html-entities": "^1.2.16",
     "@types/mongoose": "^5.0.7",
     "@types/nconf": "0.0.37",

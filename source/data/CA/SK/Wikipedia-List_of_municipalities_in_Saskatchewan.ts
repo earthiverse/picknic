@@ -16,8 +16,8 @@ console.log("Connecting to MongoDB...");
 // TODO: Add failure to connect
 Mongoose.connect(mongoConfig.picknic).then(function () {
   // Scrape the list of cities to get the table
-  WikipediaExtractor.GetPage("List of municipalities in British Columbia").then(function (html: any) {
-    WikipediaExtractor.FindTable(html, "List of municipalities").then(function (table: any) {
+  WikipediaExtractor.GetPage("List of municipalities in Saskatchewan").then(function (html: any) {
+    WikipediaExtractor.FindTable(html, "Urban municipalities").then(function (table: any) {
       console.log(table.rows.length)
       table.rows.forEach(function (row: string[]) {
         // Get the page title from the link in the first column
@@ -36,12 +36,12 @@ Mongoose.connect(mongoConfig.picknic).then(function () {
           console.log("Performing upsert on", placeName)
           Municipality.update({
             "properties.country": "CA",
-            "properties.subdivision": "BC",
+            "properties.subdivision": "SK",
             "properties.name": placeName
           }, {
               $set: {
                 "properties.country": "CA",
-                "properties.subdivision": "BC",
+                "properties.subdivision": "SK",
                 "properties.name": placeName,
                 "properties.type": placeType,
                 "geometry.type": "Point",
@@ -59,12 +59,12 @@ Mongoose.connect(mongoConfig.picknic).then(function () {
                 console.log("Performing update on", placeName)
                 Municipality.update({
                   "properties.country": "CA",
-                  "properties.subdivision": "BC",
+                  "properties.subdivision": "SK",
                   "properties.name": placeName
                 }, {
                     $set: {
                       "properties.country": "CA",
-                      "properties.subdivision": "BC",
+                      "properties.subdivision": "SK",
                       "properties.name": placeName,
                       "properties.twitter": users
                     }
