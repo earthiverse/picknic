@@ -11,7 +11,7 @@ let dataset_url_csv = "https://data.edmonton.ca/api/views/vk3s-q842/rows.csv?acc
 let license_name = "City of Edmonton Open Data Terms of Use (Version 2.1)"
 let license_url = "http://www.edmonton.ca/city_government/documents/Web-version2.1-OpenDataAgreement.pdf"
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
+Download.parseDataStringAsync(dataset_name, dataset_url_csv, async function (res: string) {
   let database_updates: Array<any> = Array<any>(0);
   let retrieved = new Date();
 
