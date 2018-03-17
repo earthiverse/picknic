@@ -92,6 +92,12 @@ export namespace Download {
       json: true
     }, dataset_name, dataset_url_data, parseFunction);
   }
+  export function parseDataJSONAsync(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<any[]>) {
+    parse({
+      uri: dataset_url_data,
+      json: true
+    }, dataset_name, dataset_url_data, parseFunction);
+  }
   // Used for excel based files
   export function parseDataBinary(dataset_name: string, dataset_url_data: string, parseFunction: (res: Uint8Array) => Promise<any>[]) {
     parse({
