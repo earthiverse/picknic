@@ -9,7 +9,7 @@ import { Picnic } from "../../models/Picnic";
 import { UserModule } from "../user/UserModule";
 
 // Load Configuration
-Nconf.file(Path.join(__dirname, "../config.json"));
+Nconf.file(Path.join(__dirname, "../../../config.json"));
 let picknicConfig = Nconf.get("picknic");
 
 export class DataModule extends Module {
