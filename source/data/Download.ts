@@ -3,6 +3,8 @@ import Nconf = require("nconf");
 import Path = require("path");
 import Request = require('request-promise-native');
 
+const fakeUa = require('fake-useragent');
+
 // Load Configuration
 Nconf.file(Path.join(__dirname, "../../config.json"));
 let mongoConfig = Nconf.get("mongo");
@@ -77,32 +79,47 @@ export namespace Download {
   // Used for CSV based files and Raw HTML
   export function parseDataString(dataset_name: string, dataset_url_data: string, parseFunction: (res: string) => Promise<any>[]) {
     parse({
-      uri: dataset_url_data
+      uri: dataset_url_data,
+      headers: {
+        'User-Agent': fakeUa()
+      }
     }, dataset_name, dataset_url_data, parseFunction);
   }
   export function parseDataStringAsync(dataset_name: string, dataset_url_data: string, parseFunction: (res: string) => Promise<any[]>) {
     parse2({
-      uri: dataset_url_data
+      uri: dataset_url_data,
+      headers: {
+        'User-Agent': fakeUa()
+      }
     }, dataset_name, dataset_url_data, parseFunction)
   }
   // Used for JSON based files
   export function parseDataJSON(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<any>[]) {
     parse({
       uri: dataset_url_data,
-      json: true
+      json: true,
+      headers: {
+        'User-Agent': fakeUa()
+      }
     }, dataset_name, dataset_url_data, parseFunction);
   }
   export function parseDataJSONAsync(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<any[]>) {
     parse({
       uri: dataset_url_data,
-      json: true
+      json: true,
+      headers: {
+        'User-Agent': fakeUa()
+      }
     }, dataset_name, dataset_url_data, parseFunction);
   }
   // Used for excel based files
   export function parseDataBinary(dataset_name: string, dataset_url_data: string, parseFunction: (res: Uint8Array) => Promise<any>[]) {
     parse({
       uri: dataset_url_data,
-      encoding: null
+      encoding: null,
+      headers: {
+        'User-Agent': fakeUa()
+      }
     }, dataset_name, dataset_url_data, parseFunction);
   }
 }
