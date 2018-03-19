@@ -44,7 +44,7 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (b
     let hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails)
 
     console.log("Finding location for " + siteName + "...")
-    let coordinates = await Request({
+    let data = await Request({
       uri: "http://vanmapp1.vancouver.ca/googleKml/designated_picnic_locations/id/" + parkLocationID
     }).then(function (body: string) {
       // Lol, KML...
@@ -53,6 +53,8 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (b
       let lat = result[2]
       return [lng, lat]
     })
+
+    let coordinates = data;
 
     database_updates.push(Picnic.findOneAndUpdate({
       "properties.source.name": source_name,
