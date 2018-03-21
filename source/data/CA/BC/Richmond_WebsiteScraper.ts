@@ -58,29 +58,31 @@ Request(dataset_url_human).then(function (body: string) {
     })
 
     for (let i = 0; i < parks.length; i++) {
-      let parkName = parks[i].parkName
+      // There's a park name with two spaces in the name for some reason, let's fix that...
+      let parkName = parks[i].parkName.replace(/\s+/, ' ')
       let parkURL = parks[i].parkURL
 
       console.log("Parsing " + parkName + "...")
       let data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL).then(function (body: string) {
         // Find the number of picnic tables at this park.
-        let numPicnicTables = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/ig.exec(body)[1]
+        let numPicnicTables = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/i.exec(body)[1]
+        let address = /maps\.google\.com\/maps\?q=(.+?)&/i.exec(body)[1]
 
-        return numPicnicTables
-      }).catch(function (error) {
-        console.log("Couldn't get the page for " + parkName + "!")
-        console.log(error)
+        return ({ numPicnicTables, address })
       })
 
+      let numPicnicTables = data.numPicnicTables
+      let address = data.address
+
       let comment = parkName + "."
-      if (data == "1") {
-        comment += " " + data + " picnic table."
-      } else if (data) {
-        comment += " " + data + " picnic tables."
+      if (numPicnicTables == "1") {
+        comment += " " + numPicnicTables + " picnic table."
+      } else if (numPicnicTables) {
+        comment += " " + numPicnicTables + " picnic tables."
       }
 
       let googleData = await googleMapsClient.geocode({
-        address: parkName + " Richmond, BC, Canada"
+        address: address
       }).asPromise()
       googleData = googleData.json.results[0]
       if (googleData) {
