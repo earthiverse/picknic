@@ -9,7 +9,7 @@ let dataset_name = "Picnic Tables"
 let dataset_url_human = "https://data.sunshinecoast.qld.gov.au/dataset/Picnic-Tables/emjg-3ene"
 let dataset_url_csv = "https://data.sunshinecoast.qld.gov.au/api/views/emjg-3ene/rows.csv?accessType=DOWNLOAD"
 let license_name = "Creative Commons Attribution 3.0 Australia"
-let license_url = "creativecommons.org/licenses/by/3.0/au/deed.en"
+let license_url = "https://creativecommons.org/licenses/by/3.0/au/deed.en"
 
 // Regular Expression for Location
 let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
