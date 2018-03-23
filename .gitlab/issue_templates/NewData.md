@@ -1,4 +1,4 @@
---- REPLACE TITLE WITH LOCATION OF DATA POINTS (City, Province, Country) ---
+[comment]: # (Set the title to [City, Province, Country]!)
 
 ```
 Human URL: --- NEED A URL (or N/A if it's a dataset file) ---
@@ -10,7 +10,7 @@ License:
 License URL: 
 ```
 
---- ADDITIONAL COMMENTS GO HERE ---
+[comment]: # (Put extra content in this section)
 
 
-/label ~data
+/label ~Data 
