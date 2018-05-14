@@ -1,7 +1,7 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "Lethbridge Open Data"
@@ -12,52 +12,53 @@ let license_name = "City of Lethbridge​ - Open Data License (Version 1.0)"
 let license_url = "http://www.lethbridge.ca/Pages/OpenDataLicense.aspx"
 
 Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+  let database_updates: Array<any> = Array<any>(0)
+  let retrieved = new Date()
 
   CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let lat: Number = parseFloat(data["Y"]);
-    let lng: Number = parseFloat(data["X"]);
+    let lat: Number = parseFloat(data["Y"])
+    let lng: Number = parseFloat(data["X"])
 
-    let material: string = data["Material"].toLowerCase();
-    let concrete_pad: boolean = data["Concrete_Pad"] == "Yes";
-    let wheelchair: boolean = data["Wheelchair"] == "Yes";
-    let plaque: boolean = data["Plaque"] == "Yes";
-    let old_comment: string = data["Comment"];
-    let comment: string = "A table made from " + material + ".";
+    let asset_id: string = data["AssetID"]
+    let material: string = data["Material"].toLowerCase()
+    let concrete_pad: boolean = data["Concrete_Pad"] == "Yes"
+    let wheelchair: boolean = data["Wheelchair"] == "Yes"
+    let plaque: boolean = data["Plaque"] == "Yes"
+    let old_comment: string = data["Comment"]
+    let comment: string = "A table made from " + material + "."
     if (concrete_pad) {
-      comment += " Has a concrete pad.";
+      comment += " Has a concrete pad."
     }
     if (plaque) {
       comment += " Has a plaque."
     }
     if (old_comment) {
-      comment += " The dataset which this table was obtained from has the following comment: \"" + old_comment + "\"";
+      comment += " The dataset which this table was obtained from has the following comment: \"" + old_comment + "\""
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
+    database_updates.push(Picnic.create({
+      "type": "Feature",
+      "properties.type": "table",
+      "properties.source.retrieved": retrieved,
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
+      "properties.source.id": asset_id,
+      "properties.source.url": dataset_url_human,
+      "properties.license.name": license_name,
+      "properties.license.url": license_url,
+      "properties.accessible": wheelchair,
+      "properties.comment": comment,
       "geometry.type": "Point",
       "geometry.coordinates": [lng, lat]
-    }, {
-        $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.accessible": wheelchair,
-          "properties.comment": comment,
-          "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }
-      }, {
-        "upsert": true,
-        "new": true
-      }).exec());
+    }))
   })
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  database_updates.push(Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec())
+
+  return database_updates
+})

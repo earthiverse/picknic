@@ -33,7 +33,7 @@ export namespace Download {
           // Disconnect from database
           console.log("Waiting for database updates to complete...")
           Promise.all(database_updates).then(function () {
-            console.log("Updated " + database_updates.length + " data points!")
+            console.log("Performed " + database_updates.length + " database operations!")
             console.log("Disconnecting...");
             Mongoose.disconnect();
           })

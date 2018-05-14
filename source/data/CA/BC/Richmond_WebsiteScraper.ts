@@ -1,19 +1,22 @@
+// NOTES:
+// * I don't know how to license webscraping...
+
 import Cheerio = require('cheerio')
 import Nconf = require("nconf")
 import Path = require("path")
 import Request = require('request-promise-native')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Load configuration
-Nconf.file(Path.join(__dirname, "../../../../config.json"));
-let keysConfig = Nconf.get("keys");
+Nconf.file(Path.join(__dirname, "../../../../config.json"))
+let keysConfig = Nconf.get("keys")
 
 var googleMapsClient = require('@google/maps').createClient({
   key: keysConfig.public.googleMaps,
   Promise: Promise
-});
+})
 
 // Important Fields
 let source_name = "City of Richmond"
@@ -89,35 +92,32 @@ Request(dataset_url_human).then(function (body: string) {
         let lat = googleData.geometry.location.lat
         let lng = googleData.geometry.location.lng
 
-        database_updates.push(Picnic.findOneAndUpdate({
+        database_updates.push(Picnic.create({
+          "type": "Feature",
+          "properties.type": "site",
+          "properties.source.retrieved": retrieved,
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
-          "properties.source.id": parkName
-        }, {
-            $set: {
-              "type": "Feature",
-              "properties.type": "site",
-              "properties.source.retrieved": retrieved,
-              "properties.source.name": source_name,
-              "properties.source.dataset": dataset_name,
-              "properties.source.url": dataset_url_human,
-              "properties.source.id": parkName,
-              "properties.license.name": license_name,
-              "properties.license.url": license_url,
-              "properties.comment": comment,
-              "geometry.type": "Point",
-              "geometry.coordinates": [lng, lat]
-            }
-          }, {
-            "upsert": true,
-            "new": true
-          }).exec());
+          "properties.source.url": dataset_url_human,
+          "properties.source.id": parkName,
+          "properties.license.name": license_name,
+          "properties.license.url": license_url,
+          "properties.comment": comment,
+          "geometry.type": "Point",
+          "geometry.coordinates": [lng, lat]
+        }))
       } else {
         console.log("Couldn't get a location from Google for " + parkName + "!")
       }
-
     }
 
-    return database_updates;
+    // Remove old tables from this data source
+    database_updates.push(Picnic.remove({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
+      "properties.source.retrieved": { $lt: retrieved }
+    }).lean().exec())
+
+    return database_updates
   })
 })
