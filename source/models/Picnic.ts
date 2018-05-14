@@ -35,7 +35,7 @@ export const PicnicSchema = new Mongoose.Schema({
     accessible: { type: Boolean, required: false },
     sheltered: { type: Boolean, required: false },
     comment: { type: String, required: false },
-    user: { type: String, required: true }
+    user: { type: String, required: false }
   },
   geometry: {
     type: { type: String, required: true },
@@ -43,5 +43,6 @@ export const PicnicSchema = new Mongoose.Schema({
   }
 }, { collection: mongo.collections.picnic });
 PicnicSchema.index({ geometry: '2dsphere' });
+PicnicSchema.index({ "properties.source.name": 1, "properties.source.dataset": 1, "properties.source.id": 1 });
 
 export const Picnic = Mongoose.model<IPicnic>('Picnic', PicnicSchema);
