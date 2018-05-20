@@ -1,7 +1,10 @@
+// Notes:
+// * The website doesn't expose support for 'OR', but we use it in this script.
+
 import Request = require('request-promise-native')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "City of Winnipeg"
@@ -11,56 +14,40 @@ let dataset_url_json = "https://parkmaps.winnipeg.ca/Search.ashx?exact=false&key
 let license_name = "Unknown"
 let license_url = "Unknown"
 
-// First: Use this URL which gets the parks with picnic tables or shelters
-// Fun fact: The website doesn't support 'OR', but we can exploit it here, lol.
-// https://parkmaps.winnipeg.ca/Search.ashx?exact=false&keyword=24%7C64&keyword_type=OR&latitude=0&longitude=0&addr_latitude=undefined&addr_longitude=undefined&radius=undefined
-
-// Second: Use the park IDs in the previous results with this URL format
-// Then look for {"Type": "Picnic Shelter"} or {"Type": "Picnic Site"}
-// https://parkmaps.winnipeg.ca/POSInfo.ashx?park_id=345&keyword=24%7C64&keyword_type=AND
-
-Download.parseDataJSONAsync(dataset_name, dataset_url_json, async function (parks: any) {
-  let database_updates: Array<any> = Array<any>(0)
+Download.parseDataJSON(dataset_name, dataset_url_json, async function (parks: any[]) {
+  let database_updates = 0
   let retrieved = new Date()
 
-  let parks2: any[] = []
-  parks.forEach(function (park: any) {
-    parks2.push({ parkId: park.ID, parkName: park.Name })
-  });
-  for (let i = 0; i < parks2.length; i++) {
-    let park = parks2[i]
-    let parkId = park.parkId
-    let parkName = park.parkName
+  for (let park of parks) {
+    let parkId = park.ID
+    let parkName = park.Name
 
     let parkData = await Request({
       "uri": "https://parkmaps.winnipeg.ca/POSInfo.ashx?park_id=" + parkId + "&keyword=24%7C64&keyword_type=AND",
       "json": true
     })
     console.log("Parsing " + parkName + "...")
-    parkData.Assets.forEach(function (asset: any) {
-      let picnicShelter;
-      let picnicTable;
+    for (let asset of parkData.Assets) {
+      let picnicShelter
       if (asset.Type == "Picnic Shelter") {
-        picnicShelter = true;
-      } else if (asset.Type == "Picnic Site") {
-        picnicTable = true;
-      } else {
+        picnicShelter = true
+      } else if (asset.Type != "Picnic Site") {
         // Not a picnic asset.
-        return;
+        continue
       }
 
       let assetID = asset.ID
       let lat = asset.Latitude
       let lng = asset.Longitude
 
-      let comment;
+      let comment
       if (asset.InfoRecords) {
         if (asset.InfoRecords[0].InfoName && asset.InfoRecords[0].InfoValue) {
           comment = asset.InfoRecords[0].InfoName + " " + asset.InfoRecords[0].InfoValue
         }
       }
 
-      database_updates.push(Picnic.findOneAndUpdate({
+      await Picnic.updateOne({
         "properties.source.name": source_name,
         "properties.source.dataset": dataset_name,
         "properties.source.id": assetID
@@ -83,9 +70,18 @@ Download.parseDataJSONAsync(dataset_name, dataset_url_json, async function (park
         }, {
           "upsert": true,
           "new": true
-        }).exec());
-    })
+        }).exec()
+      database_updates += 1
+    }
   }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

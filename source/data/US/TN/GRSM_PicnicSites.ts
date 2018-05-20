@@ -1,7 +1,7 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "National Park Service"
@@ -11,27 +11,28 @@ let dataset_url_csv = "https://opendata.arcgis.com/datasets/2d6bcd1a567c4badabcf
 let license_name = "Unspecified (Public Domain?)"
 let license_url = "https://en.wikipedia.org/wiki/Public_domain"
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let lat = parseFloat(data["Y"]);
-    let lng = parseFloat(data["X"]);
-    let alt = parseFloat(data["ELEVATION"]);
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
+    let lat = parseFloat(data["Y"])
+    let lng = parseFloat(data["X"])
+    let alt = parseFloat(data["ELEVATION"])
 
-    let comment: string = data["COMMENT"];
-    let globalID: string = data["GEOMETRYID"];
+    let comment: string = data["COMMENT"]
+    let globalID: string = data["GEOMETRYID"]
 
     if (data["LOC_NAME"]) {
-      comment = data["LOC_NAME"] + " - ";
+      comment = data["LOC_NAME"] + " - "
     }
     if (data["LANDFORM"]) {
-      comment += "Landform: " + data["LANDFORM"];
+      comment += "Landform: " + data["LANDFORM"]
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": globalID
     }, {
         $set: {
@@ -51,8 +52,17 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
       }, {
         "upsert": true,
         "new": true
-      }).exec());
-  })
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

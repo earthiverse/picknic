@@ -1,9 +1,9 @@
-import Express = require('express');
+import Express = require('express')
 
 export abstract class Module {
   constructor(protected app: Express.Application) {
-    this.addRoutes(app);
+    this.addRoutes(app)
   }
 
-  abstract addRoutes(app: Express.Application): void;
+  abstract addRoutes(app: Express.Application): void
 }

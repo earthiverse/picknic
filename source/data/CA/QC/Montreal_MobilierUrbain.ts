@@ -1,10 +1,10 @@
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "Portail des données ouvertes de la Ville de Montréal"
@@ -14,26 +14,24 @@ let dataset_url_json = "http://donnees.ville.montreal.qc.ca/dataset/fb04fa09-fda
 let license_name = "Creative Commons Attribution 4.0 International"
 let license_url = "http://creativecommons.org/licenses/by/4.0/"
 
-Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any) {
+  let database_updates = 0
+  let retrieved = new Date()
 
   for (let feature of res.features) {
     // Check if it's a picnic table first
     if (feature.properties.ElementDes == null || feature.properties.ElementDes.search(/table a pique-nique/i) == -1) {
-      continue;
+      continue
     }
-    let coordinates = feature.geometry.coordinates;
-    let object_id = feature.properties.OBJECTID;
-    let park_name = feature.properties.Nom_parc;
-    let comment: string;
-    if (feature.properties.Nom_parc != null && feature.properties.Nom_parc != "") {
-      comment = capitalize(feature.properties.Nom_parc);
-    } else {
-      comment = undefined;
+    let coordinates = feature.geometry.coordinates
+    let object_id = feature.properties.OBJECTID
+    let park_name = feature.properties.Nom_parc
+    let comment: string
+    if (feature.properties.Nom_parc) {
+      comment = capitalize(feature.properties.Nom_parc)
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
+    await Picnic.updateOne({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
       "properties.source.id": object_id
@@ -53,10 +51,18 @@ Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
           "geometry.coordinates": coordinates
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
+        "upsert": true
+      }).exec()
+    database_updates += 1
   }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

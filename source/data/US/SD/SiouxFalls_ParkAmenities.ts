@@ -1,12 +1,12 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "City of Sioux Falls"
@@ -16,29 +16,30 @@ let dataset_url_csv = "https://opendata.arcgis.com/datasets/acd11d56a9394f2889a3
 let license_name = "Attribution 4.0 International (CC BY 4.0) "
 let license_url = "https://creativecommons.org/licenses/by/4.0/"
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let type = data["AmenityType"];
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
+    let type = data["AmenityType"]
     if (type != "PICNIC SHELTER") { // I can't see any data in this dataset for unsheltered picnic tables...
-      return;
+      continue
     }
-    let sheltered = true;
+    let sheltered = true
 
-    let lat: number = parseFloat(data["Y"]);
-    let lng: number = parseFloat(data["X"]);
+    let lat: number = parseFloat(data["Y"])
+    let lng: number = parseFloat(data["X"])
 
     let objectID = data["OBJECTID"]
 
     let comment: string = capitalize(data["Information"])
     if (comment == "") {
-      comment = undefined;
+      comment = undefined
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "geometry.coordinates": [lng, lat]
     }, {
         $set: {
@@ -57,10 +58,18 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
           "geometry.coordinates": [lng, lat]
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
-  })
+        "upsert": true
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

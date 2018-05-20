@@ -1,7 +1,7 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "SF OpenData"
@@ -11,40 +11,38 @@ let dataset_url_csv = "https://data.sfgov.org/api/views/ays8-rxxc/rows.csv?acces
 let license_name = "ODC Public Domain Dedication and Licence (PDDL)"
 let license_url = "http://opendatacommons.org/licenses/pddl/1.0/"
 
-// Regular Expression for Location
-let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
-
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let type: string = data["Asset Type"].toLowerCase();
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
+    let type: string = data["Asset Type"].toLowerCase()
     if (type != "table") {
-      return;
+      continue
     }
-    let match: RegExpExecArray = regex.exec(data["Geom"]);
-    let lat: number = parseFloat(match[1]);
-    let lng: number = parseFloat(match[2]);
+    let match: RegExpExecArray = /([\d\.-]+),\s([\d\.-]+)/.exec(data["Geom"])
+    let lat: number = parseFloat(match[1])
+    let lng: number = parseFloat(match[2])
 
-    let asset_id = data["Asset ID"];
-    let subtype: string = data["Asset Subtype"].toLowerCase();
-    let map_label: string = data["Map Label"];
-    let asset_name: string = data["Asset Name"];
-    let quantity = data["Quantity"];
+    let asset_id = data["Asset ID"]
+    let subtype: string = data["Asset Subtype"].toLowerCase()
+    let map_label: string = data["Map Label"]
+    let asset_name: string = data["Asset Name"]
+    let quantity = data["Quantity"]
 
-    let comment: string;
+    let comment: string
     if (subtype == "picnic") {
-      comment = "A picnic table.";
+      comment = "A picnic table."
     } else if (subtype == "half table") {
-      comment = "A half table.";
+      comment = "A half table."
     } else {
       comment = "A table."
     }
     comment += " The dataset which this table was obtained from has the following information: \"Label: " + map_label + ", Asset Name: " + asset_name + ", Quantity: " + quantity + "\"."
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "properties.source.url": dataset_url_human,
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": asset_id
     }, {
         $set: {
@@ -62,10 +60,18 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
           "geometry.coordinates": [lng, lat]
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
-  })
+        "upsert": true
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

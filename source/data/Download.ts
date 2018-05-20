@@ -1,68 +1,50 @@
-import Mongoose = require('mongoose');
-import Nconf = require("nconf");
-import Path = require("path");
-import Request = require('request-promise-native');
+import Mongoose = require('mongoose')
+import Nconf = require("nconf")
+import Path = require("path")
+import Request = require('request-promise-native')
 
-const fakeUa = require('fake-useragent');
+const fakeUa = require('fake-useragent')
 
 // Load Configuration
-Nconf.file(Path.join(__dirname, "../../config.json"));
-let mongoConfig = Nconf.get("mongo");
+Nconf.file(Path.join(__dirname, "../../config.json"))
+let mongoConfig = Nconf.get("mongo")
 
 export namespace Download {
-  function parse(requestSettings: any, dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => any) {
-    console.log("Connecting to MongoDB...");
-    Mongoose.connect(mongoConfig.picknic).then(function () {
-      let database_updates: Array<Promise<any>> = Array<Promise<any>>(0);
+  async function parse(requestSettings: any, dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<number>) {
+    try {
+      // Open Connection
+      console.log("Connecting to MongoDB...")
+      await Mongoose.connect(mongoConfig.picknic)
 
-      // Download data
-      console.log("Downloading " + dataset_url_data + "...");
-      Request(requestSettings)
-        // Parse data
-        .then(async function (body) {
-          console.log("Parsing data...");
-          database_updates = await parseFunction(body);
-        })
-        // Error handler for download
-        .catch(function (error) {
-          console.log("----- ERROR (" + dataset_name + ") -----");
-          console.log(error);
-          Mongoose.disconnect();
-        })
-        .then(function () {
-          // Disconnect from database
-          console.log("Waiting for database updates to complete...")
-          Promise.all(database_updates).then(function () {
-            console.log("Performed " + database_updates.length + " database operations!")
-            console.log("Disconnecting...");
-            Mongoose.disconnect();
-          })
-        })
-    }).catch(function (error) {
+      // Download Data
+      console.log("Downloading " + dataset_url_data + "...")
+      let body = await Request(requestSettings)
+
+      // Parse Data
+      console.log("Parsing data...")
+      let num_db_operations = await parseFunction(body)
+      console.log("Performed " + num_db_operations + " database operations!")
+
+      // Close Connection
+      console.log("Disconnecting from MongoDB...")
+      await Mongoose.disconnect()
+    } catch (error) {
       console.log(error)
       process.exit()
-    })
+    }
   }
 
   // Used for CSV based files and Raw HTML
-  export function parseDataString(dataset_name: string, dataset_url_data: string, parseFunction: (res: string) => Promise<any>[]) {
-    parse({
-      uri: dataset_url_data,
-      headers: {
-        'User-Agent': fakeUa()
-      }
-    }, dataset_name, dataset_url_data, parseFunction);
-  }
-  export function parseDataStringAsync(dataset_name: string, dataset_url_data: string, parseFunction: (res: string) => Promise<any[]>) {
-    parse({
+  export async function parseDataString(dataset_name: string, dataset_url_data: string, parseFunction: (res: string) => Promise<number>) {
+    await parse({
       uri: dataset_url_data,
       headers: {
         'User-Agent': fakeUa()
       }
     }, dataset_name, dataset_url_data, parseFunction)
   }
-  export function parseDataPostStringAsync(dataset_name: string, dataset_url_data: string, post_form: any, parseFunction: (res: string) => Promise<any[]>) {
-    parse({
+  export async function parseDataPostString(dataset_name: string, dataset_url_data: string, post_form: any, parseFunction: (res: string) => Promise<number>) {
+    await parse({
       uri: dataset_url_data,
       headers: {
         'User-Agent': fakeUa()
@@ -73,34 +55,25 @@ export namespace Download {
   }
 
   // Used for JSON based files
-  export function parseDataJSON(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<any>[]) {
-    parse({
+  export async function parseDataJSON(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<number>) {
+    await parse({
       uri: dataset_url_data,
       json: true,
       headers: {
         'User-Agent': fakeUa()
       }
-    }, dataset_name, dataset_url_data, parseFunction);
-  }
-  export function parseDataJSONAsync(dataset_name: string, dataset_url_data: string, parseFunction: (res: any) => Promise<any[]>) {
-    parse({
-      uri: dataset_url_data,
-      json: true,
-      headers: {
-        'User-Agent': fakeUa()
-      }
-    }, dataset_name, dataset_url_data, parseFunction);
+    }, dataset_name, dataset_url_data, parseFunction)
   }
 
   // Used for excel based files
-  export function parseDataBinary(dataset_name: string, dataset_url_data: string, parseFunction: (res: Uint8Array) => Promise<any>[]) {
-    parse({
+  export async function parseDataBinary(dataset_name: string, dataset_url_data: string, parseFunction: (res: Uint8Array) => Promise<number>) {
+    await parse({
       uri: dataset_url_data,
       encoding: null,
       headers: {
         'User-Agent': fakeUa()
       }
-    }, dataset_name, dataset_url_data, parseFunction);
+    }, dataset_name, dataset_url_data, parseFunction)
   }
 }
 

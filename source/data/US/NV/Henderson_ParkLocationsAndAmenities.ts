@@ -1,12 +1,12 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "City of Henderson GIS Data Portal"
@@ -17,19 +17,19 @@ let dataset_url_csv = "https://opendata.arcgis.com/datasets/553a7c45998e4baf8c64
 let license_name = "Unknown"
 let license_url = ""
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
     // This dataset proposes future parks, too.
     let existing: boolean = data["EXISTING"] == "Y"
     if (!existing) {
-      return;
+      continue
     }
 
     let cov_picnic = data["COV_PICNIC"]
-    let shelter: boolean;
+    let shelter: boolean
     if (cov_picnic == "Y") {
       shelter = true
     } else if (cov_picnic == "N") {
@@ -37,17 +37,17 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
     }
     let picnic = data["PICNIC"] == "Y"
     if (!picnic && !shelter) {
-      return;
+      continue
     }
 
-    let lat: number = parseFloat(data["Y"]);
-    let lng: number = parseFloat(data["X"]);
+    let lat: number = parseFloat(data["Y"])
+    let lng: number = parseFloat(data["X"])
 
     let facility = capitalize(data["FACILITY"]).trim()
     let comment = facility + "."
 
     if (data["BBQUE"] == "Y") {
-      comment = comment.trimLeft();
+      comment = comment.trimLeft()
       comment += " Has BBQ site(s)."
     }
 
@@ -63,8 +63,9 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
 
     let objectID = data["OBJECTID"]
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": objectID
     }, {
         $set: {
@@ -84,9 +85,17 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
         }
       }, {
         "upsert": true,
-        "new": true
-      }).exec());
-  })
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

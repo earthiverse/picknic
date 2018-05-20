@@ -1,32 +1,42 @@
+// NOTES:
+// This script is a little different, because ARCGIS limits the # of returned results to 1000, and I make two passes to get them.
+// Improvements could be made to read a tag that gets set in the first result that says it was limited, and continue (increment by 1000),
+// but for now this is easier.
+
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "NSW Spatial Data Catalogue"
 let dataset_name = "NSW Points of Interest"
 let dataset_url_human = "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer"
-// This URL is magic. It took me about 2 hours of searching to find it
-// This page may help if it stops working: http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/find
-let dataset_url_geojson = "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/find?searchText=Picnic+Area&contains=true&searchFields=poitype&sr=&layers=Points_Of_Interest&layerDefs=&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&dynamicLayers=&returnZ=false&returnM=false&gdbVersion=&f=pjson"
+let dataset_url_geojson_1 = "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/0/query?where=poitype%3D%27Picnic+Area%27&outFields=poiname,objectid&returnGeometry=true&resultOffset=0&resultRecordCount=1000&f=json"
+let dataset_url_geojson_2 = "http://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/0/query?where=poitype%3D%27Picnic+Area%27&outFields=poiname,objectid&returnGeometry=true&resultOffset=1000&resultRecordCount=1000&f=json"
 let license_name = "Creative Commons Attribution 3.0 Australia"
 let license_url = "https://creativecommons.org/licenses/by/3.0/au/legalcode"
 
-Download.parseDataJSON(dataset_name, dataset_url_geojson, function (res: any) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+let retrieved = new Date()
+let parsingFunction = async function (res: any) {
+  let database_updates = 0
 
-  res.results.forEach(function (result: any) {
-    let name: string = result.attributes.poiname;
-    let coordinates: any = [result.geometry.x, result.geometry.y];
+  for (let result of res.features) {
+    let comment: string
+    let name: string = result.attributes.poiname
+    if (name) {
+      comment = "Located in " + capitalize(name) + "."
+    }
+    let coordinates: any = [result.geometry.x, result.geometry.y]
+    let objectid: any = result.attributes.objectid
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
-      "geometry.coordinates": coordinates
+    await Picnic.updateOne({
+      "properties.source.dataset": dataset_name,
+      "properties.source.url": dataset_url_human,
+      "properties.source.id": objectid
     }, {
         $set: {
           "type": "Feature",
@@ -34,6 +44,7 @@ Download.parseDataJSON(dataset_name, dataset_url_geojson, function (res: any) {
           "properties.source.retrieved": retrieved,
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
+          "properties.source.id": objectid,
           "properties.source.url": dataset_url_human,
           "properties.license.name": license_name,
           "properties.license.url": license_url,
@@ -41,10 +52,24 @@ Download.parseDataJSON(dataset_name, dataset_url_geojson, function (res: any) {
           "geometry.coordinates": coordinates
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
-  });
+        "upsert": true
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+}
+
+let runSync = async () => {
+  await Download.parseDataJSON(dataset_name, dataset_url_geojson_1, parsingFunction)
+  await Download.parseDataJSON(dataset_name, dataset_url_geojson_2, parsingFunction)
+}
+runSync()

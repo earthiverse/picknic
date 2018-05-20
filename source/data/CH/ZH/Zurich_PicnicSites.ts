@@ -1,5 +1,8 @@
+// NOTES:
+// * This dataset has no ID field identifying individual picnic tables (as of 2018-05-14)
+
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "Stadt Zürich Open Data"
@@ -9,13 +12,13 @@ let dataset_url_json = "https://data.stadt-zuerich.ch/dataset/picknickplatz/reso
 let license_name = "CC0 1.0 Universal"
 let license_url = "https://creativecommons.org/publicdomain/zero/1.0/"
 
-Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-  res.features.forEach(function (feature: any) {
+  for (let feature of res.features) {
     // Slice, because there's a third coordinate for elevation that is set to zero in this dataset
-    let coordinates = feature.geometry.coordinates.slice(0, 2);
+    let coordinates = feature.geometry.coordinates.slice(0, 2)
 
     let comment: string = "name: " + feature.properties.name + ". "
     if (feature.properties.anlageelemente) {
@@ -23,11 +26,11 @@ Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
     }
     let infrastruktur = feature.properties.infrastruktur.replace(/;/g, '').replace(/_/g, ',')
     if (infrastruktur) {
-      comment += "infrastruktur: " + infrastruktur + ".";
+      comment += "infrastruktur: " + infrastruktur + "."
     }
-    comment.trimRight();
+    comment.trimRight()
 
-    database_updates.push(Picnic.findOneAndUpdate({
+    await Picnic.updateOne({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
       "geometry.coordinates": coordinates
@@ -46,10 +49,18 @@ Download.parseDataJSON(dataset_name, dataset_url_json, function (res: any) {
           "geometry.coordinates": coordinates
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
-  });
+        "upsert": true
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

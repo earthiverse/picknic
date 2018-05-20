@@ -5,8 +5,8 @@ import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "Brisbane City Council Data Directory"
@@ -16,15 +16,15 @@ let dataset_url_csv = "https://www.data.brisbane.qld.gov.au/data/dataset/39cb83b
 let license_name = "Creative Commons Attribution 4.0"
 let license_url = "https://creativecommons.org/licenses/by/4.0/"
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0)
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
   let retrieved = new Date()
 
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
     let itemType = data["ITEM_TYPE"]
     if (!itemType.startsWith("PICNIC") || itemType == "PICNIC SHELTER") {
       // Not a picnic table, or is a picnic shelter but not a table
-      return
+      continue
     }
 
     let lng: number = data["LONGITUDE"]
@@ -40,8 +40,9 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
       comment += " " + description + "."
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "properties.source.url": dataset_url_human,
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": objectID
     }, {
         $set: {
@@ -61,8 +62,17 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
       }, {
         "upsert": true,
         "new": true
-      }).exec())
-  })
+      }).exec()
+    database_updates += 1
+  }
+
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
 
   return database_updates
 })

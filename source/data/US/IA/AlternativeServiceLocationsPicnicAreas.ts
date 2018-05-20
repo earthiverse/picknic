@@ -1,12 +1,12 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // From https://stackoverflow.com/a/2332821
 function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase(); });
-};
+  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
+}
 
 // Important Fields
 let source_name = "Gov Data Iowa"
@@ -17,17 +17,14 @@ let dataset_url_csv = "https://data.iowa.gov/api/views/7dgi-gzrf/rows.csv?access
 let license_name = "Unknown"
 let license_url = ""
 
-// Regular Expression for Location
-let regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
-
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let match: RegExpExecArray = regex.exec(data["Shape"]);
-    let lat: number = parseFloat(match[1]);
-    let lng: number = parseFloat(match[2]);
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
+    let match: RegExpExecArray = /([\d\.-]+),\s([\d\.-]+)/.exec(data["Shape"])
+    let lat: number = parseFloat(match[1])
+    let lng: number = parseFloat(match[2])
 
     let objectID = data["OBJECTID"]
 
@@ -39,12 +36,13 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
     }
     let place: string = capitalize(data["Place"])
     if (place) {
-      comment = comment.trimLeft();
+      comment = comment.trimLeft()
       comment += " Located in " + place + "."
     }
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": objectID
     }, {
         $set: {
@@ -63,10 +61,17 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
         }
       }, {
         "upsert": true,
-        "new": true
-      }).exec());
+      }).exec()
+    database_updates += 1
+  }
 
-  })
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
 
-  return database_updates;
-});
+  return database_updates
+})

@@ -35,7 +35,7 @@ Request(dataset_url_human).then(function (body: string) {
   let viewStateGenerator = $('#__VIEWSTATEGENERATOR').attr('value')
 
   // Do the search with the attributes we got!
-  Download.parseDataPostStringAsync(dataset_name, dataset_url_human, {
+  Download.parseDataPostString(dataset_name, dataset_url_human, {
     "__EVENTARGUMENT": eventArgument,
     "__EVENTTARGET": eventTarget,
     "__EVENTVALIDATION": eventValidation,
@@ -47,7 +47,7 @@ Request(dataset_url_human).then(function (body: string) {
     "ctl00$pagecontent$ddlSpecFeature": "0",
     "ctl00$pagecontent$btnSearch": "Search"
   }, async function (body: string) {
-    let database_updates: Array<any> = Array<any>(0)
+    let database_updates = 0
     let retrieved = new Date()
 
     // Get the links to all the parks that contain picnic tables
@@ -60,10 +60,10 @@ Request(dataset_url_human).then(function (body: string) {
       parks.push({ parkName, parkURL })
     })
 
-    for (let i = 0; i < parks.length; i++) {
+    for (let park of parks) {
       // There's a park name with two spaces in the name for some reason, let's fix that...
-      let parkName = parks[i].parkName.replace(/\s+/, ' ')
-      let parkURL = parks[i].parkURL
+      let parkName = park.parkName.replace(/\s+/, ' ')
+      let parkURL = park.parkURL
 
       console.log("Parsing " + parkName + "...")
       let data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL).then(function (body: string) {
@@ -92,31 +92,41 @@ Request(dataset_url_human).then(function (body: string) {
         let lat = googleData.geometry.location.lat
         let lng = googleData.geometry.location.lng
 
-        database_updates.push(Picnic.create({
-          "type": "Feature",
-          "properties.type": "site",
-          "properties.source.retrieved": retrieved,
+        await Picnic.updateOne({
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": parkName,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.comment": comment,
-          "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }))
+          "properties.source.id": parkName
+        }, {
+            $set: {
+              "type": "Feature",
+              "properties.type": "site",
+              "properties.source.retrieved": retrieved,
+              "properties.source.name": source_name,
+              "properties.source.dataset": dataset_name,
+              "properties.source.id": parkName,
+              "properties.source.url": dataset_url_human,
+              "properties.license.name": license_name,
+              "properties.license.url": license_url,
+              "properties.comment": comment,
+              "geometry.type": "Point",
+              "geometry.coordinates": [lng, lat]
+            }
+          }, {
+            upsert: true
+          }).lean().exec()
+        database_updates += 1
       } else {
         console.log("Couldn't get a location from Google for " + parkName + "!")
       }
     }
 
     // Remove old tables from this data source
-    database_updates.push(Picnic.remove({
+    await Picnic.remove({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
       "properties.source.retrieved": { $lt: retrieved }
-    }).lean().exec())
+    }).lean().exec()
+    database_updates += 1
 
     return database_updates
   })

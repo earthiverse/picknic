@@ -1,7 +1,7 @@
-import CSVParse = require('csv-parse/lib/sync');
+import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic';
+import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
 let source_name = "City of Perrysburg Open Data"
@@ -11,28 +11,27 @@ let dataset_url_csv = "http://data.pburg.opendata.arcgis.com/datasets/3d438bf93d
 let license_name = "Creative Commons Attribution 3.0 United States"
 let license_url = "https://creativecommons.org/licenses/by/3.0/us/"
 
-Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
-  let database_updates: Array<any> = Array<any>(0);
-  let retrieved = new Date();
+Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
+  let database_updates = 0
+  let retrieved = new Date()
 
-  CSVParse(res, { columns: true, ltrim: true }).forEach(function (data: any) {
-    let feature: string = data["FEATURE"];
+  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
+    let feature: string = data["FEATURE"]
     if (feature != "Picnic_Table") {
-      return;
+      continue
     }
-    let lng: number = parseFloat(data["X"]);
-    let lat: number = parseFloat(data["Y"]);
+    let lng: number = parseFloat(data["X"])
+    let lat: number = parseFloat(data["Y"])
 
-    let sheltered: boolean;
+    let sheltered: boolean
     if (data["COMMENTS"].trim() == "Covered") {
-      sheltered = true;
-    } else {
-      sheltered = undefined;
+      sheltered = true
     }
-    let objectID = data["OBJECTID"];
+    let objectID = data["OBJECTID"]
 
-    database_updates.push(Picnic.findOneAndUpdate({
-      "geometry.type": "Point",
+    await Picnic.updateOne({
+      "properties.source.name": source_name,
+      "properties.source.dataset": dataset_name,
       "properties.source.id": objectID
     }, {
         $set: {
@@ -50,10 +49,18 @@ Download.parseDataString(dataset_name, dataset_url_csv, function (res: string) {
           "geometry.coordinates": [lng, lat]
         }
       }, {
-        "upsert": true,
-        "new": true
-      }).exec());
-  })
+        "upsert": true
+      }).exec()
+    database_updates += 1
+  }
 
-  return database_updates;
-});
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
+  return database_updates
+})

@@ -7,13 +7,13 @@ import { Download } from '../../Download'
 import { Picnic } from '../../../models/Picnic'
 
 // Load configuration
-Nconf.file(Path.join(__dirname, "../../../../config.json"));
-let keysConfig = Nconf.get("keys");
+Nconf.file(Path.join(__dirname, "../../../../config.json"))
+let keysConfig = Nconf.get("keys")
 
 var googleMapsClient = require('@google/maps').createClient({
   key: keysConfig.public.googleMaps,
   Promise: Promise
-});
+})
 
 // Important Fields
 let source_name = "City of Redmond"
@@ -22,8 +22,8 @@ let dataset_url_human = "http://www.redmond.gov/cms/One.aspx?portalId=169&pageId
 let license_name = "Unknown"
 let license_url = "Unknown"
 
-Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (res: string) {
-  let database_updates: Array<any> = Array<any>(0)
+Download.parseDataString(dataset_name, dataset_url_human, async function (res: string) {
+  let database_updates = 0
   let page_grabs: Array<any> = Array<any>(0)
   let retrieved = new Date()
 
@@ -35,7 +35,7 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (r
     let href = e.attr('href')
     urls.push("http://www.redmond.gov/cms/" + href)
   })
-  for (let i = 0; i < urls.length; i++) {
+  for (let url of urls) {
     let parkName: string
     let hasPicnicTable: boolean
     let hasPicnicShelter: boolean
@@ -43,11 +43,11 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (r
     let failedURL = false
     let noPicnicTables = false
     let googleResponse = await Request({
-      "uri": urls[i]
+      "uri": url
     }).then(function (body: string) {
       let $ = Cheerio.load(body)
       // Check if it mentions picnic related ammenities
-      parkName = $('#pagetitle').text();
+      parkName = $('#pagetitle').text()
       let mainContent = $('#main-content').text()
       hasPicnicTable = /picnic\s+table/i.test(mainContent)
       hasPicnicShelter = /picnic\s+shelter/i.test(mainContent)
@@ -65,12 +65,12 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (r
     })
 
     if (googleResponse) {
-      let result = googleResponse.json.results[0];
+      let result = googleResponse.json.results[0]
       let lat = result.geometry.location.lat
       let lng = result.geometry.location.lng
 
       console.log(parkName + " was OK!")
-      database_updates.push(Picnic.findOneAndUpdate({
+      await Picnic.updateOne({
         "properties.source.name": source_name,
         "properties.source.dataset": dataset_name,
         "properties.source.id": parkName
@@ -91,15 +91,15 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (r
             "geometry.coordinates": [lng, lat]
           }
         }, {
-          "upsert": true,
-          "new": true
-        }).exec());
+          "upsert": true
+        }).exec()
+      database_updates += 1
     } else {
       if (noPicnicTables) {
         console.log(parkName + " has no picnic tables.")
       } else if (failedURL) {
         console.log("----- Failure -----")
-        console.log("Failed to retrieve " + urls[i])
+        console.log("Failed to retrieve " + url)
       } else {
         console.log("----- Failure -----")
         console.log("Failed to parse " + parkName)
@@ -108,5 +108,13 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (r
     }
   }
 
+  // Remove old tables from this data source
+  await Picnic.remove({
+    "properties.source.name": source_name,
+    "properties.source.dataset": dataset_name,
+    "properties.source.retrieved": { $lt: retrieved }
+  }).lean().exec()
+  database_updates += 1
+
   return database_updates
-});
+})

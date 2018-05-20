@@ -1,5 +1,8 @@
 // NOTES:
 // * I don't know how to license webscraping...
+// * There is a zip file that contains the same information that I scrape here
+//   ftp://webftp.vancouver.ca/opendata/csv/csv_parks_facilities.zip
+//   but Request doesn't like ftp:// links, and I don't feel like adding another package for ftp just yet...
 
 import Cheerio = require('cheerio')
 import Request = require('request-promise-native')
@@ -14,8 +17,8 @@ let dataset_url_human = "http://vancouver.ca/parks-recreation-culture/picnics.as
 let license_name = "Unknown"
 let license_url = "Unknown"
 
-Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (body: string) {
-  let database_updates: Array<any> = Array<any>(0)
+Download.parseDataString(dataset_name, dataset_url_human, async function (body: string) {
+  let database_updates = 0
   let retrieved = new Date()
 
   let $ = Cheerio.load(body)
@@ -32,10 +35,10 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (b
     parks.push({ siteName, parkLocationID, parkDetails })
   })
 
-  for (let i = 0; i < parks.length; i++) {
-    let siteName = parks[i].siteName
-    let parkLocationID = parks[i].parkLocationID
-    let parkDetails: string = parks[i].siteName + ". " + parks[i].parkDetails
+  for (let park of parks) {
+    let siteName = park.siteName
+    let parkLocationID = park.parkLocationID
+    let parkDetails: string = park.siteName + ". " + park.parkDetails
 
     // What's the opposite of not sheltered? Sheltered!
     let hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails)
@@ -53,29 +56,39 @@ Download.parseDataStringAsync(dataset_name, dataset_url_human, async function (b
 
     let coordinates = data
 
-    database_updates.push(Picnic.create({
-      "type": "Feature",
-      "properties.type": "site",
-      "properties.source.retrieved": retrieved,
+    await Picnic.updateOne({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
-      "properties.source.url": dataset_url_human,
-      "properties.source.id": parkLocationID,
-      "properties.license.name": license_name,
-      "properties.license.url": license_url,
-      "properties.sheltered": hasPicnicShelter,
-      "properties.comment": parkDetails,
-      "geometry.type": "Point",
-      "geometry.coordinates": coordinates
-    }))
+      "properties.source.id": parkLocationID
+    }, {
+        $set: {
+          "type": "Feature",
+          "properties.type": "site",
+          "properties.source.retrieved": retrieved,
+          "properties.source.name": source_name,
+          "properties.source.dataset": dataset_name,
+          "properties.source.url": dataset_url_human,
+          "properties.source.id": parkLocationID,
+          "properties.license.name": license_name,
+          "properties.license.url": license_url,
+          "properties.sheltered": hasPicnicShelter,
+          "properties.comment": parkDetails,
+          "geometry.type": "Point",
+          "geometry.coordinates": coordinates
+        }
+      }, {
+        upsert: true
+      })
+    database_updates += 1
   }
 
   // Remove old tables from this data source
-  database_updates.push(Picnic.remove({
+  await Picnic.remove({
     "properties.source.name": source_name,
     "properties.source.dataset": dataset_name,
     "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec())
+  }).lean().exec()
+  database_updates += 1
 
   return database_updates
 })
