@@ -52,8 +52,7 @@ Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any)
           "geometry.coordinates": coordinates
         }
       }, {
-        "upsert": true,
-        "new": true
+        "upsert": true
       }).exec()
     database_updates += 1
   }

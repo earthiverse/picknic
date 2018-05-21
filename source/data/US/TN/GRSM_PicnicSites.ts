@@ -50,8 +50,7 @@ Download.parseDataString(dataset_name, dataset_url_csv, async function (res: str
           "geometry.coordinates": [lng, lat, alt]
         }
       }, {
-        "upsert": true,
-        "new": true
+        "upsert": true
       }).exec()
     database_updates += 1
   }

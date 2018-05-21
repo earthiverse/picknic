@@ -1,31 +1,34 @@
-// NOTES:
-// * AHTD = Arkansas Highways and Transportation Department
-// * There are no object IDs in this dataset.
-
 import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
 import { Picnic } from '../../../models/Picnic'
 
 // Important Fields
-let source_name = "Arkansas GIS Office"
-let dataset_name = "Picnic Grounds AHTD"
-let dataset_url_human = "https://hub.arcgis.com/datasets/AGIO::picnic-grounds-ahtd"
-let dataset_url_csv = "https://gis.arkansas.gov/arcgis/rest/services/FEATURESERVICES/Structure/FeatureServer/32/query?where=1%3D1&returnGeometry=true&f=geojson"
+let source_name = "Prince George's County Planning Department"
+let dataset_name = "Picnic Areas"
+let dataset_url_human = "http://gisdata.pgplanning.org/arcgis/rest/services/Applications/Parks_and_Rec/MapServer/14"
+let dataset_url_json = "http://gisdata.pgplanning.org/arcgis/rest/services/Applications/Parks_and_Rec/MapServer/14/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json"
 let license_name = "Unknown"
 let license_url = "Unknwon"
 
-Download.parseDataJSON(dataset_name, dataset_url_csv, async function (res: any) {
+Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any) {
   let database_updates = 0
   let retrieved = new Date()
 
   for (let data of res.features) {
-    let coordinates: number[] = data.geometry.coordinates[0]
+    let lat: number = parseFloat(data.geometry.y)
+    let lng: number = parseFloat(data.geometry.x)
+    let object_id = data.attributes.PARKID
+
+    let comment: string = ""
+    if (data.attributes.DESCRIPTION) {
+      comment = data.attributes.DESCRIPTION
+    }
 
     await Picnic.updateOne({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
-      "geometry.coordinates": coordinates
+      "properties.source.id": object_id
     }, {
         $set: {
           "type": "Feature",
@@ -33,11 +36,13 @@ Download.parseDataJSON(dataset_name, dataset_url_csv, async function (res: any) 
           "properties.source.retrieved": retrieved,
           "properties.source.name": source_name,
           "properties.source.dataset": dataset_name,
+          "properties.source.id": object_id,
           "properties.source.url": dataset_url_human,
           "properties.license.name": license_name,
           "properties.license.url": license_url,
+          "properties.comment": comment,
           "geometry.type": "Point",
-          "geometry.coordinates": coordinates
+          "geometry.coordinates": [lng, lat]
         }
       }, {
         "upsert": true

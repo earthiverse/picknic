@@ -68,8 +68,7 @@ Download.parseDataJSON(dataset_name, dataset_url_json, async function (parks: an
             "geometry.coordinates": [lng, lat]
           }
         }, {
-          "upsert": true,
-          "new": true
+          "upsert": true
         }).exec()
       database_updates += 1
     }
