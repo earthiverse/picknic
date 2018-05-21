@@ -1,3 +1,6 @@
+// NOTES:
+// * Once upon a time 'Component_Type_Composante' became numbers instead of text, and it screwed up the script.
+
 import { Download } from '../Download'
 import { Picnic } from '../../models/Picnic'
 
