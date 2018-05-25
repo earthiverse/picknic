@@ -24,7 +24,7 @@ Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any)
     let coordinates = feature.geometry.coordinates
     let object_id = feature.properties.OBJECTID
     let accessible: boolean
-    if (feature.properties.Accessible.search(/Yes/i) >= 0) {
+    if (feature.properties.Accessible.search(/Yes/i) != -1) {
       accessible = true
     } else if (feature.properties.Accessible) {
       accessible = false

@@ -1,3 +1,8 @@
+// NOTES:
+// * This dataset could be grabbed directly from the ArcGIS server
+// * https://rpdgis.sfgov.org/arcgis/rest/services/Production/SFRPD_Assets/FeatureServer/0/query?where=Asset_Type+%3D+%27Table%27&objectIds=&time=&geometry=&geometryType=esriGeometryEnvelope&inSR=&spatialRel=esriSpatialRelIntersects&distance=&units=esriSRUnit_Foot&relationParam=&outFields=*&returnGeometry=true&maxAllowableOffset=&geometryPrecision=&outSR=4326&gdbVersion=&returnDistinctValues=false&returnIdsOnly=false&returnCountOnly=false&returnExtentOnly=false&orderByFields=&groupByFieldsForStatistics=&outStatistics=&returnZ=false&returnM=false&multipatchOption=&resultOffset=&resultRecordCount=&f=html
+// * It looks like there's a few more results on the ArcGIS server, too.
+
 import CSVParse = require('csv-parse/lib/sync')
 
 import { Download } from '../../Download'
