@@ -60,16 +60,26 @@ export class TemplatingModule extends Module {
         }
         // Render it with Mustache
         res.send(Mustache.render(data, {
-          i18n: function () {
+          i18n: function () { // Internationalization
             return function (text: string, render: any) {
               return render(TemplatingModule.mi18n.t(text))
             }
           },
-          keys: keys.public,
-          show_map_search: (req.path.endsWith("index.html")),
+          keys: keys.public, // API Keys
+          show_map_search: (req.path.endsWith("index.html")), // TODO: This is clunky, and shouldn't be here.
           session: req.session,
-          // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
-          geoip2: TemplatingModule.geoip2.lookupSimpleSync((req as any).clientIp)
+          geoip2: function () {
+            return function () {
+              // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
+              let result = TemplatingModule.geoip2.lookupSimpleSync((req as any).clientIp)
+              if (result) {
+                return JSON.stringify({ lat: result.location.latitude, lng: result.location.longitude })
+              } else {
+                // Edmonton's latitutde and longitude
+                return "{ lat: 53.5444, lng: -113.4904 }"
+              }
+            }
+          }
         }, partials))
       })
     })
