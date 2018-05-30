@@ -1,7 +1,6 @@
-[submodule "JapanCityGeoJson"]
+[submodule "source/data/JP/extract/JapanCityGeoJson"]
 	path = source/data/JP/extract/JapanCityGeoJson
 	url = https://github.com/niiyz/JapanCityGeoJson.git
-	shallow = true
-[submodule "geo-countries"]
+[submodule "source/data/_World/extract/geo-countries"]
 	path = source/data/_World/extract/geo-countries
 	url = https://github.com/datasets/geo-countries.git
