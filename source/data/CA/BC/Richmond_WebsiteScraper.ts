@@ -121,7 +121,7 @@ Request(dataset_url_human).then(function (body: string) {
     }
 
     // Remove old tables from this data source
-    await Picnic.remove({
+    await Picnic.deleteMany({
       "properties.source.name": source_name,
       "properties.source.dataset": dataset_name,
       "properties.source.retrieved": { $lt: retrieved }

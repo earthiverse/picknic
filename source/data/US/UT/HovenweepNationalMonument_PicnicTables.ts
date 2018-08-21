@@ -48,7 +48,7 @@ Download.parseDataString(dataset_name, dataset_url_csv, async function (res: str
   }
 
   // Remove old tables from this data source
-  await Picnic.remove({
+  await Picnic.deleteMany({
     "properties.source.name": source_name,
     "properties.source.dataset": dataset_name,
     "properties.source.retrieved": { $lt: retrieved }

@@ -6,6 +6,7 @@ import * as multer from 'multer'
 
 import { Module } from "../Module"
 import { Picnic } from "../../models/Picnic"
+import { User } from "../../models/User"
 import { UserModule } from "../user/UserModule"
 
 // Load Configuration
@@ -88,13 +89,62 @@ export class DataModule extends Module {
       }
 
       // Add picnic table to database
-      Picnic.create(table, function (error: any, tables: string) {
+      Picnic.create(table, function (error: any, newTable: string) {
         if (error) {
           res.send("We had an error... " + error)
           console.log(error)
         } else {
           res.redirect(req.header('Referer'))
         }
+      })
+    })
+    app.post('/data/tables/edit', multer().single(), function (req: Express.Request, res: Express.Response) {
+      // Authenticate
+      let user = UserModule.getLoggedInUser(req)
+      if (!user) {
+        res.send("Error: No user authentication.")
+        return
+      }
+
+      // TODO: Authenticate the permission on the actual table.
+      User.findOne({ 'email': user }, async function (err, userData) {
+        if (err) {
+          res.send("Error: There was an error checking permissions.")
+        }
+
+        let fields = req.body
+
+        let table = await Picnic.findOne({ 'id': fields.id }).exec()
+
+        table.properties.comment = fields.comment
+        table.properties.license.url = fields.license_url
+        table.properties.license.name = fields.license_name
+
+        // Switch form text (yes/no) to boolean
+        switch (fields.sheltered.toLowerCase()) {
+          case "yes":
+            table.properties.sheltered = true
+            break
+          case "no":
+            table.properties.sheltered = false
+            break
+        }
+        switch (fields.accessible.toLowerCase()) {
+          case "yes":
+            table.properties.accessible = true
+            break
+          case "no":
+            table.properties.accessible = false
+            break
+        }
+
+        table.save(function (err, updatedTable) {
+          if (err) {
+            res.send("Error: Failed saving updated table.")
+          } else {
+            res.redirect(req.header('Referer'))
+          }
+        })
       })
     })
   }

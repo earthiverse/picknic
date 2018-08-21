@@ -61,7 +61,7 @@ Download.parseDataJSON(dataset_name, dataset_url_geojson, async function (res: a
   }
 
   // Remove old tables from this data source
-  await Picnic.remove({
+  await Picnic.deleteMany({
     "properties.source.name": source_name,
     "properties.source.dataset": dataset_name,
     "properties.source.retrieved": { $lt: retrieved }
