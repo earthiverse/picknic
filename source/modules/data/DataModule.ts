@@ -1,4 +1,5 @@
 import Express = require('express')
+import Geohash = require('latlon-geohash')
 import Nconf = require("nconf")
 import Path = require("path")
 
@@ -37,6 +38,37 @@ export class DataModule extends Module {
       } else {
         res.send("Error: No ID supplied.")
       }
+    })
+    app.get('/data/tables/heatmap', function (req: Express.Request, res: Express.Response) {
+      // TODO: Add admin permissions, because this is quite computational.
+
+      Picnic.find().lean().exec().then(function (tables) {
+        // Geohash the locations, and calculate the number of tables in each hashed area.
+        let table_set = new Set()
+        let weighted_set: any = {}
+
+        for (let table of tables) {
+          let lng: number = table.geometry.coordinates[0]
+          let lat: number = table.geometry.coordinates[1]
+          let geohash = Geohash.encode(lat, lng, 4) // TODO: This 4 was created by trial and error. We should probably figure it out instead.
+          // DEBUG (related to above TODO): table_set.add(geohash)
+          if (weighted_set.hasOwnProperty(geohash)) {
+            weighted_set[geohash] += 1
+          } else {
+            weighted_set[geohash] = 1
+          }
+        }
+
+        // Decode the geohashes and return a weighted heatmap
+        let return_set = new Array();
+        for (let table in weighted_set) {
+          let point = Geohash.decode(table)
+          let num_tables = weighted_set[table]
+          return_set.push([point.lat, point.lon, num_tables])
+        }
+
+        res.send(JSON.stringify(return_set))
+      })
     })
     app.post('/data/tables/add', multer().single(), function (req: Express.Request, res: Express.Response) {
       // Authenticate
