@@ -19,15 +19,15 @@ Download.parseDataString(dataset_name, dataset_url_csv, async function (res: str
   let retrieved = new Date()
 
   for (let data of CSVParse(res, { columns: true, ltrim: true })) {
-    let color: string = data["Colour"].trim().toLowerCase()
+    let color: string = data["COLOUR"].trim().toLowerCase()
     if (color == "") {
       color = undefined
     }
-    let manufacturer: string = data["Manufactur"].trim().toLowerCase()
+    let manufacturer: string = data["MANUFACTUR"].trim().toLowerCase()
     if (manufacturer == "") {
       manufacturer = undefined
     }
-    let material: string = data["Material"].trim().toLowerCase()
+    let material: string = data["MATERIAL"].trim().toLowerCase()
     if (material == "") {
       material = undefined
     }
