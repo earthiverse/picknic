@@ -14,7 +14,7 @@ export namespace Download {
     try {
       // Open Connection
       console.log("Connecting to MongoDB...")
-      await Mongoose.connect(mongoConfig.picknic)
+      await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true })
 
       // Download Data
       console.log("Downloading " + dataset_url_data + "...")

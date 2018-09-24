@@ -1,11 +1,9 @@
 import BodyParser = require('body-parser')
 import Express = require('express')
 const requestLanguage = require('express-request-language')
-import ExpressStatic = require('express-serve-static-core')
 import ExpressSession = require('express-session')
 const MongoStore = require('connect-mongo')(ExpressSession)
 const geoip2 = require('geoip2')
-import Http = require('http')
 import I18next = require('i18next')
 const i18nextBackend = require('i18next-sync-fs-backend')
 import Mongoose = require("mongoose")
@@ -22,7 +20,8 @@ let mongoConfig = Nconf.get("mongo")
 let keysConfig = Nconf.get("keys")
 
 // Setup Mongo
-Mongoose.connect(mongoConfig.picknic)
+Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true })
+Mongoose.set('useCreateIndex', true);
 
 // Setup i18next
 I18next

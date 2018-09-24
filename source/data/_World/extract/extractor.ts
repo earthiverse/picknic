@@ -2,7 +2,6 @@ import Fs = require('fs')
 import Path = require('path')
 import Mongoose = require('mongoose')
 import Nconf = require("nconf")
-let Mapshaper = require("mapshaper")
 
 import { Picnic } from '../../../models/Picnic'
 
@@ -22,7 +21,8 @@ let json_text = Fs.readFile(countries_json, "utf8", async function (error, json_
 
   // Open Connection
   console.log("Connecting to MongoDB...")
-  await Mongoose.connect(mongoConfig.picknic)
+  await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true })
+  Mongoose.set('useFindAndModify', false)
 
   let countries = JSON.parse(json_text)
   for (let country of countries.features) {

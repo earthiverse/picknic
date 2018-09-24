@@ -22,7 +22,7 @@ Fs.readdir(prefectures_json_folder, async function (error, filenames) {
 
   // Open Connection
   console.log("Connecting to MongoDB...")
-  await Mongoose.connect(mongoConfig.picknic)
+  await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true })
 
   // Go through all the prefecture's JSON, and query for tables inside it
   for (let filename of filenames) {
