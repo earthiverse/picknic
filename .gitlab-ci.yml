@@ -1,0 +1,29 @@
+# We're running on NodeJS
+image: node:9.8.0
+
+# Cache the modules!
+cache:
+  paths:
+    - node_modules/
+
+before_script:  
+  - apt-get update -qq && apt-get install
+
+# Stages (Order matters!)
+stages:
+  - dependencies
+  - build
+
+Dependencies:
+  stage: dependencies
+  tags:
+    - node
+  script:
+    - npm install
+
+Build:
+  stage: build
+  tags:
+    - node
+  script:
+    - npm run build
