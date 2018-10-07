@@ -10,6 +10,8 @@ import Download = require("../../Download");
 Nconf.file(Path.join(__dirname, "../../../../config.json"));
 const keysConfig = Nconf.get("keys");
 
+// TODO: I can't change Google's package, and I don't want to rewrite it myself, so we're going to ignore this rule.
+// tslint:disable-next-line:no-var-requires
 const googleMapsClient = require("@google/maps").createClient({
   Promise,
   key: keysConfig.public.googleMaps,

@@ -1,4 +1,6 @@
 import Fs = require("fs");
+// TODO: There is no @types/mapshaper, so until then we will disable the warning.
+// tslint:disable-next-line:no-var-requires
 const Mapshaper = require("mapshaper");
 import Mongoose = require("mongoose");
 import Nconf = require("nconf");
