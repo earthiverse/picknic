@@ -1,55 +1,55 @@
-import Fs = require('fs')
-import Path = require('path')
-import Mongoose = require('mongoose')
-import Nconf = require("nconf")
-
-import { Picnic } from '../../../models/Picnic'
+import Fs = require("fs");
+import Mongoose = require("mongoose");
+import Nconf = require("nconf");
+import Path = require("path");
+import { Picnic } from "../../../models/Picnic";
 
 // Load Configuration
-Nconf.file(Path.join(__dirname, "../../../../config.json"))
-let mongoConfig = Nconf.get("mongo")
+Nconf.file(Path.join(__dirname, "../../../../config.json"));
+const mongoConfig = Nconf.get("mongo");
 
-let data_output_folder = "../../../../source/data/"
-let data_output_filename = "PicknicTables.jsonl"
-let countries_json = data_output_folder + "_World/extract/geo-countries/data/countries.geojson"
+const dataOutputFolder = "../../../../source/data/";
+const dataOutputFilename = "PicknicTables.jsonl";
+const countriesJSON = dataOutputFolder + "_World/extract/geo-countries/data/countries.geojson";
 
-let json_text = Fs.readFile(countries_json, "utf8", async function (error, json_text) {
+Fs.readFile(countriesJSON, "utf8", async (error, jsonText) => {
   if (error) {
-    console.error("Could not load the geojson file.", error)
-    process.exit(1)
+    console.error("Could not load the geojson file.", error);
+    process.exit(1);
   }
 
   // Open Connection
-  console.log("Connecting to MongoDB...")
-  await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true })
-  Mongoose.set('useFindAndModify', false)
+  console.log("Connecting to MongoDB...");
+  await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true });
+  Mongoose.set("useFindAndModify", false);
 
-  let countries = JSON.parse(json_text)
-  for (let country of countries.features) {
-    let country_name = country.properties.ADMIN
-    let country_geojson = country.geometry
+  const countries = JSON.parse(jsonText);
+  for (const country of countries.features) {
+    const countryName = country.properties.ADMIN;
+    const countryGeoJSON = country.geometry;
 
     try {
-      let tables = await Picnic.find({ "properties.source.name": "Picknic" }).where("geometry").within(country_geojson).lean().exec()
-      console.log(country_name + " - " + tables.length)
+      const tables: any = await Picnic.find({ "properties.source.name": "Picknic" })
+        .where("geometry").within(countryGeoJSON).lean().exec();
+      console.log(countryName + " - " + tables.length);
 
       if (tables.length > 0) {
         // There's tables!
-        let jsonl_output = ""
-        for (let table of tables) {
-          jsonl_output += JSON.stringify(table) + "\n"
+        let jsonlOutput = "";
+        for (const table of tables) {
+          jsonlOutput += JSON.stringify(table) + "\n";
         }
         // TODO: Change this so the files go in the /CA/ directories, and such...
         // TODO: Backup is more important than getting this working, so I'm pushing this anyways...
-        let export_path = Path.join(data_output_folder, "_World", country_name + "_" + data_output_filename)
-        Fs.writeFileSync(export_path, jsonl_output)
+        const exportPath = Path.join(dataOutputFolder, "_World", countryName + "_" + dataOutputFilename);
+        Fs.writeFileSync(exportPath, jsonlOutput);
       }
     } catch (error) {
-      console.error("Errored for " + country_name + "...")
+      console.error("Errored for " + countryName + "...");
     }
   }
 
   // Close Connection
-  console.log("Disconnecting from MongoDB...")
-  await Mongoose.disconnect()
-})
+  console.log("Disconnecting from MongoDB...");
+  await Mongoose.disconnect();
+});

@@ -12,6 +12,7 @@ before_script:
 # Stages (Order matters!)
 stages:
   - dependencies
+  - quality
   - build
 
 Dependencies:
@@ -27,3 +28,14 @@ Build:
     - node
   script:
     - npm run build
+
+Quality:
+  stage: quality
+  script:
+    - npm run lint
+  allow_failure: true
+
+Test:
+  stage: test
+  script:
+    - npm run test

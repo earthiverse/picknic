@@ -1,68 +1,67 @@
-import CSVParse = require('csv-parse/lib/sync')
-
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import CSVParse = require("csv-parse/lib/sync");
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Melbourne Data"
-let dataset_name = "Street Furniture"
-let dataset_url_human = "https://data.melbourne.vic.gov.au/Assets-Infrastructure/Street-furniture-including-bollards-bicycle-rails-/8fgn-5q6t"
-let dataset_url_csv = "https://data.melbourne.vic.gov.au/api/views/8fgn-5q6t/rows.csv?accessType=DOWNLOAD"
-let license_name = "Creative Commons Attribution 4.0 International Public License"
-let license_url = "https://creativecommons.org/licenses/by/4.0/legalcode"
+const sourceName = "Melbourne Data";
+const dsName = "Street Furniture";
+const dsHumanURL = "https://data.melbourne.vic.gov.au/Assets-Infrastructure/Street-furniture-including-bollards-bicycle-rails-/8fgn-5q6t";
+const dsURL = "https://data.melbourne.vic.gov.au/api/views/8fgn-5q6t/rows.csv?accessType=DOWNLOAD";
+const licenseName = "Creative Commons Attribution 4.0 International Public License";
+const licenseURL = "https://creativecommons.org/licenses/by/4.0/legalcode";
 
-Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsURL, async (res: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
-    let type: string = data["ASSET_TYPE"]
-    if (type != "Picnic Setting") {
-      continue
+  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
+    const type: string = data.ASSET_TYPE;
+    if (type !== "Picnic Setting") {
+      continue;
     }
 
-    let match: RegExpExecArray = /([\d\.-]+),\s([\d\.-]+)/.exec(data["CoordinateLocation"])
-    let lat: number = parseFloat(match[1])
-    let lng: number = parseFloat(match[2])
+    const match: RegExpExecArray = /([\d\.-]+),\s([\d\.-]+)/.exec(data.CoordinateLocation);
+    const lat: number = parseFloat(match[1]);
+    const lng: number = parseFloat(match[2]);
 
-    let gis_id = data["GIS_ID"]
-    let description: string = data["DESCRIPTION"]
-    let location_description: string = data["LOCATION_DESC"]
+    const gisID = data.GIS_ID;
+    const description: string = data.DESCRIPTION;
+    const locationDescription: string = data.LOCATION_DESC;
 
-    let comment = description + ". " + location_description
+    const comment = description + ". " + locationDescription;
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "properties.source.id": gis_id
+      "properties.source.dataset": dsName,
+      "properties.source.id": gisID,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": gis_id,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.comment": comment,
+          "geometry.coordinates": [lng, lat],
           "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }
+          "properties.comment": comment,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.source.dataset": dsName,
+          "properties.source.id": gisID,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": dsHumanURL,
+          "properties.type": "table",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

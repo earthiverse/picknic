@@ -1,140 +1,142 @@
-import Mongoose = require('mongoose')
-import Request = require('request-promise-native')
-import Striptags = require('striptags')
+// TODO: This script is broken...
+import Request = require("request-promise-native");
+import Striptags = require("striptags");
 
-import { Picnic } from '../../../models/Picnic'
-import { Download } from '../../Download'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Alberta Parks"
-let dataset_name = "Camping by Activity Map"
-let dataset_url_human = "https://www.albertaparks.ca/albertaparksca/visit-our-parks/camping/by-activity-map/"
-let license_name = "Creative Commons Attribution-NonCommercial 4.0 International Public License"
-let license_url = "https://creativecommons.org/licenses/by-nc/4.0/"
+const sourceName = "Alberta Parks";
+const dsName = "Camping by Activity Map";
+const dsURL = "https://www.albertaparks.ca/albertaparksca/visit-our-parks/camping/by-activity-map/";
+const licenseName = "Creative Commons Attribution-NonCommercial 4.0 International Public License";
+const licenseURL = "https://creativecommons.org/licenses/by-nc/4.0/";
 
-Download.parseDataString(dataset_name, dataset_url_human, async function (body: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsURL, async (body: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
   // Find the JSON in the code that represents the park data
-  let m: RegExpExecArray
-  let park_data: Array<any>
-  if ((m = /var\s*sites\s*=\s*(\[[\s\S]*?\])/.exec(body)) !== null) {
+  let parkData: any[];
+  const matches1: RegExpExecArray = /var\s*sites\s*=\s*(\[[\s\S]*?\])/.exec(body);
+  if (matches1 !== null) {
     // Found data (Probably)!
     // Put the array of parks in a simple JSON object so I can parse it to an actual object
-    let data = JSON.parse("{\"data\":" + m[1] + "}")
-    park_data = data.data
+    const data = JSON.parse("{\"data\":" + matches1[1] + "}");
+    parkData = data.data;
   } else {
-    console.log("Could not find the list of parks...")
-    return database_updates
+    console.log("Could not find the list of parks...");
+    return numOps;
   }
 
-  for (let park of park_data) {
-    if (park.type.search("Picnic") == -1) {
+  for (const park of parkData) {
+    if (park.type.search("Picnic") === -1) {
       // No day-use picnicing spots
-      continue
+      continue;
     }
-    console.log("Parsing " + park.label + "...")
-    let park_url = "https://www.albertaparks.ca" + park.url
-    // Load the park URL 
-    let body = await Request(park_url)
-    let site_data: Array<any>
-    if ((m = /var\s*sites\s*=\s*(\[[\s\S]*?\])\s*;/.exec(body)) !== null) {
+    console.log("Parsing " + park.label + "...");
+    const parkURL = "https://www.albertaparks.ca" + park.url;
+    // Load the park URL
+    const body2 = await Request(parkURL);
+    let siteData: any[];
+    const matches2 = /var\s*sites\s*=\s*(\[[\s\S]*?\])\s*;/.exec(body2);
+    if (matches2 !== null) {
       // Found data (Probably)!
       // Put the array of parks in a simple JSON object so I can parse it to an actual object
-      let prepare = "{\"data\":" + m[1] + "}"
-      // Regex to fix the relaxed JSON from https://stackoverflow.com/questions/9637517/parsing-relaxed-json-without-eval
-      prepare = prepare.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ')
+      let prepare = "{\"data\":" + matches1[1] + "}";
+      // Regex to fix the relaxed JSON
+      // from https://stackoverflow.com/questions/9637517/parsing-relaxed-json-without-eval
+      prepare = prepare.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ');
       // Regex to fix the bad regex above (lol)
       // (there's a bug where if you use http:// or https:// it will malform the ':')
-      prepare = prepare.replace(/http\": /g, "http:")
+      prepare = prepare.replace(/http\": /g, "http:");
       // Regex to fix a weird bug on 'Canmore Nordic Centre Day Lodge'
-      prepare = prepare.replace(/'VC'/g, "\"VC\"")
-      prepare = prepare.replace(/\s+/g, ' ')
-      let data
+      prepare = prepare.replace(/'VC'/g, "\"VC\"");
+      prepare = prepare.replace(/\s+/g, " ");
+      let data;
       try {
-        data = JSON.parse(prepare)
-        site_data = data.data
+        data = JSON.parse(prepare);
+        siteData = data.data;
       } catch (e) {
-        console.log("----- ERROR -----")
-        console.log(park_url)
-        console.log(park.label)
-        console.log(body)
-        console.log(prepare)
-        continue
+        console.log("----- ERROR -----");
+        console.log(parkURL);
+        console.log(park.label);
+        console.log(body2);
+        console.log(prepare);
+        continue;
       }
     } else {
-      console.log("Could not load data for " + park.label + ".")
-      continue
+      console.log("Could not load data for " + park.label + ".");
+      continue;
     }
 
-    for (let site of site_data) {
-      var facility = site.facility
-      if (facility != "Day Use") {
+    for (const site of siteData) {
+      const facility = site.facility;
+      if (facility !== "Day Use") {
         // Not a facility we care about
-        continue
+        continue;
       }
-      let facility_url = "https://www.albertaparks.ca" + site.link
-      let coordinates = site.latlng.reverse()
-      let site_name = park.label + " - " + site.name
+      const facilityURL = "https://www.albertaparks.ca" + site.link;
+      const coordinates = site.latlng.reverse();
+      const siteName = park.label + " - " + site.name;
 
       // TODO: Load park_url and see if the text "no picnic tables" appears on website.
-      let body = await Request(facility_url)
+      const body3 = await Request(facilityURL);
       // Check for references that this place has no picnic tables
-      const no_picnic_tables_regex_1 = /no picnic/i
-      let has_picnic_tables = (no_picnic_tables_regex_1.exec(body) == null)
-      if (!has_picnic_tables) {
+      const noPicnicTablesRegex1 = /no picnic/i;
+      const hasPicnicTables = (noPicnicTablesRegex1.exec(body3) == null);
+      if (!hasPicnicTables) {
         // No picnic tables here :(
-        continue
+        continue;
       }
       // Check for any reference of picnic tables
-      const no_picnic_tables_regex_2 = /picnic/i
-      let doesnt_specify_picnic_tables = (no_picnic_tables_regex_2.exec(body) == null)
-      if (doesnt_specify_picnic_tables) {
+      const noPicnicTablesRegex2 = /picnic/i;
+      const doesntSpecifyPicnicTables = (noPicnicTablesRegex2.exec(body3) == null);
+      if (doesntSpecifyPicnicTables) {
         // It could have picnic tables, but it probably doesn't...
-        continue
+        continue;
       }
 
-      const notes_regex = /<div class=\"callout\">\s*<h4>notes<\/h4>([\s\S]*?)<\/div>/i
-      let m
-      let notes: string
-      if ((m = notes_regex.exec(body)) !== null) {
-        notes = Striptags(m[1]).trim()
+      const notesRegex = /<div class=\"callout\">\s*<h4>notes<\/h4>([\s\S]*?)<\/div>/i;
+      const m2 = notesRegex.exec(body3);
+      let notes: string;
+      if ((m2) !== null) {
+        notes = Striptags(m2[1]).trim();
       }
 
       // Insert or Update Table
       await Picnic.updateOne({
-        "properties.source.name": source_name,
-        "properties.source.dataset": dataset_name,
-        "properties.source.id": site_name
+        "properties.source.dataset": dsName,
+        "properties.source.id": siteName,
+        "properties.source.name": sourceName,
       }, {
           $set: {
-            "type": "Feature",
-            "properties.type": "site",
-            "properties.source.retrieved": retrieved,
-            "properties.source.name": source_name,
-            "properties.source.dataset": dataset_name,
-            "properties.source.id": site_name,
-            "properties.source.url": dataset_url_human,
-            "properties.license.name": license_name,
-            "properties.license.url": license_url,
-            "properties.comment": notes,
+            "geometry.coordinates": coordinates,
             "geometry.type": "Point",
-            "geometry.coordinates": coordinates
-          }
+            "properties.comment": notes,
+            "properties.license.name": licenseName,
+            "properties.license.url": licenseURL,
+            "properties.source.dataset": dsName,
+            "properties.source.id": siteName,
+            "properties.source.name": sourceName,
+            "properties.source.retrieved": retrieved,
+            "properties.source.url": dsURL,
+            "properties.type": "site",
+            "type": "Feature",
+          },
         }, {
-          "upsert": true
-        }).exec()
-      database_updates += 1
+          upsert: true,
+        }).exec();
+      numOps += 1;
     }
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

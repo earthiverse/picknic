@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="{{#i18n}}lang{{/i18n}}">
+
+<head>
+  <meta name="theme-color" content="#a8d49f">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta charset="utf-8">
+  <link rel="icon" type="image/png" href="/images/favicon.png">
+  <title>Table Information</title>
+  <!-- Site-wide style -->{{> style}}
+  <style>
+    .container {
+      padding-top:25px;
+      height:100%;
+    }
+
+    #map {
+      border-radius:5px;
+      height: 100%;
+      min-height:500px;
+      width: 100%;
+      margin-bottom: 0.5em;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navigation -->{{> nav}}
+  <!-- User is logged in -->{{# session.user }}
+  <div class="container">
+    <h1>Add a Table</h1>
+    <form>
+      <legend>Map</legend>
+      <div class="form-group row">
+        <input id="address" class="form-control" type="text" placeholder="Enter a Location">
+      </div>
+    </form>
+    <div class="map" id="map"></div>
+    <form id="add_table_form" action="/data/tables/add" method="post" onsubmit="event.preventDefault(); addATable()">
+
+      <legend>Location</legend>
+      <div class="form-group row">
+        <button id="move_map_center" type="button" class="btn btn-secondary">
+          <i class="fa fa-map" aria-hidden="true"></i> Map Center</button>&nbsp;
+        <button id="move_current" type="button" class="btn btn-secondary" disabled>
+          <i class="fa fa-location-arrow" aria-hidden="true"></i> Current Location</button>
+      </div>
+      <div class="form-group row">
+        <label for="latitude" class="col-sm-3 col-form-label">Latitude</label>
+        <input id="latitude" name="latitude" class="form-control col-sm-9" type="number" placeholder="Latitude" min="-90" max="90"
+          step="0.00001">
+      </div>
+      <div class="form-group row">
+        <label for="longitude" class="col-sm-3 col-form-label">Longitude</label>
+        <input id="longitude" name="longitude" class="form-control col-sm-9" type="number" placeholder="Longitude" min="-180" max="180"
+          step="0.00001">
+      </div>
+
+      <legend>Attributes</legend>
+      <div class="form-group row">
+        <button id="reset_attributes" type="button" class="btn btn-warning">
+          <i class="fa fa-undo" aria-hidden="true"></i> Reset to Default</button>
+      </div>
+      <div class="form-group row">
+        <label for="sheltered" class="col-sm-3 col-form-label">
+          <i class="fa fa-umbrella" aria-hidden="true"></i> Sheltered</label>
+        <select id="sheltered" name="sheltered" class="form-control col-sm-9">
+          <option>Unknown</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div class="form-group row">
+        <label for="accessible" class="col-sm-3 col-form-label">
+          <i class="fa fa-wheelchair" aria-hidden="true"></i> Accessible</label>
+        <select id="accessible" name="accessible" class="form-control col-sm-9">
+          <option>Unknown</option>
+          <option>Yes</option>
+          <option>No</option>
+        </select>
+      </div>
+      <div class="form-group row">
+        <input type="text" id="comment" name="comment" class="form-control" placeholder="Comment">
+      </div>
+
+      <legend>Source</legend>
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <select id="source" class="form-control">
+            <option>Other</option>
+            <option>Picknic</option>
+            <option disabled>{{ session.user }}</option>
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <input type="text" name="source_name" id="source_name" class="form-control" placeholder="Source Name" required>
+        </div>
+        <div class="col-sm-4">
+          <input type="url" name="source_url" id="source_url" class="form-control" placeholder="Source URL" required>
+        </div>
+      </div>
+
+      <!-- -->
+      <legend>License</legend>
+      <div class="form-group row">
+        <div class="col-sm-4">
+          <select id="license" class="form-control">
+            <option>Other</option>
+            <option>CC BY 4.0</option>
+          </select>
+        </div>
+        <div class="col-sm-4">
+          <input type="text" name="license_name" id="license_name" class="form-control" placeholder="License Name" required>
+        </div>
+        <div class="col-sm-4">
+          <input type="url" name="license_url" id="license_url" class="form-control" placeholder="License URL" required>
+        </div>
+      </div>
+
+      <div class="form-group row">
+        <button type="submit" id="add_table" class="btn btn-primary">Add Table</button>
+      </div>
+  </div>
+  </form>
+  </div>
+  {{/ session.user }}
+  <div class="container">
+    <div class="row">
+      <div class="col-8">
+        <div class="map" id="map"></div>
+      </div>
+      <div class="col-4">Info goes here</div>
+    </div>
+  </div>
+
+  <script>
+    // Map
+    var mapDiv = document.getElementById('map');
+
+    function initMap() {
+      // TODO: This part gets fubar'd when you save it in Visual Studio Code. It auto-formats and effs everything up, because it's mustache templating stuff inside javascript...
+      var initialPoint = {{#geoip2}}{{/geoip2}}
+      
+      // Map Customization
+      var map = new google.maps.Map(mapDiv, {
+        zoom: 15,
+        minZoom: 13,
+        center: initialPoint,
+        scrollwheel: false,
+        mapTypeControl: true,
+        mapTypeControlOptions: { position: google.maps.ControlPosition.LEFT_BOTTOM },
+        streetViewControl: true,
+        scaleControl: true,
+        fullscreenControl: false,
+        // Style created on Snazzymaps -- https://snazzymaps.com/style/58514/picknic-lightwater
+        styles: [{ "featureType": "administrative", "elementType": "labels.text.fill", "stylers": [{ "color": "#444444" }] }, { "featureType": "landscape", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#f2f2f2" }] }, { "featureType": "landscape", "elementType": "geometry.stroke", "stylers": [{ "color": "#cacaca" }] }, { "featureType": "poi", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "poi.park", "elementType": "all", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.park", "elementType": "geometry.fill", "stylers": [{ "color": "#a8d49f" }] }, { "featureType": "poi.school", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "poi.sports_complex", "elementType": "geometry.fill", "stylers": [{ "visibility": "on" }, { "color": "#ffd0b2" }] }, { "featureType": "poi.sports_complex", "elementType": "labels", "stylers": [{ "visibility": "on" }] }, { "featureType": "road", "elementType": "all", "stylers": [{ "saturation": -100 }, { "lightness": 45 }] }, { "featureType": "road.highway", "elementType": "all", "stylers": [{ "visibility": "simplified" }] }, { "featureType": "road.arterial", "elementType": "labels.icon", "stylers": [{ "visibility": "off" }] }, { "featureType": "transit", "elementType": "all", "stylers": [{ "visibility": "off" }] }, { "featureType": "water", "elementType": "geometry.fill", "stylers": [{ "color": "#b3e3f9" }] }]
+      });
+      map.data.setStyle(function (feature) {
+        var icon = '';
+        if (feature.getProperty("type") == "table") {
+          icon = '/images/markers/table_brown.png'
+        } else if (feature.getProperty("type") == "site") {
+          icon = '/images/markers/site_grey.png'
+        } else {
+          // TODO: Create unknown marker
+        }
+        return {
+          "icon": icon
+        }
+      });
+    }
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key={{keys.googleMaps}}&amp;callback=initMap&amp;libraries=places"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha256-xaF9RpdtRxzwYMWg4ldJoyPWqyDPCRD0Cv7YEEe6Ie8="
+    crossorigin="anonymous"></script>
+</body>
+
+</html>
