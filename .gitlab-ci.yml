@@ -1,3 +1,5 @@
+# NOTE: You can test this file in the linter @ https://gitlab.earthiverse.ca/earthiverse/picknic/-/ci/lint
+
 # We're running on NodeJS
 image: node:9.8.0
 
@@ -22,20 +24,17 @@ Dependencies:
   script:
     - npm install
 
+Quality:
+  stage: quality
+  tags:
+    - node
+  script:
+    - npm run lint
+  allow_failure: true
+
 Build:
   stage: build
   tags:
     - node
   script:
     - npm run build
-
-Quality:
-  stage: quality
-  script:
-    - npm run lint
-  allow_failure: true
-
-Test:
-  stage: test
-  script:
-    - npm run test
