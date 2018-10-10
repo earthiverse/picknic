@@ -1,21 +1,19 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "Colorado Parks and Wildlife Atlas";
 const dsName = "Picnic Area";
-const humanURL = "http://ndismaps.nrel.colostate.edu/arcgis/rest/services/FishingAtlas/CFA_AnglerBase_Map/MapServer/49";
-const dsURL = "http://ndismaps.nrel.colostate.edu/arcgis/rest/services/FishingAtlas/CFA_AnglerBase_Map/MapServer/49/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const gisURL = "http://ndismaps.nrel.colostate.edu/arcgis/rest/services/FishingAtlas/CFA_AnglerBase_Map/MapServer/49";
 const licenseName = "Copyright CPW Technicians and GIS staff, Chris Johnson, Eric Drummond, Bill Gaertner, and Matt Schulz.";
 const licenseURL = "Unknwon";
 
-Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of res.features) {
-    const lat: number = parseFloat(data.geometry.y);
-    const lng: number = parseFloat(data.geometry.x);
+  for (const data of res) {
+    const coordinates: any = [data.geometry.x, data.geometry.y];
     const objID = data.attributes.GlobalID;
 
     let accessible: boolean;
@@ -41,6 +39,13 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
     } else if (material === "2") {
       comment += " The table is made of wood.";
     }
+    const count = data.attributes.SITE_COUNT;
+    if (count === 0) {
+      // No tables at this location, skip it.
+      continue;
+    } else if (count > 0) {
+      comment += " There are " + count + " tables.";
+    }
     comment = comment.trimLeft();
 
     let sheltered: boolean;
@@ -54,7 +59,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
       "properties.source.name": sourceName,
     }, {
         $set: {
-          "geometry.coordinates": [lng, lat],
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
           "properties.accessible": accessible,
           "properties.comment": comment,
@@ -65,7 +70,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
           "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "site",
           "type": "Feature",
         },

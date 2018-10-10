@@ -1,23 +1,21 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "Gisborne District Council ArcGIS Server";
 const dsName = "GDC Parks and Facilities";
-const humanURL = "http://maps.gdc.govt.nz/arcgis/rest/services/Data/GDC_parks_facilities/MapServer/0";
-const dsURL = "http://maps.gdc.govt.nz/arcgis/rest/services/Data/GDC_parks_facilities/MapServer/0/query?where=AssetType+LIKE+'Picnic%25'&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const gisURL = "http://maps.gdc.govt.nz/arcgis/rest/services/Data/GDC_parks_facilities/MapServer/0";
 const licenseName = "Unknown";
 const licenseURL = "Unknwon";
 
-Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+parseDataArcGIS(dsName, gisURL, "assettype LIKE 'Picnic%'", "compkey,comments,unitdesc", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of res.features) {
-    const lat: number = parseFloat(data.geometry.y);
-    const lng: number = parseFloat(data.geometry.x);
+  for (const data of res) {
+    const coordinates = [data.geometry.x, data.geometry.y];
     const objID = data.attributes.CompKey;
-    let comment: string = "";
+    let comment = "";
 
     if (data.attributes.Comments) {
       comment = data.attributes.Comments;
@@ -37,7 +35,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
       "properties.source.name": sourceName,
     }, {
         $set: {
-          "geometry.coordinates": [lng, lat],
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
           "properties.comment": comment,
           "properties.license.name": licenseName,
@@ -46,7 +44,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
           "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "table",
           "type": "Feature",
         },

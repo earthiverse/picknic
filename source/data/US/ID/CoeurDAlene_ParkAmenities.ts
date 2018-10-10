@@ -1,23 +1,19 @@
-import CSVParse = require("csv-parse/lib/sync");
-
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "Prince George's County Planning Department";
 const dsName = "Park Amenities";
-const humanURL = "https://maps.cdaid.org/arcgis/rest/services/Public/Recreation/MapServer/15";
-const dsURL = "https://maps.cdaid.org/arcgis/rest/services/Public/Recreation/MapServer/15/query?where=Amenity+LIKE+'Picnic%25'&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const gisURL = "https://maps.cdaid.org/arcgis/rest/services/Public/Recreation/MapServer/15";
 const licenseName = "Unknown";
 const licenseURL = "Unknwon";
 
-Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+parseDataArcGIS(dsName, gisURL, "amenity LIKE 'Picnic%'", "objectid,amenity", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of res.features) {
-    const lat: number = parseFloat(data.geometry.y);
-    const lng: number = parseFloat(data.geometry.x);
+  for (const data of res) {
+    const coordinates = [data.geometry.x, data.geometry.y];
     const objID = data.attributes.OBJECTID;
 
     let sheltered: boolean;
@@ -32,7 +28,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
       "properties.source.name": sourceName,
     }, {
         $set: {
-          "geometry.coordinates": [lng, lat],
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
           "properties.license.name": licenseName,
           "properties.license.url": licenseURL,
@@ -41,7 +37,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
           "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "site",
           "type": "Feature",
         },

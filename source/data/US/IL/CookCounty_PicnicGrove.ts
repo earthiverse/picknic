@@ -4,7 +4,8 @@ import Download = require("../../Download");
 // Important Fields
 const sourceName = "Cook County Government";
 const dsName = "Picnic Grove";
-const humanURL = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/7";
+// NOTE: This server has old ArcGIS software that doesn't support pagination, meaning we can't use parseDataArcGIS...
+const gisURL = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/7";
 const dsURL1 = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/7/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json";
 const dsURL2 = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/7/query?where=OBJECTID>%3D500&outFields=*&returnGeometry=true&outSR=4326&f=json";
 const licenseName = "Unknown";
@@ -39,7 +40,7 @@ const parsingFunction = async (res: any) => {
           "properties.source.id": objectID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "site",
           "type": "Feature",
         },

@@ -1,47 +1,37 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
 import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
-const sourceName = "County of Brant";
-const dsName = "Picnic Area";
-const gisURL = "http://maps.brant.ca/arcgis/rest/services/PublicData/OutdoorAdventure/MapServer/16";
+const sourceName = "Iowa ArcGIS Server";
+const dsName = "Recreation Amenities";
+const gisURL = "https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer/8";
 const licenseName = "Unknown";
-const licenseURL = "Unknwon";
+const licenseURL = "";
 
-parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
+parseDataArcGIS(dsName, gisURL, "Type%3D'Picnic+Area'", "OBJECTID", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
   for (const data of res) {
-    const coordinates: any = [data.geometry.x, data.geometry.y];
-    const objID = data.attributes.GLOBALID;
-
-    let comment: string;
-    const material = data.attributes.MATERIAL;
-    if (material === "1") {
-      comment = "The table is made of metal.";
-    } else if (material === "2") {
-      comment = "The table is made of wood.";
-    }
+    const coordinates = [data.geometry.x, data.geometry.y];
+    const objectID = data.OBJECTID;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
-      "properties.source.id": objID,
+      "properties.source.id": objectID,
       "properties.source.name": sourceName,
     }, {
         $set: {
           "geometry.coordinates": coordinates,
           "geometry.type": "Point",
-          "properties.comment": comment,
           "properties.license.name": licenseName,
           "properties.license.url": licenseURL,
           "properties.source.dataset": dsName,
-          "properties.source.id": objID,
+          "properties.source.id": objectID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
           "properties.source.url": gisURL,
-          "properties.type": "site",
+          "properties.type": "table",
           "type": "Feature",
         },
       }, {

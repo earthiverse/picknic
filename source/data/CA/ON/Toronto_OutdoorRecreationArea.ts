@@ -1,23 +1,20 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "City of Toronto";
 const dsName = "Outdoor Recreation Area";
-const humanURL = "http://gis.toronto.ca/arcgis/rest/services/primary/cot_geospatial13_webm/MapServer/51/query";
-const dsURL = "http://gis.toronto.ca/arcgis/rest/services/primary/cot_geospatial13_webm/MapServer/51/query?where=ASSETCATEGORY%3D1114&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const gisURL = "http://gis.toronto.ca/arcgis/rest/services/primary/cot_geospatial13_webm/MapServer/51/query";
 const licenseName = "Unknown";
 const licenseURL = "Unknwon";
 
-Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+parseDataArcGIS(dsName, gisURL, "ASSETCATEGORY=1114", "asset_id,asset_name", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of res.features) {
-    const lat: number = parseFloat(data.geometry.y);
-    const lng: number = parseFloat(data.geometry.x);
+  for (const data of res) {
+    const coordinates: any = [data.geometry.x, data.geometry.y];
     const objID = data.attributes.ASSET_ID;
-
     const name = data.attributes.ASSET_NAME;
 
     await Picnic.updateOne({
@@ -26,7 +23,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
       "properties.source.name": sourceName,
     }, {
         $set: {
-          "geometry.coordinates": [lng, lat],
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
           "properties.comment": name,
           "properties.license.name": licenseName,
@@ -35,7 +32,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
           "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "site",
           "type": "Feature",
         },

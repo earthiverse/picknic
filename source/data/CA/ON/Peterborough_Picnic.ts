@@ -1,19 +1,18 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "City of Peterborough";
 const dsName = "Picnic";
-const humanURL = "http://maps.peterborough.ca/arcgis/rest/services/External/Operational/MapServer/20";
-const dsURL = "http://maps.peterborough.ca/arcgis/rest/services/External/Operational/MapServer/20/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const gisURL = "http://maps.peterborough.ca/arcgis/rest/services/External/Operational/MapServer/20";
 const licenseName = "Unknown";
 const licenseURL = "Unknwon";
 
-Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+parseDataArcGIS(dsName, gisURL, "1=1", "objectid", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of res.features) {
+  for (const data of res) {
     const coordinates: number[] = data.geometry.points[0];
     const objID = data.attributes.OBJECTID;
 
@@ -31,7 +30,7 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
           "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
+          "properties.source.url": gisURL,
           "properties.type": "site",
           "type": "Feature",
         },

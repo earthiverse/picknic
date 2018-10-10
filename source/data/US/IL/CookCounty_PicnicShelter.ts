@@ -6,6 +6,7 @@ import Download = require("../../Download");
 // Important Fields
 const sourceName = "Cook County Government";
 const dsName = "Picnic Shelter";
+// NOTE: This server has old ArcGIS software that doesn't support pagination, meaning we can't use parseDataArcGIS...
 const humanURL = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/6";
 const dsURL = "http://cookviewer1.cookcountyil.gov/ArcGIS/rest/services/cookVwrDynmc/MapServer/6/query?where=1%3D1&outFields=*&returnGeometry=true&outSR=4326&f=json";
 const licenseName = "Unknown";

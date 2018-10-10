@@ -1,7 +1,7 @@
 import CSVParse = require("csv-parse/lib/sync");
 
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { capitalize, parseDataString } from "../../Download";
 
 // Important Fields
 const sourceName = "City of Sioux Falls";
@@ -11,7 +11,7 @@ const dsURL = "https://opendata.arcgis.com/datasets/acd11d56a9394f2889a39e1504c8
 const licenseName = "Attribution 4.0 International (CC BY 4.0) ";
 const licenseURL = "https://creativecommons.org/licenses/by/4.0/";
 
-Download.parseDataString(dsName, dsURL, async (res: string) => {
+parseDataString(dsName, dsURL, async (res: string) => {
   let numOps = 0;
   const retrieved = new Date();
 
@@ -27,7 +27,7 @@ Download.parseDataString(dsName, dsURL, async (res: string) => {
 
     const objectID = data.OBJECTID;
 
-    let comment: string = Download.capitalize(data.Information);
+    let comment: string = capitalize(data.Information);
     if (comment === "") {
       comment = undefined;
     }

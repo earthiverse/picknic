@@ -1,3 +1,5 @@
+// TODO: There has to be a better way to organize this script...
+// The ArcGIS function shouldn't have duplicate code...
 import Mongoose = require("mongoose");
 import Nconf = require("nconf");
 import Path = require("path");
@@ -19,6 +21,7 @@ async function parse(settings: any, dsName: string, dsURL: string, parseFunction
   try {
     // Open Connection
     console.log("Connecting to MongoDB...");
+    Mongoose.set("useCreateIndex", true);
     await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true });
 
     // Download Data
@@ -81,4 +84,52 @@ export async function parseDataBinary(dsName: string, dsURL: string,
     },
     uri: dsURL,
   }, dsName, dsURL, parseFunction);
+}
+
+export async function parseDataArcGIS(dsName: string, gisLayerURL: string, where: string = "1=1", outFields: string = "*", maxRecCount: number = 1000,
+  parseFunction: (res: any[]) => Promise<number>) {
+  try {
+    // Open Connection
+    console.log("Connecting to MongoDB...");
+    Mongoose.set("useCreateIndex", true);
+    await Mongoose.connect(mongoConfig.picknic, { useNewUrlParser: true });
+
+    // Download Data
+    console.log("Downloading from " + gisLayerURL + "...");
+    let offset = 0;
+    const data = [];
+    while (true) {
+      const body = await Request({
+        headers: {
+          "User-Agent": fakeUa(),
+        },
+        json: true,
+        uri: gisLayerURL + "/query?where=" + where +
+          "&outFields=" + outFields +
+          "&resultOffset=" + (offset === 0 ? "" : offset) + // This is important for servers without pagination support.
+          "&returnGeometry=true&outSR=4326&f=json",
+      });
+      // Add our new data
+      for (const feature of body.features) {
+        data.push(feature);
+      }
+      if (data.length - offset < maxRecCount || data.length === 0) {
+        // No more records
+        break;
+      }
+      offset += data.length;
+    }
+
+    // Parse Data
+    console.log("Parsing data...");
+    const numOps = await parseFunction(data);
+    console.log("Performed " + numOps + " database operations!");
+
+    // Close Connection
+    console.log("Disconnecting from MongoDB...");
+    await Mongoose.disconnect();
+  } catch (error) {
+    console.log(error);
+    process.exit();
+  }
 }
