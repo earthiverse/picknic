@@ -8,6 +8,7 @@
   <link rel="icon" type="image/png" href="/images/favicon.png">
   <title>Contact Picknic</title>
   <!-- Site-wide style -->{{> style}}
+  <!-- Contact-Page style -->{{> contact-style}}
   <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 
@@ -21,17 +22,18 @@
       <a href="mailto:picknic.site@gmail.com">picknic.site@gmail.com</a>.
     </p>
     <h3>Social Media</h3>
-    <p>
-      <span style="line-height:3em">
-        <a href="https://www.facebook.com/picknic.site/">
-          <img src="/images/facebook.svg" style="width:3em;height:3em"> @picknic.site</a>
-      </span>
-      <span style="line-height:3em;margin-left:3em;">
-        <a href="https://twitter.com/picknic_site/">
-          <img src="/images/twitter.svg" style="width:3em;height:3em"> @picknic_site</a>
-      </span>
-
-    </p>
+    <div class="flex-container social-media-flex">
+      <a href="https://www.facebook.com/picknic.site/" class="social-media-link">
+        <div class="social-media-block">
+          <img class="social-media-image" src="/images/facebook.svg">&nbsp;@picknic.site
+        </div>
+      </a>
+      <a href="https://twitter.com/picknic_site/" class="social-media-link">
+        <div class="social-media-block">
+          <img class="social-media-image" src="/images/twitter.svg">&nbsp;@picknic_site
+        </div>
+      </a>
+    </div>
   </div>
 
   <script>
