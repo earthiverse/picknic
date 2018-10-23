@@ -19,12 +19,16 @@ TODO explain the explicit cities here
 ### Quick Guide to Install and Start Picknic
 1. Clone the repository into your favourite local development space. e.g. `git clone `
 2. Run `npm install`
-3. Run `npm script-build`
+3. Run `npm run-script build`
 4. Run `npm start`
 
 Once the site is running you'll see some warnings. That's ok for now
 
-5. Go to `localhost:3000` and see the project run. We don't have any data yet.
+5. Go to `localhost:3000` and see the project run. We don't have any data yet. You can change the port number by editing the `config.json` file locally.
+
+### MongoDB Setup
+
+### Data Imports
 
 TODO: Outline how MongoDB data works
 
