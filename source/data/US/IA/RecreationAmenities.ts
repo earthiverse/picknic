@@ -1,30 +1,20 @@
-import CSVParse = require("csv-parse/lib/sync");
-
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
-const sourceName = "City of Boise";
-const dsName = "Park Activities and Amenities";
-const humanURL = "http://opendata.cityofboise.org/datasets/7533d78ac95c45f88dba9b7d85e1c75c_0";
-const dsURL = "http://opendata.cityofboise.org/datasets/7533d78ac95c45f88dba9b7d85e1c75c_0.csv";
-// TODO: Find out
-const licenseName = "No Warranty";
+const sourceName = "Iowa ArcGIS Server";
+const dsName = "Recreation Amenities";
+const gisURL = "https://programs.iowadnr.gov/geospatial/rest/services/Recreation/Recreation/MapServer/8";
+const licenseName = "Unknown";
 const licenseURL = "";
 
-Download.parseDataString(dsName, dsURL, async (res: string) => {
+parseDataArcGIS(dsName, gisURL, "Type%3D'Picnic+Area'", "OBJECTID", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const description: string = data.DescriptionText;
-    if (description.search(/picnic/i) === -1) {
-      continue;
-    }
-    const lat: number = parseFloat(data.Y);
-    const lng: number = parseFloat(data.X);
-
-    const objectID = data.ID;
+  for (const data of res) {
+    const coordinates = [data.geometry.x, data.geometry.y];
+    const objectID = data.OBJECTID;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
@@ -32,17 +22,16 @@ Download.parseDataString(dsName, dsURL, async (res: string) => {
       "properties.source.name": sourceName,
     }, {
         $set: {
-          "geometry.coordinates": [lng, lat],
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
-          "properties.comment": description,
           "properties.license.name": licenseName,
           "properties.license.url": licenseURL,
           "properties.source.dataset": dsName,
           "properties.source.id": objectID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
-          "properties.type": "site",
+          "properties.source.url": gisURL,
+          "properties.type": "table",
           "type": "Feature",
         },
       }, {

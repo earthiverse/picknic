@@ -1,29 +1,33 @@
 import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
 import { parseDataArcGIS } from "../../Download";
 
 // Important Fields
-const sourceName = "County of Brant";
-const dsName = "Picnic Area";
-const gisURL = "http://maps.brant.ca/arcgis/rest/services/PublicData/OutdoorAdventure/MapServer/16";
+const sourceName = "Gisborne District Council ArcGIS Server";
+const dsName = "GDC Parks and Facilities";
+const gisURL = "http://maps.gdc.govt.nz/arcgis/rest/services/Data/GDC_parks_facilities/MapServer/0";
 const licenseName = "Unknown";
 const licenseURL = "Unknwon";
 
-parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
+parseDataArcGIS(dsName, gisURL, "assettype LIKE 'Picnic%'", "compkey,comments,unitdesc", 1000, async (res: any[]) => {
   let numOps = 0;
   const retrieved = new Date();
 
   for (const data of res) {
-    const coordinates: any = [data.geometry.x, data.geometry.y];
-    const objID = data.attributes.GLOBALID;
+    const coordinates = [data.geometry.x, data.geometry.y];
+    const objID = data.attributes.CompKey;
+    let comment = "";
 
-    let comment: string;
-    const material = data.attributes.MATERIAL;
-    if (material === "1") {
-      comment = "The table is made of metal.";
-    } else if (material === "2") {
-      comment = "The table is made of wood.";
+    if (data.attributes.Comments) {
+      comment = data.attributes.Comments;
     }
+    if (data.attributes.UnitDesc) {
+      if (comment !== "") {
+        comment = comment + ". ";
+      }
+      comment = comment + data.attributes.UnitDesc + ".";
+
+    }
+    comment = comment.replace(/\s+/g, " ");
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
@@ -41,7 +45,7 @@ parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
           "properties.source.url": gisURL,
-          "properties.type": "site",
+          "properties.type": "table",
           "type": "Feature",
         },
       }, {

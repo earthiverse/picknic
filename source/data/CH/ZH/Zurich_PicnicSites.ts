@@ -1,66 +1,66 @@
 // NOTES:
 // * This dataset has no ID field identifying individual picnic tables (as of 2018-05-14)
 
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Stadt Zürich Open Data"
-let dataset_name = "Picknickplatz"
-let dataset_url_human = "https://data.stadt-zuerich.ch/dataset/picknickplatz"
-let dataset_url_json = "https://data.stadt-zuerich.ch/dataset/picknickplatz/resource/b533a584-6cd8-460c-8c3f-5b71cd0207ca/download/picknickplatz.json"
-let license_name = "CC0 1.0 Universal"
-let license_url = "https://creativecommons.org/publicdomain/zero/1.0/"
+const sourceName = "Stadt Zürich Open Data";
+const dsName = "Picknickplatz";
+const humanURL = "https://data.stadt-zuerich.ch/dataset/picknickplatz";
+const dsURL = "https://data.stadt-zuerich.ch/dataset/picknickplatz/resource/b533a584-6cd8-460c-8c3f-5b71cd0207ca/download/picknickplatz.json";
+const licenseName = "CC0 1.0 Universal";
+const licenseURL = "https://creativecommons.org/publicdomain/zero/1.0/";
 
-Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataJSON(dsName, dsURL, async (res: any) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let feature of res.features) {
+  for (const feature of res.features) {
     // Slice, because there's a third coordinate for elevation that is set to zero in this dataset
-    let coordinates = feature.geometry.coordinates.slice(0, 2)
+    const coordinates = feature.geometry.coordinates.slice(0, 2);
 
-    let comment: string = "name: " + feature.properties.name + ". "
+    let comment: string = "name: " + feature.properties.name + ". ";
     if (feature.properties.anlageelemente) {
-      comment += "anlageelemente: " + feature.properties.anlageelemente + ". "
+      comment += "anlageelemente: " + feature.properties.anlageelemente + ". ";
     }
-    let infrastruktur = feature.properties.infrastruktur.replace(/;/g, '').replace(/_/g, ',')
+    const infrastruktur = feature.properties.infrastruktur.replace(/;/g, "").replace(/_/g, ",");
     if (infrastruktur) {
-      comment += "infrastruktur: " + infrastruktur + "."
+      comment += "infrastruktur: " + infrastruktur + ".";
     }
-    comment.trimRight()
+    comment.trimRight();
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "geometry.coordinates": coordinates
+      "geometry.coordinates": coordinates,
+      "properties.source.dataset": dsName,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "site",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.comment": comment,
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
-          "geometry.coordinates": coordinates
-        }
+          "properties.comment": comment,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.source.dataset": dsName,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": humanURL,
+          "properties.type": "site",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

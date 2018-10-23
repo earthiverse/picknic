@@ -1,57 +1,57 @@
-import CSVParse = require('csv-parse/lib/sync')
+import CSVParse = require("csv-parse/lib/sync");
 
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Ohio State University"
-let dataset_name = "Picnic Table"
-let dataset_url_human = "https://hub.arcgis.com/datasets/09412cb07aa745578563feffc02160ab_24"
-let dataset_url_csv = "https://opendata.arcgis.com/datasets/09412cb07aa745578563feffc02160ab_24.csv"
-let license_name = "CC0" // Emailed the creator of the dataset, recieved a response "Feel free to use that data set however you would like."
-let license_url = "https://creativecommons.org/publicdomain/zero/1.0/"
+const sourceName = "Ohio State University";
+const dsName = "Picnic Table";
+const humanURL = "https://hub.arcgis.com/datasets/09412cb07aa745578563feffc02160ab_24";
+const dsURL = "https://opendata.arcgis.com/datasets/09412cb07aa745578563feffc02160ab_24.csv";
+const licenseName = "CC0"; // Emailed the creator of the dataset, recieved a response "Feel free to use that data set however you would like."
+const licenseURL = "https://creativecommons.org/publicdomain/zero/1.0/";
 
-Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsURL, async (res: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
-    let lng: number = parseFloat(data["X"])
-    let lat: number = parseFloat(data["Y"])
+  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
+    const lng: number = parseFloat(data.X);
+    const lat: number = parseFloat(data.Y);
 
-    let globalID = data["GlobalID"]
+    const globalID = data.GlobalID;
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "properties.source.id": globalID
+      "properties.source.dataset": dsName,
+      "properties.source.id": globalID,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": globalID,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
+          "geometry.coordinates": [lng, lat],
           "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.source.dataset": dsName,
+          "properties.source.id": globalID,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": humanURL,
+          "properties.type": "table",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

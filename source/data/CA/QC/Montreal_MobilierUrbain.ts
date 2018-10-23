@@ -1,68 +1,62 @@
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
-
-// From https://stackoverflow.com/a/2332821
-function capitalize(s: string) {
-  return s.toLowerCase().replace(/\b./g, function (a: string) { return a.toUpperCase() })
-}
+import { Picnic } from "../../../models/Picnic";
+import { capitalize, parseDataJSON } from "../../Download";
 
 // Important Fields
-let source_name = "Portail des données ouvertes de la Ville de Montréal"
-let dataset_name = "Mobilier urbain dans les grands parcs"
-let dataset_url_human = "http://donnees.ville.montreal.qc.ca/dataset/mobilierurbaingp"
-let dataset_url_json = "http://donnees.ville.montreal.qc.ca/dataset/fb04fa09-fda1-44df-b575-1d14b2508372/resource/65766e31-f186-4ac9-9595-bfcf47ae9158/download/mobilierurbaingp.geojson"
-let license_name = "Creative Commons Attribution 4.0 International"
-let license_url = "http://creativecommons.org/licenses/by/4.0/"
+const sourceName = "Portail des données ouvertes de la Ville de Montréal";
+const dsName = "Mobilier urbain dans les grands parcs";
+const humanURL = "http://donnees.ville.montreal.qc.ca/dataset/mobilierurbaingp";
+const dsURL = "http://donnees.ville.montreal.qc.ca/dataset/fb04fa09-fda1-44df-b575-1d14b2508372/resource/65766e31-f186-4ac9-9595-bfcf47ae9158/download/mobilierurbaingp.geojson";
+const licenseName = "Creative Commons Attribution 4.0 International";
+const licenseURL = "http://creativecommons.org/licenses/by/4.0/";
 
-Download.parseDataJSON(dataset_name, dataset_url_json, async function (res: any) {
-  let database_updates = 0
-  let retrieved = new Date()
+parseDataJSON(dsName, dsURL, async (res: any) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let feature of res.features) {
+  for (const feature of res.features) {
     // Check if it's a picnic table first
-    if (feature.properties.ElementDes == null || feature.properties.ElementDes.search(/table a pique-nique/i) == -1) {
-      continue
+    if (feature.properties.ElementDes == null || feature.properties.ElementDes.search(/table a pique-nique/i) === -1) {
+      continue;
     }
-    let coordinates = feature.geometry.coordinates
-    let object_id = feature.properties.OBJECTID
-    let park_name = feature.properties.Nom_parc
-    let comment: string
+    const coordinates = feature.geometry.coordinates;
+    const objectID = feature.properties.OBJECTID;
+    let comment: string;
     if (feature.properties.Nom_parc) {
-      comment = capitalize(feature.properties.Nom_parc)
+      comment = capitalize(feature.properties.Nom_parc);
     }
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "properties.source.id": object_id
+      "properties.source.dataset": dsName,
+      "properties.source.id": objectID,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": object_id,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.comment": comment,
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
-          "geometry.coordinates": coordinates
-        }
+          "properties.comment": comment,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.source.dataset": dsName,
+          "properties.source.id": objectID,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": humanURL,
+          "properties.type": "table",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

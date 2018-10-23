@@ -1,68 +1,68 @@
-import XLSX = require('xlsx')
+import XLSX = require("xlsx");
 
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Adelaide City Council"
-let dataset_name = "Picnic Tables"
-let dataset_url_human = "https://opendata.adelaidecitycouncil.com/PicnicTables/"
-let dataset_url_xls = "https://opendata.adelaidecitycouncil.com/PicnicTables/PicnicTables.xls"
-let license_name = "Creative Commons Attribution 4.0 International Public License"
-let license_url = "https://creativecommons.org/licenses/by/4.0/legalcode"
+const sourceName = "Adelaide City Council";
+const dsName = "Picnic Tables";
+const humanURL = "https://opendata.adelaidecitycouncil.com/PicnicTables/";
+const dsURL = "https://opendata.adelaidecitycouncil.com/PicnicTables/PicnicTables.xls";
+const licenseName = "Creative Commons Attribution 4.0 International Public License";
+const licenseURL = "https://creativecommons.org/licenses/by/4.0/legalcode";
 
-Download.parseDataBinary(dataset_name, dataset_url_xls, async function (res: Uint8Array) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataBinary(dsName, dsURL, async (res: Uint8Array) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  let workbook = XLSX.read(res)
-  for (let sheetName of workbook.SheetNames) {
-    let data: any = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
-    for (let row of data) {
-      let lat: number = parseFloat(row["POINT_Y"])
-      let lng: number = parseFloat(row["POINT_X"])
+  const workbook = XLSX.read(res);
+  for (const sheetName of workbook.SheetNames) {
+    const data: any = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+    for (const row of data) {
+      const lat: number = parseFloat(row.POINT_Y);
+      const lng: number = parseFloat(row.POINT_X);
 
-      let type: string = row["Type"]
-      let uniqueAsse: string = row["UniqueAsse"]
+      const type: string = row.Type;
+      const uniqueAsse: string = row.UniqueAsse;
 
-      let comment: string = ""
-      if (type && type != "Unknown") {
-        comment = "Type: " + type
+      let comment: string = "";
+      if (type && type !== "Unknown") {
+        comment = "Type: " + type;
       }
 
       await Picnic.updateOne({
-        "properties.source.name": source_name,
-        "properties.source.dataset": dataset_name,
-        "properties.source.id": uniqueAsse
+        "properties.source.dataset": dsName,
+        "properties.source.id": uniqueAsse,
+        "properties.source.name": sourceName,
       }, {
           $set: {
-            "type": "Feature",
-            "properties.type": "table",
-            "properties.source.retrieved": retrieved,
-            "properties.source.name": source_name,
-            "properties.source.dataset": dataset_name,
-            "properties.source.url": dataset_url_human,
-            "properties.source.id": uniqueAsse,
-            "properties.license.name": license_name,
-            "properties.license.url": license_url,
-            "properties.comment": comment,
+            "geometry.coordinates": [lng, lat],
             "geometry.type": "Point",
-            "geometry.coordinates": [lng, lat]
-          }
+            "properties.comment": comment,
+            "properties.license.name": licenseName,
+            "properties.license.url": licenseURL,
+            "properties.source.dataset": dsName,
+            "properties.source.id": uniqueAsse,
+            "properties.source.name": sourceName,
+            "properties.source.retrieved": retrieved,
+            "properties.source.url": humanURL,
+            "properties.type": "table",
+            "type": "Feature",
+          },
         }, {
-          "upsert": true
-        }).exec()
-      database_updates += 1
+          upsert: true,
+        }).exec();
+      numOps += 1;
     }
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

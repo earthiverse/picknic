@@ -4,91 +4,90 @@
 //   ftp://webftp.vancouver.ca/opendata/csv/csv_parks_facilities.zip
 //   but Request doesn't like ftp:// links, and I don't feel like adding another package for ftp just yet...
 
-import Cheerio = require('cheerio')
-import Request = require('request-promise-native')
-
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import Cheerio = require("cheerio");
+import Request = require("request-promise-native");
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "City of Vancouver"
-let dataset_name = "Picnics in Vancouver's parks"
-let dataset_url_human = "http://vancouver.ca/parks-recreation-culture/picnics.aspx"
-let license_name = "Unknown"
-let license_url = "Unknown"
+const sourceName = "City of Vancouver";
+const dsName = "Picnics in Vancouver's parks";
+const dsHumanURL = "http://vancouver.ca/parks-recreation-culture/picnics.aspx";
+const licenseName = "Unknown";
+const licenseURL = "Unknown";
 
-Download.parseDataString(dataset_name, dataset_url_human, async function (body: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsHumanURL, async (body: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  let $ = Cheerio.load(body)
-  let parks: any[] = []
-  $("table.collapse").find("tr").each(async function (i) {
-    if (i == 0) {
+  const $ = Cheerio.load(body);
+  const parks: any[] = [];
+  $("table.collapse").find("tr").each(async (i) => {
+    if (i === 0) {
       // Skip the table header
-      return
+      return;
     }
-    let columns = $(this).find("td")
-    let siteName = columns.eq(0).text().trim()
-    let parkLocationID = columns.eq(1).find("a").attr('href').slice(-4)
-    let parkDetails = columns.eq(3).text().trim().replace(/[\n\r]+/g, '. ').replace(/\s+/g, ' ').trim() + "."
-    parks.push({ siteName, parkLocationID, parkDetails })
-  })
+    const columns = $(this).find("td");
+    const siteName = columns.eq(0).text().trim();
+    const parkLocationID = columns.eq(1).find("a").attr("href").slice(-4);
+    const parkDetails = columns.eq(3).text().trim().replace(/[\n\r]+/g, ". ").replace(/\s+/g, " ").trim() + ".";
+    parks.push({ siteName, parkLocationID, parkDetails });
+  });
 
-  for (let park of parks) {
-    let siteName = park.siteName
-    let parkLocationID = park.parkLocationID
-    let parkDetails: string = park.siteName + ". " + park.parkDetails
+  for (const park of parks) {
+    const siteName = park.siteName;
+    const parkLocationID = park.parkLocationID;
+    const parkDetails: string = park.siteName + ". " + park.parkDetails;
 
     // What's the opposite of not sheltered? Sheltered!
-    let hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails)
+    const hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails);
 
-    console.log("Finding location for " + siteName + "...")
-    let data = await Request({
-      uri: "http://vanmapp1.vancouver.ca/googleKml/designated_picnic_locations/id/" + parkLocationID
-    }).then(function (body: string) {
+    console.log("Finding location for " + siteName + "...");
+    const data = await Request({
+      uri: "http://vanmapp1.vancouver.ca/googleKml/designated_picnic_locations/id/" + parkLocationID,
+    }).then((body2: string) => {
       // Lol, KML...
-      let result = /<coordinates>([\-.0-9]+),([\-.0-9]+)/.exec(body)
-      let lng = result[1]
-      let lat = result[2]
-      return [lng, lat]
-    })
+      const result = /<coordinates>([\-.0-9]+),([\-.0-9]+)/.exec(body2);
+      const lng = result[1];
+      const lat = result[2];
+      return [lng, lat];
+    });
 
-    let coordinates = data
+    const coordinates = data;
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "properties.source.id": parkLocationID
+      "properties.source.dataset": dsName,
+      "properties.source.id": parkLocationID,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "site",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.source.id": parkLocationID,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.sheltered": hasPicnicShelter,
-          "properties.comment": parkDetails,
+          "geometry.coordinates": coordinates,
           "geometry.type": "Point",
-          "geometry.coordinates": coordinates
-        }
+          "properties.comment": parkDetails,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.sheltered": hasPicnicShelter,
+          "properties.source.dataset": dsName,
+          "properties.source.id": parkLocationID,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": dsHumanURL,
+          "properties.type": "site",
+          "type": "Feature",
+        },
       }, {
-        upsert: true
-      })
-    database_updates += 1
+        upsert: true,
+      });
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

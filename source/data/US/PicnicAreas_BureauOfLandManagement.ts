@@ -1,34 +1,30 @@
-import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
-import { parseDataArcGIS } from "../../Download";
+import { Picnic } from "../../models/Picnic";
+import { capitalize, parseDataArcGIS } from "../Download";
 
 // Important Fields
-const sourceName = "County of Brant";
-const dsName = "Picnic Area";
-const gisURL = "http://maps.brant.ca/arcgis/rest/services/PublicData/OutdoorAdventure/MapServer/16";
+const sourceName = "Bureau of Land Management";
+const dsName = "Picnic Areas";
+const gisURL = "https://gis.blm.gov/arcgis/rest/services/recreation/BLM_Natl_Recs_pts/MapServer/9";
 const licenseName = "Unknown";
-const licenseURL = "Unknwon";
+const licenseURL = "Unknown";
 
-parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
+export async function parse(res: any[]) {
   let numOps = 0;
   const retrieved = new Date();
 
   for (const data of res) {
-    const coordinates: any = [data.geometry.x, data.geometry.y];
-    const objID = data.attributes.GLOBALID;
-
     let comment: string;
-    const material = data.attributes.MATERIAL;
-    if (material === "1") {
-      comment = "The table is made of metal.";
-    } else if (material === "2") {
-      comment = "The table is made of wood.";
+    const name: string = data.attributes.FET_NAME;
+    if (name) {
+      comment = "Located in " + capitalize(name) + ".";
     }
+    const coordinates: any = [data.geometry.x, data.geometry.y];
+    const objectid: string = data.attributes.Original_GlobalID;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
-      "properties.source.id": objID,
-      "properties.source.name": sourceName,
+      "properties.source.id": objectid,
+      "properties.source.url": gisURL,
     }, {
         $set: {
           "geometry.coordinates": coordinates,
@@ -37,7 +33,7 @@ parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
           "properties.license.name": licenseName,
           "properties.license.url": licenseURL,
           "properties.source.dataset": dsName,
-          "properties.source.id": objID,
+          "properties.source.id": objectid,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
           "properties.source.url": gisURL,
@@ -59,4 +55,8 @@ parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
   numOps += 1;
 
   return numOps;
-});
+}
+
+if (require.main === module) {
+  parseDataArcGIS(dsName, gisURL, "fet_type=4", "original_globalid,fet_name", 1000, parse);
+}

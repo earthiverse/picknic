@@ -1,7 +1,6 @@
 # Extra
 .tscache
 .baseDir.js
-tslint.json
 
 # Created by https://www.gitignore.io/api/linux,node,osx,typings,grunt,windows,python
 
