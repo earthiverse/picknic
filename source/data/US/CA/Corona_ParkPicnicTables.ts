@@ -1,107 +1,107 @@
 // NOTES:
 // * This dataset has an object id field, but it has IDs from 1 to 351 for 351 tables, so it's probably not useful.
 
-import CSVParse = require('csv-parse/lib/sync')
+import CSVParse = require("csv-parse/lib/sync");
 
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "City of Corona Open Data"
-let dataset_name = "Park Picnic Tables"
-let dataset_url_human = "https://gis-cityofcorona.opendata.arcgis.com/datasets/park-picnic-tables"
-let dataset_url_csv = "https://opendata.arcgis.com/datasets/ff7a42aa04b54542b0249678556891c8_3.csv"
+const sourceName = "City of Corona Open Data";
+const dsName = "Park Picnic Tables";
+const humanURL = "https://gis-cityofcorona.opendata.arcgis.com/datasets/park-picnic-tables";
+const dsURL = "https://opendata.arcgis.com/datasets/ff7a42aa04b54542b0249678556891c8_3.csv";
 // TODO: Find out
-let license_name = "Unknown"
-let license_url = ""
+const licenseName = "Unknown";
+const licenseURL = "";
 
-Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsURL, async (res: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
-    let lng: number = parseFloat(data["X"])
-    let lat: number = parseFloat(data["Y"])
+  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
+    const lng: number = parseFloat(data.X);
+    const lat: number = parseFloat(data.Y);
 
-    let sheltered: boolean
-    if (data["SHELTER"] == "NO") {
-      sheltered = false
-    } else if (data["SHELTER"].trim()) {
-      sheltered = true
+    let sheltered: boolean;
+    if (data.SHELTER === "NO") {
+      sheltered = false;
+    } else if (data.SHELTER.trim()) {
+      sheltered = true;
     }
 
-    let information: string = data["Comments"].trim()
+    const information: string = data.Comments.trim();
     if (information.includes("MISSING")) {
-      continue
+      continue;
     }
-    let ada_seating: boolean
+    let adaSeating: boolean;
     if (information.includes("ADA SEATING")) {
-      ada_seating = true
+      adaSeating = true;
     }
 
-    let comment: string = "A "
-    let color: string = data["COLOR"].trim()
+    let comment: string = "A ";
+    const color: string = data.COLOR.trim();
     if (color) {
-      comment += color.toLowerCase() + " "
+      comment += color.toLowerCase() + " ";
     }
-    let shape: string = data["TableShape"].trim()
-    if (shape == "RECT") {
-      comment += "rectangular "
-    } else if (shape == "CRCL") {
-      comment += "circular "
+    const shape: string = data.TableShape.trim();
+    if (shape === "RECT") {
+      comment += "rectangular ";
+    } else if (shape === "CRCL") {
+      comment += "circular ";
     }
-    let material: string = data["TableMaterial"].trim()
-    if (material == "CONC") {
-      comment += "concrete "
-    } else if (material == "METAL") {
-      comment += "metal "
-    } else if (material == "WOOD") {
-      comment += "wood "
+    const material: string = data.TableMaterial.trim();
+    if (material === "CONC") {
+      comment += "concrete ";
+    } else if (material === "METAL") {
+      comment += "metal ";
+    } else if (material === "WOOD") {
+      comment += "wood ";
     }
-    comment += "table "
-    let condition: string = data["Condition"].trim()
+    comment += "table ";
+    const condition: string = data.Condition.trim();
     if (condition) {
-      comment += "in " + condition.toLowerCase() + " condition "
+      comment += "in " + condition.toLowerCase() + " condition ";
     }
-    let park: string = data["PARKNAME"].trim()
+    const park: string = data.PARKNAME.trim();
     if (park) {
-      comment += "in " + park.toLowerCase()
+      comment += "in " + park.toLowerCase();
     }
-    comment = comment.trimRight() + "."
+    comment = comment.trimRight() + ".";
 
     await Picnic.updateOne({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "geometry.coordinates": [lng, lat]
+      "geometry.coordinates": [lng, lat],
+      "properties.source.dataset": dsName,
+      "properties.source.name": sourceName,
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.sheltered": sheltered,
-          "properties.accessible": ada_seating,
-          "properties.comment": comment,
+          "geometry.coordinates": [lng, lat],
           "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }
+          "properties.accessible": adaSeating,
+          "properties.comment": comment,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.sheltered": sheltered,
+          "properties.source.dataset": dsName,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": humanURL,
+          "properties.type": "table",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

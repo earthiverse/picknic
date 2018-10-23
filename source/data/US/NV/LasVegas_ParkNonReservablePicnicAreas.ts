@@ -1,86 +1,84 @@
-import CSVParse = require('csv-parse/lib/sync')
-
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import CSVParse = require("csv-parse/lib/sync");
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Important Fields
-let source_name = "Las Vegas Office of GIS"
-let dataset_name = "Park Non-Reservable Picnic Areas"
-let dataset_url_human = "https://opendata.arcgis.com/datasets/734ec0e1dd374271ab36f9073d3e1dc7_2"
-let dataset_url_csv = "https://opendata.arcgis.com/datasets/734ec0e1dd374271ab36f9073d3e1dc7_2.csv"
-// TODO: Find out
-let license_name = "Unknown"
-let license_url = ""
+const sourceName = "Las Vegas Office of GIS";
+const dsName = "Park Non-Reservable Picnic Areas";
+const humanURL = "https://opendata.arcgis.com/datasets/734ec0e1dd374271ab36f9073d3e1dc7_2";
+const dsURL = "https://opendata.arcgis.com/datasets/734ec0e1dd374271ab36f9073d3e1dc7_2.csv";
+const licenseName = "Unknown";
+const licenseURL = "";
 
-Download.parseDataString(dataset_name, dataset_url_csv, async function (res: string) {
-  let database_updates = 0
-  let retrieved = new Date()
+Download.parseDataString(dsName, dsURL, async (res: string) => {
+  let numOps = 0;
+  const retrieved = new Date();
 
-  for (let data of CSVParse(res, { columns: true, ltrim: true })) {
-    let lat: Number = parseFloat(data["Y"])
-    let lng: Number = parseFloat(data["X"])
+  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
+    const lat: number = parseFloat(data.Y);
+    const lng: number = parseFloat(data.X);
 
-    let type = data["TYPE"].trim()
-    let sheltered: boolean
-    if (type == "Eating Area Uncovered") {
-      sheltered = false
-    } else if (type == "Eating Area Covered") {
-      sheltered = true
+    const type = data.TYPE.trim();
+    let sheltered: boolean;
+    if (type === "Eating Area Uncovered") {
+      sheltered = false;
+    } else if (type === "Eating Area Covered") {
+      sheltered = true;
     }
 
-    let notes: string = data["NOTES"]
-    let park: string = data["FAC_NME"]
-    let condition: string = data["COND"]
-    let bbq: string = data["BARBQ_GRILL"]
-    let objectID: string = data["OBJECTID"]
+    const notes: string = data.NOTES;
+    const park: string = data.FAC_NME;
+    const condition: string = data.COND;
+    const bbq: string = data.BARBQ_GRILL;
+    const objectID: string = data.OBJECTID;
 
-    let comment: string = ""
+    let comment: string = "";
     if (notes) {
-      comment = "Notes: " + notes + "."
+      comment = "Notes: " + notes + ".";
     }
-    if (bbq == "Yes") {
-      comment += " Has a BBQ grill."
-      comment = comment.trimLeft()
+    if (bbq === "Yes") {
+      comment += " Has a BBQ grill.";
+      comment = comment.trimLeft();
     }
     if (condition) {
-      comment += " In " + condition.toLowerCase() + " condition."
-      comment = comment.trimLeft()
+      comment += " In " + condition.toLowerCase() + " condition.";
+      comment = comment.trimLeft();
     }
     if (park) {
-      comment += " Located in " + park + "."
-      comment = comment.trimLeft()
+      comment += " Located in " + park + ".";
+      comment = comment.trimLeft();
     }
 
     await Picnic.updateOne({
+      "geometry.coordinates": [lng, lat],
       "geometry.type": "Point",
-      "geometry.coordinates": [lng, lat]
     }, {
         $set: {
-          "type": "Feature",
-          "properties.type": "table",
-          "properties.source.retrieved": retrieved,
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.url": dataset_url_human,
-          "properties.license.name": license_name,
-          "properties.license.url": license_url,
-          "properties.comment": comment,
+          "geometry.coordinates": [lng, lat],
           "geometry.type": "Point",
-          "geometry.coordinates": [lng, lat]
-        }
+          "properties.comment": comment,
+          "properties.license.name": licenseName,
+          "properties.license.url": licenseURL,
+          "properties.source.dataset": dsName,
+          "properties.source.name": sourceName,
+          "properties.source.retrieved": retrieved,
+          "properties.source.url": humanURL,
+          "properties.type": "table",
+          "type": "Feature",
+        },
       }, {
-        "upsert": true
-      }).exec()
-    database_updates += 1
+        upsert: true,
+      }).exec();
+    numOps += 1;
   }
 
   // Remove old tables from this data source
   await Picnic.deleteMany({
-    "properties.source.name": source_name,
-    "properties.source.dataset": dataset_name,
-    "properties.source.retrieved": { $lt: retrieved }
-  }).lean().exec()
-  database_updates += 1
+    "properties.source.dataset": dsName,
+    "properties.source.name": sourceName,
+    "properties.source.retrieved": { $lt: retrieved },
+  }).lean().exec();
+  numOps += 1;
 
-  return database_updates
-})
+  return numOps;
+});

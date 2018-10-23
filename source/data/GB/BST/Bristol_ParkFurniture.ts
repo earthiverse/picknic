@@ -1,35 +1,33 @@
 import CSVParse = require("csv-parse/lib/sync");
-import Striptags = require("striptags");
 
 import { Picnic } from "../../../models/Picnic";
 import Download = require("../../Download");
 
 // Important Fields
-const sourceName = "Los Angeles Geohub";
-const dsName = "Picnic Areas";
-const humanURL = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9";
-const dsURL = "http://geohub.lacity.org/datasets/678499fcf0b84e06ac80a37ae7cde7e3_9.csv";
-const licenseName = "Public Domain";
-const licenseURL = "https://creativecommons.org/publicdomain/mark/1.0/";
+const sourceName = "Bristol ArcGIS Server";
+const dsName = "Park Furniture";
+const humanURL = "http://maps.bristol.gov.uk/arcgis/rest/services/ext/moving_home/FeatureServer/60";
+const dsURL = "http://maps.bristol.gov.uk/arcgis/rest/services/ext/moving_home/FeatureServer/60/query?where=Type+%3D+'Picnic+Table'&outFields=*&returnGeometry=true&outSR=4326&f=json";
+const licenseName = "Unknown";
+const licenseURL = "Unknwon";
 
-Download.parseDataString(dsName, dsURL, async (res: string) => {
+Download.parseDataJSON(dsName, dsURL, async (res: any) => {
   let numOps = 0;
   const retrieved = new Date();
 
-  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const lat = parseFloat(data.latitude);
-    const lng = parseFloat(data.longitude);
+  for (const data of res.features) {
+    const lat: number = parseFloat(data.geometry.y);
+    const lng: number = parseFloat(data.geometry.x);
+    const objID = data.attributes.ASSET_ID;
+    let comment: string = data.attributes.SITE_NAME;
 
-    const ext_id = data.ext_id;
-
-    let comment: string = data.Name.trim();
-    if (data.hours.trim()) {
-      comment += ". " + Striptags(data.hours).trim();
+    if (data.attributes.LOCATION) {
+      comment = ". " + data.attributes.LOCATION + ".";
     }
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
-      "properties.source.id": ext_id,
+      "properties.source.id": objID,
       "properties.source.name": sourceName,
     }, {
         $set: {
@@ -39,11 +37,11 @@ Download.parseDataString(dsName, dsURL, async (res: string) => {
           "properties.license.name": licenseName,
           "properties.license.url": licenseURL,
           "properties.source.dataset": dsName,
-          "properties.source.id": ext_id,
+          "properties.source.id": objID,
           "properties.source.name": sourceName,
           "properties.source.retrieved": retrieved,
           "properties.source.url": humanURL,
-          "properties.type": "site",
+          "properties.type": "table",
           "type": "Feature",
         },
       }, {

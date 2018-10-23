@@ -1,0 +1,24 @@
+{
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "align": [
+            true,
+            "statements",
+            "members",
+            "elements"
+        ],
+        "max-line-length": [
+            true,
+            {
+                "limit": 120,
+                "ignore-pattern": "^import |^export |^const .+? = \".+\";"
+            }
+        ],
+        "no-console": false
+    },
+    "rulesDirectory": []
+}

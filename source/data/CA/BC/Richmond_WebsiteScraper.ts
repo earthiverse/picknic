@@ -1,133 +1,138 @@
 // NOTES:
+// This script is broken
 // * I don't know how to license webscraping...
 
-import Cheerio = require('cheerio')
-import Nconf = require("nconf")
-import Path = require("path")
-import Request = require('request-promise-native')
+import Cheerio = require("cheerio");
+import Nconf = require("nconf");
+import Path = require("path");
+import Request = require("request-promise-native");
 
-import { Download } from '../../Download'
-import { Picnic } from '../../../models/Picnic'
+import { Picnic } from "../../../models/Picnic";
+import Download = require("../../Download");
 
 // Load configuration
-Nconf.file(Path.join(__dirname, "../../../../config.json"))
-let keysConfig = Nconf.get("keys")
+Nconf.file(Path.join(__dirname, "../../../../config.json"));
+const keysConfig = Nconf.get("keys");
 
-var googleMapsClient = require('@google/maps').createClient({
+// Missing @types for @google/maps.
+// tslint:disable-next-line:no-var-requires
+const googleMaps = require("@google/maps");
+const googleMapsClient = googleMaps.createClient({
+  Promise,
   key: keysConfig.public.googleMaps,
-  Promise: Promise
-})
+});
 
 // Important Fields
-let source_name = "City of Richmond"
-let dataset_name = "Parks Database and Search"
-let dataset_url_human = "https://www.richmond.ca/parks/parks/about/amenities/default.aspx"
-let license_name = "Unknown"
-let license_url = "Unknown"
+const sourceName = "City of Richmond";
+const dsName = "Parks Database and Search";
+const dsHumanURL = "https://www.richmond.ca/parks/parks/about/amenities/default.aspx";
+const licenseName = "Unknown";
+const licenseURL = "Unknown";
 
 // Load the page once to get all the good bits that are required to fulfil the search parameters...
-Request(dataset_url_human).then(function (body: string) {
-  let $ = Cheerio.load(body)
-  let eventArgument = $('#__EVENTARGUMENT').attr('value')
-  let eventTarget = $('#__EVENTTARGET').attr('value')
-  let eventValidation = $('#__EVENTVALIDATION').attr('value')
-  let viewState = $('#__VIEWSTATE').attr('value')
-  let viewStateGenerator = $('#__VIEWSTATEGENERATOR').attr('value')
+Request(dsHumanURL).then((body: string) => {
+  const $ = Cheerio.load(body);
+  const eventArgument = $("#__EVENTARGUMENT").attr("value");
+  const eventTarget = $("#__EVENTTARGET").attr("value");
+  const eventValidation = $("#__EVENTVALIDATION").attr("value");
+  const viewState = $("#__VIEWSTATE").attr("value");
+  const viewStateGenerator = $("#__VIEWSTATEGENERATOR").attr("value");
 
   // Do the search with the attributes we got!
-  Download.parseDataPostString(dataset_name, dataset_url_human, {
-    "__EVENTARGUMENT": eventArgument,
-    "__EVENTTARGET": eventTarget,
-    "__EVENTVALIDATION": eventValidation,
-    "__VIEWSTATE": viewState,
-    "__VIEWSTATEGENERATOR": viewStateGenerator,
-    "ctl00$pagecontent$txtParkName": "",
-    "ctl00$pagecontent$ddlRecArea": "0",
-    "ctl00$pagecontent$ddlAmenities": "7", // 7 is the lucky number for picnic tables!
-    "ctl00$pagecontent$ddlSpecFeature": "0",
-    "ctl00$pagecontent$btnSearch": "Search"
-  }, async function (body: string) {
-    let database_updates = 0
-    let retrieved = new Date()
+  Download.parseDataPostString(dsName, dsHumanURL, {
+    __EVENTARGUMENT: eventArgument,
+    __EVENTTARGET: eventTarget,
+    __EVENTVALIDATION: eventValidation,
+    __VIEWSTATE: viewState,
+    __VIEWSTATEGENERATOR: viewStateGenerator,
+    ctl00$pagecontent$btnSearch: "Search",
+    ctl00$pagecontent$ddlAmenities: "7", // 7 is the lucky number for picnic tables!
+    ctl00$pagecontent$ddlRecArea: "0",
+    ctl00$pagecontent$ddlSpecFeature: "0",
+    ctl00$pagecontent$txtParkName: "",
+  }, async (body2: string) => {
+    let numOps = 0;
+    const retrieved = new Date();
 
     // Get the links to all the parks that contain picnic tables
-    let $ = Cheerio.load(body)
-    let parks: any[] = []
-    $('.subtitle').each(function (i) {
-      let e = $(this)
-      let parkName = e.text()
-      let parkURL = e.find("a").attr('href')
-      parks.push({ parkName, parkURL })
-    })
+    const C = Cheerio.load(body2);
+    const parks: any[] = [];
+    C(".subtitle").each(() => {
+      const e = C(this);
+      const parkName = e.text();
+      const parkURL = e.find("a").attr("href");
+      parks.push({ parkName, parkURL });
+    });
 
-    for (let park of parks) {
+    for (const park of parks) {
       // There's a park name with two spaces in the name for some reason, let's fix that...
-      let parkName = park.parkName.replace(/\s+/, ' ')
-      let parkURL = park.parkURL
+      const parkName = park.parkName.replace(/\s+/, " ");
+      const parkURL = park.parkURL;
 
-      console.log("Parsing " + parkName + "...")
-      let data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL).then(function (body: string) {
-        // Find the number of picnic tables at this park.
-        let numPicnicTables = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/i.exec(body)[1]
-        let address = /maps\.google\.com\/maps\?q=(.+?)&/i.exec(body)[1]
+      console.log("Parsing " + parkName + "...");
+      const data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL)
+        .then((body3: string) => {
+          // Find the number of picnic tables at this park.
+          const numPicnicTables2 = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/i.exec(body3)[1];
+          const address2 = /maps\.google\.com\/maps\?q=(.+?)&/i.exec(body3)[1];
 
-        return ({ numPicnicTables, address })
-      })
+          return ({ numPicnicTables2, address2 });
+        });
 
-      let numPicnicTables = data.numPicnicTables
-      let address = data.address
+      const numPicnicTables = data.numPicnicTables2;
+      const address = data.address2;
 
-      let comment = parkName + "."
-      if (numPicnicTables == "1") {
-        comment += " " + numPicnicTables + " picnic table."
+      let comment = parkName + ".";
+      if (numPicnicTables === "1") {
+        comment += " " + numPicnicTables + " picnic table.";
       } else if (numPicnicTables) {
-        comment += " " + numPicnicTables + " picnic tables."
+        comment += " " + numPicnicTables + " picnic tables.";
       }
 
       let googleData = await googleMapsClient.geocode({
-        address: address
-      }).asPromise()
-      googleData = googleData.json.results[0]
+        address,
+      }).asPromise();
+      googleData = googleData.json.results[0];
       if (googleData) {
-        let lat = googleData.geometry.location.lat
-        let lng = googleData.geometry.location.lng
+        const lat = googleData.geometry.location.lat;
+        const lng = googleData.geometry.location.lng;
 
         await Picnic.updateOne({
-          "properties.source.name": source_name,
-          "properties.source.dataset": dataset_name,
-          "properties.source.id": parkName
+          "properties.source.dataset": dsName,
+          "properties.source.id": parkName,
+          "properties.source.name": sourceName,
         }, {
             $set: {
-              "type": "Feature",
-              "properties.type": "site",
-              "properties.source.retrieved": retrieved,
-              "properties.source.name": source_name,
-              "properties.source.dataset": dataset_name,
-              "properties.source.id": parkName,
-              "properties.source.url": dataset_url_human,
-              "properties.license.name": license_name,
-              "properties.license.url": license_url,
-              "properties.comment": comment,
+              "geometry.coordinates": [lng, lat],
               "geometry.type": "Point",
-              "geometry.coordinates": [lng, lat]
-            }
+              "properties.comment": comment,
+              "properties.license.name": licenseName,
+              "properties.license.url": licenseURL,
+              "properties.source.dataset": dsName,
+              "properties.source.id": parkName,
+              "properties.source.name": sourceName,
+              "properties.source.retrieved": retrieved,
+              "properties.source.url": dsHumanURL,
+              "properties.type": "site",
+              "type": "Feature",
+            },
           }, {
-            upsert: true
-          }).lean().exec()
-        database_updates += 1
+            upsert: true,
+          }).lean().exec();
+        numOps += 1;
       } else {
-        console.log("Couldn't get a location from Google for " + parkName + "!")
+        console.log("Couldn't get a location from Google for " + parkName + "!");
       }
     }
 
     // Remove old tables from this data source
     await Picnic.deleteMany({
-      "properties.source.name": source_name,
-      "properties.source.dataset": dataset_name,
-      "properties.source.retrieved": { $lt: retrieved }
-    }).lean().exec()
-    database_updates += 1
+      "properties.source.dataset": dsName,
+      "properties.source.name": sourceName,
+      "properties.source.retrieved": { $lt: retrieved },
+    }).lean().exec();
+    numOps += 1;
 
-    return database_updates
-  })
-})
+    return numOps;
+  });
+});
