@@ -52,7 +52,7 @@ export abstract class Downloader {
     await Mongoose.disconnect();
   }
 
-  public async addTable2(data?: IPicnic) {
+  public async addTable(data?: IPicnic) {
     // Add license & source data
     data.properties.license = {
       name: this.licenseName,
@@ -60,7 +60,7 @@ export abstract class Downloader {
     };
     data.properties.source = {
       dataset: this.datasetName,
-      id: undefined,
+      id: data.properties.source.id,
       name: this.sourceName,
       retrieved: this.datasetRetrieved,
       url: this.sourceURL,

@@ -1,11 +1,11 @@
 import Mongoose = require("mongoose");
 
 export interface IDataSourceModel {
-  retrieved: Date;
-  name: string;
-  dataset: string;
-  url: string;
-  id: string;
+  retrieved?: Date;
+  name?: string;
+  dataset?: string;
+  url?: string;
+  id?: string;
 }
 
 export const DataSourceSchema = new Mongoose.Schema({

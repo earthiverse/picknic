@@ -11,10 +11,8 @@ export const downloader = new CSVDownloader(
 export async function run(): Promise<number> {
   await downloader.downloadDataset();
   return downloader.parse(
-    /* Parse */
     async (data: any) => {
-      const lat = parseFloat(data.Latitude);
-      const lng = parseFloat(data.Longitude);
+      const coordinates = [parseFloat(data.Longitude), parseFloat(data.Latitude)];
 
       const type = data["Table Type"].toLowerCase();
       const surface = data["Surface Material"].toLowerCase();
@@ -31,9 +29,9 @@ export async function run(): Promise<number> {
       }
       comment += " materials.";
 
-      await downloader.addTable2({
+      await downloader.addTable({
         geometry: {
-          coordinates: [lng, lat],
+          coordinates,
         },
         properties: {
           comment,
