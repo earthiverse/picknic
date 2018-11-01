@@ -5,6 +5,11 @@ import Path = require("path");
 import Request = require("request-promise-native");
 import { IPicnic, Picnic } from "../models/Picnic";
 
+// From https://stackoverflow.com/a/2332821
+export function capitalize(s: string) {
+  return s.toLowerCase().replace(/\b./g, (a: string) => a.toUpperCase());
+}
+
 export abstract class Downloader {
   /** The name of the source of the data. */
   public sourceName: string;
@@ -58,13 +63,13 @@ export abstract class Downloader {
       name: this.licenseName,
       url: this.licenseURL,
     };
-    data.properties.source = {
-      dataset: this.datasetName,
-      id: data.properties.source.id,
-      name: this.sourceName,
-      retrieved: this.datasetRetrieved,
-      url: this.sourceURL,
-    };
+    if (!data.properties.source) {
+      data.properties.source = {};
+    }
+    data.properties.source.dataset = this.datasetName;
+    data.properties.source.name = this.sourceName;
+    data.properties.source.retrieved = this.datasetRetrieved;
+    data.properties.source.url = this.sourceURL;
 
     if (data.properties.type !== "site" && (data.properties.count && data.properties.count !== 1)) {
       // TODO: Is this kind of logic checking okay here? Should it be enforced in the database somehow? Or the schema?

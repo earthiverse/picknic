@@ -1,142 +1,73 @@
-// TODO: This script is broken...
+import Fs = require("fs");
 import Request = require("request-promise-native");
-import Striptags = require("striptags");
 
-import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { Downloader } from "../../Downloader";
 
-// Important Fields
-const sourceName = "Alberta Parks";
-const dsName = "Camping by Activity Map";
-const dsURL = "https://www.albertaparks.ca/albertaparksca/visit-our-parks/camping/by-activity-map/";
-const licenseName = "Creative Commons Attribution-NonCommercial 4.0 International Public License";
-const licenseURL = "https://creativecommons.org/licenses/by-nc/4.0/";
+export class AlbertaParksWebScraper extends Downloader {
+  constructor() {
+    super(
+      "Alberta Parks",
+      "https://www.albertaparks.ca/albertaparksca/visit-our-parks/camping/by-activity-map/",
+      "By Activity Map",
+      "https://www.albertaparks.ca/albertaparksca/visit-our-parks/camping/by-activity-map/",
+      "Government of Alberta Terms of Use",
+      "https://www.alberta.ca/disclaimer.aspx");
 
-Download.parseDataString(dsName, dsURL, async (body: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
-  // Find the JSON in the code that represents the park data
-  let parkData: any[];
-  const matches1: RegExpExecArray = /var\s*sites\s*=\s*(\[[\s\S]*?\])/.exec(body);
-  if (matches1 !== null) {
-    // Found data (Probably)!
-    // Put the array of parks in a simple JSON object so I can parse it to an actual object
-    const data = JSON.parse("{\"data\":" + matches1[1] + "}");
-    parkData = data.data;
-  } else {
-    console.log("Could not find the list of parks...");
-    return numOps;
+    // We're going to pull JSON.
+    this.datasetFile = this.datasetFile + ".json";
   }
 
-  for (const park of parkData) {
-    if (park.type.search("Picnic") === -1) {
-      // No day-use picnicing spots
-      continue;
-    }
-    console.log("Parsing " + park.label + "...");
-    const parkURL = "https://www.albertaparks.ca" + park.url;
-    // Load the park URL
-    const body2 = await Request(parkURL);
-    let siteData: any[];
-    const matches2 = /var\s*sites\s*=\s*(\[[\s\S]*?\])\s*;/.exec(body2);
-    if (matches2 !== null) {
-      // Found data (Probably)!
-      // Put the array of parks in a simple JSON object so I can parse it to an actual object
-      let prepare = "{\"data\":" + matches1[1] + "}";
-      // Regex to fix the relaxed JSON
-      // from https://stackoverflow.com/questions/9637517/parsing-relaxed-json-without-eval
-      prepare = prepare.replace(/(['"])?([a-z0-9A-Z_]+)(['"])?:/g, '"$2": ');
-      // Regex to fix the bad regex above (lol)
-      // (there's a bug where if you use http:// or https:// it will malform the ':')
-      prepare = prepare.replace(/http\": /g, "http:");
-      // Regex to fix a weird bug on 'Canmore Nordic Centre Day Lodge'
-      prepare = prepare.replace(/'VC'/g, "\"VC\"");
-      prepare = prepare.replace(/\s+/g, " ");
-      let data;
-      try {
-        data = JSON.parse(prepare);
-        siteData = data.data;
-      } catch (e) {
-        console.log("----- ERROR -----");
-        console.log(parkURL);
-        console.log(park.label);
-        console.log(body2);
-        console.log(prepare);
-        continue;
-      }
-    } else {
-      console.log("Could not load data for " + park.label + ".");
-      continue;
-    }
+  public async downloadDataset() {
+    // There is a variable that contains a JSON object for every park. We're going to get that information.
+    this.datasetRetrieved = new Date();
+    let html: string = await Request(this.datasetURL);
+    // NOTE: There is a bug on the website where a variable contains improper JSON. We're going to fix it.
+    html = html.replace(/"long"\s*:\s*-\s+([\d\.]+)/g, "\"long\":-$1");
+    const regexData: RegExpExecArray = /var\s*sites\s*=\s*(\[[\s\S]+\]\s*);/.exec(html);
+    let sitesData: any[] = JSON.parse(regexData[1]);
 
-    for (const site of siteData) {
-      const facility = site.facility;
-      if (facility !== "Day Use") {
-        // Not a facility we care about
-        continue;
-      }
-      const facilityURL = "https://www.albertaparks.ca" + site.link;
-      const coordinates = site.latlng.reverse();
-      const siteName = park.label + " - " + site.name;
+    /* TODO: If you go to the sub url for every parks page, sometimes there's comments about picnic tables existing
+             or not existing. This script could be improved to look for that text. Look at the commit history for
+             this file to see what was pulled before. */
 
-      // TODO: Load park_url and see if the text "no picnic tables" appears on website.
-      const body3 = await Request(facilityURL);
-      // Check for references that this place has no picnic tables
-      const noPicnicTablesRegex1 = /no picnic/i;
-      const hasPicnicTables = (noPicnicTablesRegex1.exec(body3) == null);
-      if (!hasPicnicTables) {
-        // No picnic tables here :(
-        continue;
-      }
-      // Check for any reference of picnic tables
-      const noPicnicTablesRegex2 = /picnic/i;
-      const doesntSpecifyPicnicTables = (noPicnicTablesRegex2.exec(body3) == null);
-      if (doesntSpecifyPicnicTables) {
-        // It could have picnic tables, but it probably doesn't...
-        continue;
-      }
+    // If the park doesn't specify that it's okay for picnics, skip it.
+    sitesData = sitesData.filter((datum) => datum.type.search(/picnic/i) !== -1);
 
-      const notesRegex = /<div class=\"callout\">\s*<h4>notes<\/h4>([\s\S]*?)<\/div>/i;
-      const m2 = notesRegex.exec(body3);
-      let notes: string;
-      if ((m2) !== null) {
-        notes = Striptags(m2[1]).trim();
-      }
-
-      // Insert or Update Table
-      await Picnic.updateOne({
-        "properties.source.dataset": dsName,
-        "properties.source.id": siteName,
-        "properties.source.name": sourceName,
-      }, {
-          $set: {
-            "geometry.coordinates": coordinates,
-            "geometry.type": "Point",
-            "properties.comment": notes,
-            "properties.license.name": licenseName,
-            "properties.license.url": licenseURL,
-            "properties.source.dataset": dsName,
-            "properties.source.id": siteName,
-            "properties.source.name": sourceName,
-            "properties.source.retrieved": retrieved,
-            "properties.source.url": dsURL,
-            "properties.type": "site",
-            "type": "Feature",
-          },
-        }, {
-          upsert: true,
-        }).exec();
-      numOps += 1;
-    }
+    // Save the file
+    Fs.writeFileSync(this.datasetFile, JSON.stringify(sitesData));
   }
 
-  // Remove old tables from this data source
-  await Picnic.deleteMany({
-    "properties.source.dataset": dsName,
-    "properties.source.name": sourceName,
-    "properties.source.retrieved": { $lt: retrieved },
-  }).lean().exec();
-  numOps += 1;
+  public parse(parseFunction: (data: any) => Promise<any>, cleanFunction?: () => Promise<number>): Promise<number> {
+    // Read & parse the JSON file
+    const text = Fs.readFileSync(this.datasetFile, "utf8");
+    const data = JSON.parse(text);
 
-  return numOps;
-});
+    return this.parseBase(parseFunction, data, cleanFunction);
+  }
+}
+
+export const downloader = new AlbertaParksWebScraper();
+
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return downloader.parse(
+    async (data: any) => {
+      const parkName = `${data.label.substring(0, data.label.lastIndexOf(" "))} ${data.subTitle}`;
+      const comment = `${parkName}. There may be no picnic tables at this site.`;
+      const coordinates = [data.long, data.lat];
+
+      downloader.addTable({
+        geometry: {
+          coordinates,
+        },
+        properties: {
+          comment,
+          type: "site",
+        },
+      });
+    });
+}
+
+if (require.main === module) {
+  run();
+}

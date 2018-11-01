@@ -1,80 +1,53 @@
-// NOTES:
-// * This dataset has no ID field identifying individual picnic tables (as of 2018-05-14)
-import CSVParse = require("csv-parse/lib/sync");
-import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+import { CSVDownloader } from "../../CSVDownloader";
 
-// Important Fields
-const sourceName = "Open Calgary";
-const dsName = "Parks Seating";
-const dsHumanURL = "https://data.calgary.ca/Recreation-and-Culture/Parks-Seating/ikeb-n5bc";
-const dsURL = "https://data.calgary.ca/api/views/ikeb-n5bc/rows.csv?accessType=DOWNLOAD";
-const licenseName = "Open Government License - City of Calgary (Version 2.1)";
-const licenseURL = "https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa";
+export const downloader = new CSVDownloader(
+  "Open Calgary",
+  "https://data.calgary.ca/Recreation-and-Culture/Parks-Seating/ikeb-n5bc",
+  "Parks Seating",
+  "https://data.calgary.ca/api/views/ikeb-n5bc/rows.csv?accessType=DOWNLOAD",
+  "Open Government License - City of Calgary (Version 2.1)",
+  "https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/u45n-7awa");
 
-Download.parseDataString(dsName, dsURL, async (res: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return downloader.parse(
+    async (data: any) => {
+      const coordinates = [parseFloat(data.longitude), parseFloat(data.latitude)];
 
-  const csv = CSVParse(res, { columns: true, ltrim: true });
-  for (const data of csv) {
-    const lat = parseFloat(data.latitude);
-    const lng = parseFloat(data.longitude);
-    const type = data.TYPE_DESCRIPTION;
-    if (type !== "PICNIC TABLE" && type !== "MEMORIAL PICNIC TABLE") {
-      continue;
-    }
-    const active = data.LIFE_CYCLE_STATUS;
-    if (active !== "ACTIVE") {
-      continue;
-    }
-    const assetClass: string = data.ASSET_CLASS;
-    const maintInfo: string = data.MAINT_INFO;
-    let comment = "";
-    if (assetClass.search("REMOVED") !== -1) {
-      comment += " Might be missing.";
-    }
-    if (maintInfo.search("PORTABLE") !== -1) {
-      comment += " This is a portable table, so it might be moved, or missing.";
-    }
+      const type = data.TYPE_DESCRIPTION;
+      if (type !== "PICNIC TABLE" && type !== "MEMORIAL PICNIC TABLE") {
+        return;
+      }
+      const active = data.LIFE_CYCLE_STATUS;
+      if (active !== "ACTIVE") {
+        return;
+      }
 
-    // Fix comment before adding
-    comment = comment.trimLeft();
-    if (!comment) {
-      comment = undefined;
-    }
+      const assetClass: string = data.ASSET_CLASS;
+      const maintInfo: string = data.MAINT_INFO;
+      let comment = "";
+      if (assetClass.search("REMOVED") !== -1) {
+        comment += " Might be missing.";
+      }
+      if (maintInfo.search("PORTABLE") !== -1) {
+        comment += " This is a portable table, so it might be moved, or missing.";
+      }
+      comment = comment.trimLeft();
+      if (!comment) {
+        comment = undefined;
+      }
 
-    await Picnic.updateOne({
-      "geometry.coordinates": [lng, lat],
-      "properties.source.dataset": dsName,
-      "properties.source.name": sourceName,
-    }, {
-        $set: {
-          "geometry.coordinates": [lng, lat],
-          "geometry.type": "Point",
-          "properties.comment": comment,
-          "properties.license.name": licenseName,
-          "properties.license.url": licenseURL,
-          "properties.source.dataset": dsName,
-          "properties.source.name": sourceName,
-          "properties.source.retrieved": retrieved,
-          "properties.source.url": dsHumanURL,
-          "properties.type": "table",
-          "type": "Feature",
+      await downloader.addTable({
+        geometry: {
+          coordinates,
         },
-      }, {
-        upsert: true,
-      }).lean().exec();
-    numOps += 1;
-  }
+        properties: {
+          comment,
+        },
+      });
+    });
+}
 
-  // Remove old tables from this data source
-  await Picnic.deleteMany({
-    "properties.source.dataset": dsName,
-    "properties.source.name": sourceName,
-    "properties.source.retrieved": { $lt: retrieved },
-  }).lean().exec();
-  numOps += 1;
-
-  return numOps;
-});
+if (require.main === module) {
+  run();
+}

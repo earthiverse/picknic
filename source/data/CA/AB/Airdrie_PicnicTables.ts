@@ -1,82 +1,54 @@
-// NOTES:
-// * This dataset has a sketchy ID field identifying individual picnic tables (as of 2018-05-18)
+import { CSVDownloader } from "../../CSVDownloader";
 
-import CSVParse = require("csv-parse/lib/sync");
+export const downloader = new CSVDownloader(
+  "City of Airdrie",
+  "http://data-airdrie.opendata.arcgis.com/datasets/airdrie-picnictables",
+  "Airdrie Picnictables",
+  "https://opendata.arcgis.com/datasets/b07ce15756884cfdab2537d5d9b92eb4_0.csv",
+  "Open Data Licence - City of Airdrie (Version 1.0)",
+  "http://data-airdrie.opendata.arcgis.com/pages/our-open-licence");
 
-import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return downloader.parse(
+    async (data: any) => {
+      const coordinates = [parseFloat(data.X), parseFloat(data.Y)];
+      const id: string = data.FID; // NOTE: This FID doesn't look meaninful.
 
-// Important Fields
-const sourceName = "City of Airdrie";
-const dsName = "Airdrie Picnictables";
-const humanURL = "http://data-airdrie.opendata.arcgis.com/datasets/airdrie-picnictables";
-const dsURL = "https://opendata.arcgis.com/datasets/b07ce15756884cfdab2537d5d9b92eb4_0.csv";
-const licenseName = "Open Data Licence - City of Airdrie (Version 1.0)";
-const licenseURL = "http://data-airdrie.opendata.arcgis.com/pages/our-open-licence";
-
-Download.parseDataString(dsName, dsURL, async (res: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
-
-  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const color: string = data.COLOUR.trim().toLowerCase();
-    const manufacturer: string = data.MANUFACTUR.trim().toLowerCase();
-    let material: string = data.MATERIAL.trim().toLowerCase();
-    // TODO: NOTE: This FID doesn't look meaninful, so it might break in the future. :(
-    const assetID: string = data.FID;
-
-    let comment: string;
-    if (color) {
-      comment = "A " + color.toLowerCase() + " table";
-    } else {
-      comment = "A table";
-    }
-    if (material) {
-      if (material === "wooden") {
-        material = "wood";
+      const color: string = data.COLOUR.trim().toLowerCase();
+      const manufacturer: string = data.MANUFACTUR.trim().toLowerCase();
+      let material: string = data.MATERIAL.trim().toLowerCase();
+      let comment: string;
+      if (color) {
+        comment = "A " + color.toLowerCase() + " table";
+      } else {
+        comment = "A table";
       }
-      comment += " made from " + material.toLowerCase;
-    }
-    if (manufacturer) {
-      comment += " manufactured by " + manufacturer.toLowerCase;
-    }
-    comment += ".";
+      if (material) {
+        if (material === "wooden") {
+          material = "wood";
+        }
+        comment += " made from " + material.toLowerCase;
+      }
+      if (manufacturer) {
+        comment += " manufactured by " + manufacturer.toLowerCase;
+      }
+      comment += ".";
 
-    const lat: number = parseFloat(data.Y);
-    const lng: number = parseFloat(data.X);
-
-    await Picnic.updateOne({
-      "properties.source.dataset": dsName,
-      "properties.source.id": assetID, // This ID is sketchy, as there are 140 tables, and the IDs are 1 to 140...
-      "properties.source.name": sourceName,
-    }, {
-        $set: {
-          "geometry.coordinates": [lng, lat],
-          "geometry.type": "Point",
-          "properties.comment": comment,
-          "properties.license.name": licenseName,
-          "properties.license.url": licenseURL,
-          "properties.source.dataset": dsName,
-          "properties.source.id": assetID,
-          "properties.source.name": sourceName,
-          "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
-          "properties.type": "table",
-          "type": "Feature",
+      await downloader.addTable({
+        geometry: {
+          coordinates,
         },
-      }, {
-        upsert: true,
-      }).lean().exec();
-    numOps += 1;
-  }
+        properties: {
+          comment,
+          source: {
+            id,
+          },
+        },
+      });
+    });
+}
 
-  // Remove old tables from this data source
-  await Picnic.deleteMany({
-    "properties.source.dataset": dsName,
-    "properties.source.name": sourceName,
-    "properties.source.retrieved": { $lt: retrieved },
-  }).lean().exec();
-  numOps += 1;
-
-  return Promise.resolve(numOps);
-});
+if (require.main === module) {
+  run();
+}
