@@ -23,7 +23,7 @@ describe("Download Scripts", async () => {
         "properties.source.dataset": EdmontonDownloader.datasetName,
         "properties.source.name": EdmontonDownloader.sourceName,
       }).lean().exec();
-      expect(numOps - numResults).to.be.equal(1);
+      expect(numOps).to.be.equal(numResults + 1);
       await Mongoose.disconnect();
     }).timeout(60000);
   });

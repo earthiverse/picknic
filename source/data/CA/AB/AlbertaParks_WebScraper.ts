@@ -56,7 +56,7 @@ export async function run(): Promise<number> {
       const comment = `${parkName}. There may be no picnic tables at this site.`;
       const coordinates = [data.long, data.lat];
 
-      downloader.addTable({
+      return await downloader.addTable({
         geometry: {
           coordinates,
         },

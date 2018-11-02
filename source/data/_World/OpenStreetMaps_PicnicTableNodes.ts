@@ -1,113 +1,128 @@
-// TODO: Remove the older tables after adding the new ones.
+import Fs = require("fs");
+import Xml2js = require("xml2js");
 
-// It's not feasible to fix other packages at the moment. Need @types/node-expat.
-// tslint:disable-next-line:no-var-requires
-const expat = require("node-expat");
 import { Picnic } from "../../models/Picnic";
-import { parseDataString } from "../Download";
+import { CommentCreator } from "../CommentCreator";
+import { Downloader } from "../Downloader";
 
-// Important Fields
-const sourceName = "Open Street Maps XAPI";
-const datasetName = "Open Street Maps";
-const datasetURL = "http://overpass-api.de/api/xapi?node[leisure=picnic_table]";
-const licenseName = "Open Data Commons Open Database License (ODbL)";
-const licenseURL = "https://opendatacommons.org/licenses/odbl/";
+export class OSMXMLDownloader extends Downloader {
+  constructor() {
+    super(
+      "Open Street Maps",
+      "https://wiki.openstreetmap.org/wiki/Overpass_API",
+      "Leisure Picnic Table",
+      "http://overpass-api.de/api/xapi?node[leisure=picnic_table]",
+      "Open Data Commons Open Database License (ODbL)",
+      "https://opendatacommons.org/licenses/odbl/");
 
-parseDataString(datasetName, datasetURL, async (res: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
+    // We're going to pull XML.
+    this.datasetFile = this.datasetFile + ".xml";
+  }
 
-  await new Promise((resolve) => {
-    const parser = new expat.Parser("UTF-8");
+  public async parse(parseFunction: (data: any) => Promise<any>,
+    cleanFunction?: () => Promise<number>): Promise<number> {
+    // Read & parse the CSV
+    const text = Fs.readFileSync(this.datasetFile, "utf8");
 
-    let table: any = {};
-
-    parser.on("startElement", async (name: string, attributes: any) => {
-      if (name === "node") {
-        // Start of table
-        table = {
-          "geometry": {
-            coordinates: [attributes.lon, attributes.lat],
-            type: "Point",
-          },
-          "properties.comment": "",
-          "properties.license.name": licenseName,
-          "properties.license.url": licenseURL,
-          "properties.source.dataset": datasetName,
-          "properties.source.id": attributes.id,
-          "properties.source.name": sourceName,
-          "properties.source.retrieved": retrieved,
-          "properties.source.url": datasetURL,
-          "properties.type": "table",
-          "type": "Feature",
-        };
-      } else if (name === "tag") {
-        if (attributes.k === "backrest" && attributes.v === "yes") {
-          table["properties.comment"] += " There is a backrest.";
-          table["properties.comment"] = table["properties.comment"].trimLeft();
-        } else if (attributes.k === "material") {
-          table["properties.comment"] += " The table is made of " + attributes.v + ".";
-          table["properties.comment"] = table["properties.comment"].trimLeft();
-        } else if (attributes.k === "seats") {
-          table["properties.comment"] += " There are " + attributes.v + " seats.";
-          table["properties.comment"] = table["properties.comment"].trimLeft();
-        } else if ((attributes.k === "amenity" && attributes.v === "shelter")
-          || (attributes.k === "covered" && attributes.v === "yes")) {
-          table["properties.sheltered"] = true;
-        } else if (attributes.k === "name") {
-          table["properties.comment"] = attributes.v + ". " + table["properties.comment"];
-          table["properties.comment"] = table["properties.comment"].trimRight();
-        } else if (attributes.k === "colour") {
-          table["properties.comment"] += " There table is " + attributes.v + ".";
-          table["properties.comment"] = table["properties.comment"].trimLeft();
-        } else if (attributes.k && attributes.k.startsWith("description")) {
-          // TODO: Comment languages eventually...
-          table["properties.comment"] = attributes.v + ". " + table["properties.comment"];
-          table["properties.comment"] = table["properties.comment"].trimRight();
-        } else if (attributes.k === "bin" && attributes.v === "yes") {
-          table["properties.comment"] += " There is a waste basket near the table.";
-          table["properties.comment"] = table["properties.comment"].trimLeft();
+    const data = await new Promise<any[]>((resolve) => {
+      Xml2js.parseString(text, (error, xmlData) => {
+        if (error) {
+          throw new Error(error);
         }
-      }
+        resolve(xmlData.osm.node);
+      });
     });
-    parser.on("endElement", async (name: string) => {
-      if (name === "node") {
-        // End of table
-        parser.stop();
-        // Look if there's already a table from a different source in our database. If there is, don't add this one!
-        const nearTable = await Picnic.findOne({
-          "geometry": {
-            $near: {
-              $geometry: table.geometry,
-              $maxDistance: 50, // We're checking within 50 meters.
+
+    return this.xmlParse(parseFunction, data, cleanFunction);
+  }
+
+  protected async xmlParse(parseFunction: (data: any) => Promise<number>, data: any[],
+    cleanFunction?: () => Promise<number>) {
+    await this.connect();
+
+    // Parse the data
+    for (const datum of data) {
+      const newDatum: any = {
+        id: datum.$.id,
+        lat: datum.$.lat,
+        lon: datum.$.lon,
+      };
+      for (const tag of datum.tag) {
+        newDatum[tag.$.k] = tag.$.v;
+      }
+      await parseFunction(newDatum);
+      this.numOps += 1;
+    }
+    if (cleanFunction) {
+      this.numOps += await cleanFunction();
+    } else {
+      this.numOps += await this.defaultCleanFunction();
+    }
+
+    await this.disconnect();
+
+    return this.numOps;
+  }
+}
+
+export const downloader = new OSMXMLDownloader();
+
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return downloader.parse(
+    async (data: any) => {
+      const coordinates = [data.lon, data.lat];
+      let sheltered;
+      if (data.covered === "yes" || data.amenity === "shelter") {
+        sheltered = true;
+      } else if (data.covered === "no") {
+        sheltered = false;
+      }
+      const id = data.id;
+      const comment = new CommentCreator(data.description, data.note);
+
+      // TODO: data.seats
+      // TODO: data.material or data["picnic_table:material"]
+      // TODO: data.fireplace
+      // TODO: data.name
+      // TODO: data.colour
+      // TODO: data.backrest
+      // TODO: data.mapillary
+      // TODO: data.bin
+
+      // Look for a table close by, because this dataset will contain duplicates
+      const nearTable = await Picnic.findOne({
+        "geometry": {
+          $near: {
+            $geometry: {
+              coordinates,
+              type: "Point",
+            },
+            $maxDistance: 50, // We're checking within 50 meters
+          },
+        },
+        "properties.source.name": {
+          $ne: downloader.sourceName,
+        },
+      }).lean().exec();
+      if (!nearTable) {
+        // There's no nearby table provided by another dataset, so let's add this one.
+        return await downloader.addTable({
+          geometry: {
+            coordinates,
+          },
+          properties: {
+            comment: comment.toString(),
+            sheltered,
+            source: {
+              id,
             },
           },
-          "properties.source.name": {
-            $ne: "Open Street Maps XAPI",
-          },
-        }).lean().exec();
-        if (!nearTable) {
-          // There were no nearby tables, so let's add it!
-          await Picnic.updateOne({
-            "properties.source.dataset": datasetName,
-            "properties.source.id": table["properties.source.id"],
-            "properties.source.name": sourceName,
-          }, {
-              $set: table,
-            }, {
-              upsert: true,
-            }).lean().exec();
-          numOps += 1;
-        }
-        parser.resume();
-      } else if (name === "osm") {
-        // End of document
-        resolve();
+        });
       }
     });
+}
 
-    parser.write(res);
-  });
-
-  return numOps;
-});
+if (require.main === module) {
+  run();
+}

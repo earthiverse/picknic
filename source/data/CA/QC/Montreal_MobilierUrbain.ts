@@ -1,5 +1,5 @@
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataJSON } from "../../Download";
+import { capitalCase, parseDataJSON } from "../../Download";
 
 // Important Fields
 const sourceName = "Portail des données ouvertes de la Ville de Montréal";
@@ -22,7 +22,7 @@ parseDataJSON(dsName, dsURL, async (res: any) => {
     const objectID = feature.properties.OBJECTID;
     let comment: string;
     if (feature.properties.Nom_parc) {
-      comment = capitalize(feature.properties.Nom_parc);
+      comment = capitalCase(feature.properties.Nom_parc);
     }
 
     await Picnic.updateOne({

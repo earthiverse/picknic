@@ -6,7 +6,7 @@ import Request = require("request-promise-native");
 import { IPicnic, Picnic } from "../models/Picnic";
 
 // From https://stackoverflow.com/a/2332821
-export function capitalize(s: string) {
+export function capitalCase(s: string) {
   return s.toLowerCase().replace(/\b./g, (a: string) => a.toUpperCase());
 }
 
@@ -82,13 +82,26 @@ export abstract class Downloader {
 
   /** Download the dataset */
   public async downloadDataset() {
-    // TODO: Error checking for the Request. If it fails, don't overwrite the file with nothing.
-    // TODO: This function could be improved by checking the file date and seeing if we need to download it again.
-    // TODO: The above check could be determined by a parameter in the config file specifying an age limit.
+    try {
+      const fileStats = Fs.statSync(this.datasetFile);
+      const modifiedTime = new Date(fileStats.mtime);
+      this.datasetRetrieved = new Date();
+      // TODO: Move this to a config parameter.
+      // 1000 * 3600 * 4 = 14400000 =  4 hour.
+      if (this.datasetRetrieved.getTime() - modifiedTime.getTime() < (14400000)) {
+        // Don't download the file again, just use the file we already have.
+        return;
+      }
+    } catch (error) {
+      // TODO: Make sure that it was a no-file error, and not another different error.
+      // We don't care about no file errors, because that's what we'll get when we run a download script for the first
+      // time.
+    }
+
+    // TODO: Error checking for the Request. If it fails, don't save the file.
 
     // Download the file
     const data = await Request(this.datasetURL);
-    this.datasetRetrieved = new Date();
     // Save the file
     Fs.writeFileSync(this.datasetFile, data);
   }
@@ -112,8 +125,7 @@ export abstract class Downloader {
 
     // Parse the data
     for (const datum of data) {
-      await parseFunction(datum);
-      this.numOps += 1;
+      this.numOps += await parseFunction(datum);
     }
     if (cleanFunction) {
       this.numOps += await cleanFunction();

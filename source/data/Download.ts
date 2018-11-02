@@ -13,7 +13,7 @@ Nconf.file(Path.join(__dirname, "../../config.json"));
 const mongoConfig = Nconf.get("mongo");
 
 // From https://stackoverflow.com/a/2332821
-export function capitalize(s: string) {
+export function capitalCase(s: string) {
   return s.toLowerCase().replace(/\b./g, (a: string) => a.toUpperCase());
 }
 

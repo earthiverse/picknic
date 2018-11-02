@@ -1,6 +1,6 @@
 import CSVParse = require("csv-parse/lib/sync");
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataString } from "../../Download";
+import { capitalCase, parseDataString } from "../../Download";
 
 // Important Fields
 const sourceName = "dataACT";
@@ -26,7 +26,7 @@ parseDataString(dsName, dsURL, async (res: string) => {
     const location: string = data["LOCATION NAME"].trim();
     let comment;
     if (location) {
-      comment = "Located in " + capitalize(location) + ".";
+      comment = "Located in " + capitalCase(location) + ".";
     }
 
     await Picnic.updateOne({

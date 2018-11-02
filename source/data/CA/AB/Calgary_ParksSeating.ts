@@ -37,7 +37,7 @@ export async function run(): Promise<number> {
         comment = undefined;
       }
 
-      await downloader.addTable({
+      return await downloader.addTable({
         geometry: {
           coordinates,
         },

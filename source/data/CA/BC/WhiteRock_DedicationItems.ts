@@ -1,6 +1,6 @@
 import Proj4 = require("proj4");
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataJSON } from "../../Download";
+import { capitalCase, parseDataJSON } from "../../Download";
 
 // Important Fields
 const sourceName = "City of White Rock Open Data Portal";
@@ -27,7 +27,7 @@ parseDataJSON(dsName, dsURL, async (res: any) => {
     const parkName: string = parkItem.properties.Park_Name.trim();
     let comment: string;
     if (parkName) {
-      comment = "Located in " + capitalize(parkName) + ".";
+      comment = "Located in " + capitalCase(parkName) + ".";
     }
 
     await Picnic.updateOne({

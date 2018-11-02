@@ -1,5 +1,5 @@
 import { Picnic } from "../../models/Picnic";
-import { capitalize, parseDataArcGIS } from "../Download";
+import { capitalCase, parseDataArcGIS } from "../Download";
 
 // Important Fields
 const sourceName = "Bureau of Land Management";
@@ -16,7 +16,7 @@ export async function parse(res: any[]) {
     let comment: string;
     const name: string = data.attributes.FET_NAME;
     if (name) {
-      comment = "Located in " + capitalize(name) + ".";
+      comment = "Located in " + capitalCase(name) + ".";
     }
     const coordinates: any = [data.geometry.x, data.geometry.y];
     const objectid: string = data.attributes.Original_GlobalID;

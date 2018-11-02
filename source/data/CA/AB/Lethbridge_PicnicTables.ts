@@ -1,5 +1,5 @@
 import { CSVDownloader } from "../../CSVDownloader";
-import { capitalize } from "../../Downloader";
+import { capitalCase } from "../../Downloader";
 
 export const downloader = new CSVDownloader(
   "Lethbridge Open Data",
@@ -23,7 +23,7 @@ export async function run(): Promise<number> {
       const plaque: boolean = data.Plaque === "Yes";
       const dedication: string = data.Dedication.trim();
       const greenspaceID: string = data.Grnspc_ID;
-      let comment: string = capitalize(data.Comment.trim());
+      let comment: string = capitalCase(data.Comment.trim());
       if (comment) {
         comment += ".";
       }
@@ -39,7 +39,7 @@ export async function run(): Promise<number> {
       }
       comment.trimLeft();
 
-      await downloader.addTable({
+      return await downloader.addTable({
         geometry: {
           coordinates,
         },

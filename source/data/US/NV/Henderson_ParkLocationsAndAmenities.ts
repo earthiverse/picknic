@@ -1,6 +1,6 @@
 import CSVParse = require("csv-parse/lib/sync");
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataString } from "../../Download";
+import { capitalCase, parseDataString } from "../../Download";
 
 // Important Fields
 const sourceName = "City of Henderson GIS Data Portal";
@@ -36,7 +36,7 @@ parseDataString(dsName, dsURL, async (res: string) => {
     const lat: number = parseFloat(data.Y);
     const lng: number = parseFloat(data.X);
 
-    const facility = capitalize(data.FACILITY).trim();
+    const facility = capitalCase(data.FACILITY).trim();
     let comment = facility + ".";
 
     if (data.BBQUE === "Y") {

@@ -1,7 +1,7 @@
 import CSVParse = require("csv-parse/lib/sync");
 
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataString } from "../../Download";
+import { capitalCase, parseDataString } from "../../Download";
 
 // Important Fields
 const sourceName = "Brisbane City Council Data Directory";
@@ -26,7 +26,7 @@ parseDataString(dsName, dsURL, async (res: string) => {
     const lat: number = data.LATITUDE;
 
     const description = data.DESCRIPTION;
-    const nodeName = capitalize(data.NODES_NAME);
+    const nodeName = capitalCase(data.NODES_NAME);
 
     const objectID = data.ITEM_ID;
 

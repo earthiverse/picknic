@@ -1,7 +1,7 @@
 import CSVParse = require("csv-parse/lib/sync");
 
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataString } from "../../Download";
+import { capitalCase, parseDataString } from "../../Download";
 
 // Important Fields
 const sourceName = "City of Sioux Falls";
@@ -27,7 +27,7 @@ parseDataString(dsName, dsURL, async (res: string) => {
 
     const objectID = data.OBJECTID;
 
-    let comment: string = capitalize(data.Information);
+    let comment: string = capitalCase(data.Information);
     if (comment === "") {
       comment = undefined;
     }

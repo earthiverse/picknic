@@ -1,5 +1,5 @@
 import { Picnic } from "../../../models/Picnic";
-import { capitalize, parseDataArcGIS } from "../../Download";
+import { capitalCase, parseDataArcGIS } from "../../Download";
 
 // Important Fields
 const sourceName = "NSW Spatial Data Catalogue";
@@ -16,7 +16,7 @@ parseDataArcGIS(dsName, gisURL, "poitype='Picnic Area'", "poiname,objectid", 100
     let comment: string;
     const name: string = data.attributes.poiname;
     if (name) {
-      comment = "Located in " + capitalize(name) + ".";
+      comment = "Located in " + capitalCase(name) + ".";
     }
     const coordinates: any = [data.geometry.x, data.geometry.y];
     const objectid: any = data.attributes.objectid;
