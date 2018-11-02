@@ -30,16 +30,16 @@ export interface IPicnicMongoose extends IPicnic, Mongoose.Document { }
 export const PicnicSchema = new Mongoose.Schema({
   geometry: {
     coordinates: { type: [Number], required: true },
-    type: { type: String, required: true, default: "Point" },
+    type: { type: String, required: true, enum: ["Point"], default: "Point" },
   },
   properties: {
     accessible: { type: Boolean, required: false },
     comment: { type: String, required: false },
-    count: { type: Number, required: false },
+    count: { type: Number, min: 1, required: false },
     license: DataLicenseSchema,
     sheltered: { type: Boolean, required: false },
     source: DataSourceSchema,
-    type: { type: String, required: true, default: "table" },
+    type: { type: String, required: true, enum: ["site", "table"], default: "table" },
     user: { type: String, required: false },
   },
   type: { type: String, required: true, default: "Feature" },
