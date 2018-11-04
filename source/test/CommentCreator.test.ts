@@ -5,12 +5,22 @@ import { CommentCreator } from "../data/CommentCreator";
 describe("CommentCreator", async () => {
   it("Returns undefined when there's no data.", async () => {
     const cc = new CommentCreator("");
-
     // tslint:disable-next-line:no-unused-expression
     expect(cc.toString()).to.be.undefined;
 
     cc.add("");
+    // tslint:disable-next-line:no-unused-expression
+    expect(cc.toString()).to.be.undefined;
 
+    cc.add(" ");
+    // tslint:disable-next-line:no-unused-expression
+    expect(cc.toString()).to.be.undefined;
+
+    cc.add(undefined);
+    // tslint:disable-next-line:no-unused-expression
+    expect(cc.toString()).to.be.undefined;
+
+    cc.add(null);
     // tslint:disable-next-line:no-unused-expression
     expect(cc.toString()).to.be.undefined;
   });
@@ -25,7 +35,7 @@ describe("CommentCreator", async () => {
     expect(cc.toString()).to.be.equal("This is a sentence. This IS another SENTENCE.");
   });
 
-  it("Adds periods when there is none.", async () => {
+  it("Adds a period when there is none.", async () => {
     const cc = new CommentCreator();
 
     cc.add("This is a sentence with no period");
@@ -36,5 +46,8 @@ describe("CommentCreator", async () => {
 
     cc.add("YAY!");
     expect(cc.toString()).to.be.equal("This is a sentence with no period. Yay? YAY!");
+
+    cc.add("...");
+    expect(cc.toString()).to.be.equal("This is a sentence with no period. Yay? YAY! ...");
   });
 });

@@ -27,9 +27,31 @@ export interface IPicnic {
 
 export interface IPicnicMongoose extends IPicnic, Mongoose.Document { }
 
+/** Follows GeoJSON standards */
 export const PicnicSchema = new Mongoose.Schema({
   geometry: {
-    coordinates: { type: [Number], required: true },
+    coordinates: {
+      required: true,
+      type: [Number],
+      validate: {
+        validator: (v: number[]) => {
+          // Proper length
+          if (v.length < 2 || v.length > 3) {
+            return false;
+          }
+          // No null or undefined
+          for (const e of v) {
+            if (typeof (e) !== "number") {
+              return false;
+            }
+          }
+          // Within range of WGS84
+          if (v[0] > 180 || v[0] < -180 || v[1] > 90 || v[1] < -90) {
+            return false;
+          }
+        },
+      },
+    },
     type: { type: String, required: true, enum: ["Point"], default: "Point" },
   },
   properties: {
@@ -39,7 +61,23 @@ export const PicnicSchema = new Mongoose.Schema({
     license: DataLicenseSchema,
     sheltered: { type: Boolean, required: false },
     source: DataSourceSchema,
-    type: { type: String, required: true, enum: ["site", "table"], default: "table" },
+    type: {
+      default: "table",
+      enum: ["site", "table"],
+      required: true,
+      type: String,
+      validate: {
+        validator(v: string) {
+          if (v === "table") {
+            // Sites can have multiple tables, but tables can't specify more than one table.
+            if (this.properties.count && this.properties.count !== 1) {
+              return false;
+            }
+          }
+          return true;
+        },
+      },
+    },
     user: { type: String, required: false },
   },
   type: { type: String, required: true, default: "Feature" },

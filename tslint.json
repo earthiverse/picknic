@@ -15,7 +15,7 @@
             true,
             {
                 "limit": 120,
-                "ignore-pattern": "^import |^export |^const .+? = \".+\";"
+                "ignore-pattern": "^\\s*import |^\\s*export |^\\s*const .+? = \".+\";|\\s*\".*?\","
             }
         ],
         "no-console": false

@@ -1,43 +1,51 @@
-import { CSVDownloader } from "../../CSVDownloader";
+import { ArcGISDownloader } from "../../ArcGISDownloader";
+import { CommentCreator } from "../../CommentCreator";
 import { capitalCase } from "../../Downloader";
 
-export const downloader = new CSVDownloader(
+export const downloader = new ArcGISDownloader(
   "Lethbridge Open Data",
-  "http://opendata.lethbridge.ca/datasets/8fd139cd01a84df4a311f569fe583eff_0",
+  "http://gis.lethbridge.ca/lethwebgisarcgis/rest/services/OpenData/odl_picnictables/MapServer/0",
   "Picnic Tables",
-  "http://opendata.lethbridge.ca/datasets/8fd139cd01a84df4a311f569fe583eff_0.csv",
   "City of Lethbridge​ - Open Data License (Version 1.0)",
   "http://www.lethbridge.ca/Pages/OpenDataLicense.aspx");
 
 export async function run(): Promise<number> {
-  await downloader.downloadDataset();
+  await downloader.downloadDataset("Status='Active'", "AssetID,Material,Surface,Accessible,Plaque,Dedication,Comment,Grnspc_ID");
   return downloader.parse(
     async (data: any) => {
-      const coordinates = [parseFloat(data.X), parseFloat(data.Y)];
+      const coordinates = [parseFloat(data.geometry.x), parseFloat(data.geometry.y)];
 
       const id: string = data.AssetID;
-      const accessible: boolean = data.Accessible.startsWith("Y");
+      let accessible: boolean;
+      if (data.attributes.Accessible && data.attributes.Accessible.startsWith("Y")) {
+        accessible = true;
+      } else if (data.attributes.Accessible && data.attributes.Accessible.startsWith("N")) {
+        accessible = false;
+      }
 
-      const material: string = data.Material.toLowerCase();
-      const surface: string = data.Surface.toLowerCase();
-      const plaque: boolean = data.Plaque === "Yes";
-      const dedication: string = data.Dedication.trim();
-      const greenspaceID: string = data.Grnspc_ID;
-      let comment: string = capitalCase(data.Comment.trim());
-      if (comment) {
-        comment += ".";
+      const cc = new CommentCreator();
+      cc.add(data.attributes.Comment);
+      const surface: string = data.attributes.Surface;
+      if (surface && !surface.startsWith("N")) {
+        cc.add(`The table is on a surface that is ${surface}.`);
       }
-      if (surface && surface !== "no") {
-        comment += " The table is on a surface that is " + surface.toLowerCase() + ".";
-      }
+      const plaque: boolean = data.attributes.Plaque.startsWith("Y");
+      const dedication: string = data.attributes.Dedication;
       if (plaque) {
-        comment += " Has a plaque";
         if (dedication) {
-          comment += " for " + dedication;
+          cc.add(`Has a plaque dedicated to ${dedication}`);
+        } else {
+          cc.add(`Has a plaque.`);
         }
-        comment += ".";
       }
-      comment.trimLeft();
+      const material: string = data.attributes.Material;
+      if (material) {
+        cc.add(`Made from ${material.toLowerCase()}.`);
+      }
+      const park: string = data.attributes.Grnspc_ID;
+      if (park) {
+        cc.add(`Located in ${capitalCase(park.match(/.+?(?= -)/)[0])}`);
+      }
 
       return await downloader.addTable({
         geometry: {
@@ -45,7 +53,7 @@ export async function run(): Promise<number> {
         },
         properties: {
           accessible,
-          comment,
+          comment: cc.toString(),
           source: {
             id,
           },

@@ -1,148 +1,63 @@
-import CSVParse = require("csv-parse/lib/sync");
+import { CommentCreator } from "../../CommentCreator";
+import { Downloader } from "../../Downloader";
 
-import { Picnic } from "../../../models/Picnic";
-import Download = require("../../Download");
+export const downloader = new Downloader(
+  "Sunshine Coast Council",
+  "https://data.sunshinecoast.qld.gov.au/Facilities-and-Structures/Public-Picnic-Tables/emjg-3ene/data",
+  "Public Picnic Tables",
+  "https://data.sunshinecoast.qld.gov.au/resource/emjg-3ene.json?$limit=50000&$select=shape,locationdesc,seattype,tablematerial,objectid,sheltered,equalaccess&$where=starts_with(status, 'Active')",
+  "Public Domain",
+  "https://creativecommons.org/publicdomain/zero/1.0/legalcode");
 
-// Important Fields
-const sourceName = "Sunshine Coast Council Open Data";
-const dsName = "Picnic Tables";
-const humanURL = "https://data.sunshinecoast.qld.gov.au/dataset/Picnic-Tables/emjg-3ene";
-const dsURL = "https://data.sunshinecoast.qld.gov.au/api/views/emjg-3ene/rows.csv?accessType=DOWNLOAD";
-const licenseName = "Creative Commons Attribution 3.0 Australia";
-const licenseURL = "https://creativecommons.org/licenses/by/3.0/au/deed.en";
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return await downloader.parse(
+    async (data: any) => {
+      const coordinates = [data.shape.longitude, data.shape.latitude];
+      const id = data.objectid;
 
-// Regular Expression for Location
-const regex = new RegExp(/([\d\.-]+),\s([\d\.-]+)/);
+      let sheltered: boolean;
+      if (data.sheltered === "Yes") {
+        sheltered = true;
+      } else if (data.sheltered === "No") {
+        sheltered = false;
+      }
 
-Download.parseDataString(dsName, dsURL, async (res: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
+      let accessible: boolean;
+      if (data.equalaccess === "Yes") {
+        accessible = true;
+      } else if (data.equalaccess === "No") {
+        accessible = false;
+      }
 
-  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const match: RegExpExecArray = regex.exec(data.SHAPE);
-    const lat: number = parseFloat(match[1]);
-    const lng: number = parseFloat(match[2]);
+      // TODO: There are a lot more fields you could grab from the dataset.
 
-    const objectID = data.OBJECTID;
+      const cc = new CommentCreator();
+      const locationDescription = data.locationdesc;
+      if (locationDescription) {
+        cc.add(`Located in ${locationDescription}`);
+      }
+      const material = data.tablematerial;
+      if (material) {
+        cc.add(`Made from ${material.toLowerCase()}`);
+      }
 
-    const status: string = data.Status;
-    if (status === "Disposed") { continue; } // Skip here if the asset is disposed.
-
-    let comment: string = "";
-    let originalComments: string = data.Comments;
-    originalComments = originalComments.trim();
-    if (originalComments) {
-      comment = "Original comment from dataset: \"" + originalComments + "\".";
-    }
-    let locationDescription: string = data.LocationDesc;
-    locationDescription = locationDescription.trim();
-    if (locationDescription) {
-      comment += " Location description from dataset: \"" + locationDescription + "\".";
-    }
-    const owner: string = data.Owner;
-    if (owner) {
-      comment += " Owned by " + owner + ".";
-    }
-    const manager: string = data.AssetManager;
-    if (manager) {
-      comment += " Managed by " + manager + ".";
-    }
-    const maintainer: string = data.MaintainedBy;
-    if (maintainer) {
-      comment += " Maintained by " + maintainer + ".";
-    }
-    const condition: string = data.Condition;
-    if (condition && condition !== "Not Assessed") {
-      comment += " Condition (1-5, lower is better): " + condition + ".";
-    }
-    let conditionComments: string = data.ConditionComments;
-    conditionComments = conditionComments.trim();
-    if (conditionComments) {
-      comment += " Condition comments from dataset: \"" + conditionComments + "\".";
-    }
-    const subType: string = data.AssetSubType;
-    if (subType === "Fish Cleaning") { continue; } else if (subType) {
-      comment += " Table style: " + subType + ".";
-    }
-    const seatType: string = data.SeatType;
-    if (seatType) {
-      comment += " Seat type: " + seatType + ".";
-    }
-    const tableMaterial: string = data.TableMaterial;
-    if (tableMaterial) {
-      comment += " Table material: " + tableMaterial + ".";
-    }
-    const tableFinish: string = data.TableFinishCoating;
-    if (tableFinish) {
-      comment += " Table finish: " + tableFinish + ".";
-    }
-    const mountingType: string = data.MountingType;
-    if (mountingType) {
-      comment += " Mounting type: " + mountingType + ".";
-    }
-    const manufacturer: string = data.Manufacturer;
-    if (manufacturer) {
-      comment += " Manufacturer: " + manufacturer + ".";
-    }
-    const length: string = data.Length_m;
-    if (length) {
-      comment += " Length: " + length + "m.";
-    }
-    const remainingLife: string = data.RemLife;
-    if (remainingLife) {
-      comment += " Remaining life: " + remainingLife + ".";
-    }
-    let equalAccess: any = data.EqualAccess;
-    if (equalAccess === "No") {
-      equalAccess = false;
-    } else if (equalAccess === "Yes") {
-      equalAccess = true;
-    } else {
-      equalAccess = undefined;
-    }
-    let sheltered: any = data.Sheltered;
-    if (sheltered === "No") {
-      sheltered = false;
-    } else if (sheltered === "Yes") {
-      sheltered = true;
-    } else {
-      sheltered = undefined;
-    }
-
-    await Picnic.updateOne({
-      "properties.source.dataset": dsName,
-      "properties.source.id": objectID,
-      "properties.source.name": sourceName,
-    }, {
-        $set: {
-          "geometry.coordinates": [lng, lat],
-          "geometry.type": "Point",
-          "properties.accessible": equalAccess,
-          "properties.comment": comment,
-          "properties.license.name": licenseName,
-          "properties.license.url": licenseURL,
-          "properties.sheltered": sheltered,
-          "properties.source.dataset": dsName,
-          "properties.source.id": objectID,
-          "properties.source.name": sourceName,
-          "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
-          "properties.type": "table",
-          "type": "Feature",
+      return await downloader.addTable({
+        geometry: {
+          coordinates,
         },
-      }, {
-        upsert: true,
-      }).exec();
-    numOps += 1;
-  }
+        properties: {
+          accessible,
+          comment: cc.toString(),
+          sheltered,
+          source: {
+            id,
+          },
+        },
+      });
+    });
+}
 
-  // Remove old tables from this data source
-  await Picnic.deleteMany({
-    "properties.source.dataset": dsName,
-    "properties.source.name": sourceName,
-    "properties.source.retrieved": { $lt: retrieved },
-  }).lean().exec();
-  numOps += 1;
-
-  return numOps;
-});
+if (require.main === module) {
+  run();
+}

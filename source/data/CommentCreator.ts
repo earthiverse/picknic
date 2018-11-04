@@ -1,3 +1,5 @@
+import { cpus } from "os";
+
 /** A helper class for making the comments we add to data pretty. */
 export class CommentCreator {
   private comments: string[];
@@ -9,22 +11,35 @@ export class CommentCreator {
 
   public add(...comments: string[]) {
     for (let comment of comments) {
-      // The 'if' prevents empty strings from being added
-      if (comment) {
-        // Trim the comment
-        comment = comment.trim();
-
-        // Add a period at the end of the comment if there isn't one
-        const lastChar = comment.charAt(comment.length - 1);
-        if (lastChar !== "." && lastChar !== "!" && lastChar !== "?") {
-          comment = comment + ".";
-        }
-
-        // Capitalize the first letter of the comment
-        comment = `${comment.charAt(0).toUpperCase()}${comment.slice(1)}`;
-
-        this.comments.push(comment);
+      // Skip empty strings, null, and undefined values.
+      if (!comment) {
+        continue;
       }
+
+      // Trim the comment
+      comment = comment.trim();
+
+      // Skip if there was only blank space
+      if (!comment) {
+        continue;
+      }
+
+      // Add a period at the end of the comment if there isn't a punctuation mark.
+      const lastChar = comment.charAt(comment.length - 1);
+      if (lastChar !== "." && lastChar !== "!" && lastChar !== "?") {
+        comment = comment + ".";
+      }
+
+      // Remove all double spaces.
+      comment = comment.replace(/\s+/, " ");
+
+      // Remove spaces before the punctuation mark
+      comment = comment.replace(/\s+.$/, ".");
+
+      // Capitalize the first letter of the comment
+      comment = `${comment.charAt(0).toUpperCase()}${comment.slice(1)}`;
+
+      this.comments.push(comment);
     }
   }
 

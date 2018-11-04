@@ -34,7 +34,7 @@ export class ArcGISDownloader extends Downloader {
         // No more records
         break;
       }
-      offset += data.length;
+      offset += maxRecCount;
     }
 
     Fs.writeFileSync(this.datasetFile, JSON.stringify(data));

@@ -1,66 +1,39 @@
-import CSVParse = require("csv-parse/lib/sync");
-import { Picnic } from "../../../models/Picnic";
-import { capitalCase, parseDataString } from "../../Download";
+import { CommentCreator } from "../../CommentCreator";
+import { capitalCase, Downloader } from "../../Downloader";
 
-// Important Fields
-const sourceName = "dataACT";
-const dsName = "Public Furniture in the ACT";
-const humanURL = "https://www.data.act.gov.au/Infrastructure-and-Utilities/Public-Furniture-in-the-ACT/ch39-bukk";
-const dsURL = "https://www.data.act.gov.au/api/views/ch39-bukk/rows.csv?accessType=DOWNLOAD";
-const licenseName = "Creative Commons Attribution 3.0 Australia";
-const licenseURL = "creativecommons.org/licenses/by/3.0/au/deed.en";
+export const downloader = new Downloader(
+  "dataACT",
+  "https://www.data.act.gov.au/Infrastructure-and-Utilities/Public-Furniture-in-the-ACT/ch39-bukk",
+  "Public Furniture in the ACT",
+  "https://www.data.act.gov.au/resource/knzq-ianp.json?feature_type=TABLE&$limit=50000&$select=asset_id,location_1,location_name",
+  "Creative Commons Attribution 4.0 International",
+  "https://creativecommons.org/licenses/by/4.0/legalcode");
 
-parseDataString(dsName, dsURL, async (res: string) => {
-  let numOps = 0;
-  const retrieved = new Date();
+export async function run(): Promise<number> {
+  await downloader.downloadDataset();
+  return await downloader.parse(
+    async (data: any) => {
+      const geometry = data.location_1;
+      const id = data.asset_id;
+      const location = data.location_name;
 
-  for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const type: string = data["FEATURE TYPE"];
-    if (type !== "TABLE") {
-      continue;
-    }
+      const comment = new CommentCreator();
+      if (location) {
+        comment.add(`Located in ${capitalCase(location)}`);
+      }
 
-    const lat: number = parseFloat(data.LATITUDE);
-    const lng: number = parseFloat(data.LONGITUDE);
-    const assetID = data["ASSET ID"];
-    const location: string = data["LOCATION NAME"].trim();
-    let comment;
-    if (location) {
-      comment = "Located in " + capitalCase(location) + ".";
-    }
-
-    await Picnic.updateOne({
-      "properties.source.dataset": dsName,
-      "properties.source.id": assetID,
-      "properties.source.url": humanURL,
-    }, {
-        $set: {
-          "geometry.coordinates": [lng, lat],
-          "geometry.type": "Point",
-          "properties.comment": comment,
-          "properties.license.name": licenseName,
-          "properties.license.url": licenseURL,
-          "properties.source.dataset": dsName,
-          "properties.source.id": assetID,
-          "properties.source.name": sourceName,
-          "properties.source.retrieved": retrieved,
-          "properties.source.url": humanURL,
-          "properties.type": "table",
-          "type": "Feature",
+      return await downloader.addTable({
+        geometry,
+        properties: {
+          comment: comment.toString(),
+          source: {
+            id,
+          },
         },
-      }, {
-        upsert: true,
-      }).exec();
-    numOps += 1;
-  }
+      });
+    });
+}
 
-  // Remove old tables from this data source
-  await Picnic.deleteMany({
-    "properties.source.dataset": dsName,
-    "properties.source.name": sourceName,
-    "properties.source.retrieved": { $lt: retrieved },
-  }).lean().exec();
-  numOps += 1;
-
-  return numOps;
-});
+if (require.main === module) {
+  run();
+}

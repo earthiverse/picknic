@@ -1,5 +1,7 @@
-// TODO: There has to be a better way to organize this script...
-// The ArcGIS function shouldn't have duplicate code...
+/*
+  NOTE: This is being depricated. Please use the Downloader classes.
+*/
+
 import Mongoose = require("mongoose");
 import Nconf = require("nconf");
 import Path = require("path");
@@ -118,7 +120,7 @@ export async function parseDataArcGIS(dsName: string, gisLayerURL: string, where
         // No more records
         break;
       }
-      offset += data.length;
+      offset += maxRecCount;
     }
 
     // Parse Data

@@ -10,7 +10,7 @@ export function capitalCase(s: string) {
   return s.toLowerCase().replace(/\b./g, (a: string) => a.toUpperCase());
 }
 
-export abstract class Downloader {
+export class Downloader {
   /** The name of the source of the data. */
   public sourceName: string;
   /** A human friendly URL that is used for attribution to where the data came from / can be obtained. */
@@ -102,12 +102,18 @@ export abstract class Downloader {
 
     // Download the file
     const data = await Request(this.datasetURL);
+    this.datasetRetrieved = new Date();
     // Save the file
     Fs.writeFileSync(this.datasetFile, data);
   }
 
-  public async abstract parse(parseFunction: (data: any) => Promise<any>,
-    cleanFunction?: () => Promise<number>): Promise<number>;
+  public async parse(parseFunction: (data: any) => Promise<any>,
+    cleanFunction?: () => Promise<number>) {
+    const text = Fs.readFileSync(this.datasetFile, "utf8");
+    const data = JSON.parse(text);
+
+    return this.parseBase(parseFunction, data, cleanFunction);
+  }
 
   public async defaultCleanFunction() {
     await Picnic.deleteMany({

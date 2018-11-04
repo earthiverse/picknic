@@ -23,6 +23,7 @@ describe("Download Scripts", async () => {
         "properties.source.dataset": EdmontonDownloader.datasetName,
         "properties.source.name": EdmontonDownloader.sourceName,
       }).lean().exec();
+      // +1 because we also perform an operation to delete all of the old data.
       expect(numOps).to.be.equal(numResults + 1);
       await Mongoose.disconnect();
     }).timeout(60000);

@@ -1,10 +1,11 @@
-import { CSVDownloader } from "../../CSVDownloader";
+import { CommentCreator } from "../../CommentCreator";
+import { Downloader } from "../../Downloader";
 
-export const downloader = new CSVDownloader(
+export const downloader = new Downloader(
   "Edmonton Open Data Portal",
   "https://data.edmonton.ca/Facilities-and-Structures/Public-Picnic-Table-Locations/vk3s-q842",
   "Public Picnic Table Locations",
-  "https://data.edmonton.ca/api/views/vk3s-q842/rows.csv?accessType=DOWNLOAD",
+  "https://data.edmonton.ca/resource/9n58-dubd.json?$limit=50000&$select=location,table_type,surface_material,structural_material,id",
   "City of Edmonton Open Data Terms of Use (Version 2.1)",
   "http://www.edmonton.ca/city_government/documents/Web-version2.1-OpenDataAgreement.pdf");
 
@@ -12,29 +13,33 @@ export async function run(): Promise<number> {
   await downloader.downloadDataset();
   return await downloader.parse(
     async (data: any) => {
-      const coordinates = [parseFloat(data.Longitude), parseFloat(data.Latitude)];
+      const geometry = data.location;
+      const type = data.table_type;
+      const surface = data.surface_material;
+      const structural = data.structural_material;
+      const id = data.id;
 
-      const type = data["Table Type"].toLowerCase();
-      const surface = data["Surface Material"].toLowerCase();
-      const structural = data["Structural Material"].toLowerCase();
-      let comment: string;
+      const cc = new CommentCreator();
       if (type === "other table") {
-        comment = "A table";
-      } else {
-        comment = "A " + type;
+        cc.add(`A ${type}`);
       }
-      comment += " made from " + structural;
-      if (surface !== structural) {
-        comment += " and " + surface;
+      if (structural) {
+        if (surface) {
+          cc.add(`made from ${structural.toLowerCase()} and ${surface.toLowerCase()}`);
+        } else {
+          cc.add(`made from ${structural.toLowerCase()}`);
+        }
+      } else if (surface) {
+        cc.add(`made from ${surface.toLowerCase()}`);
       }
-      comment += " materials.";
 
       return await downloader.addTable({
-        geometry: {
-          coordinates,
-        },
+        geometry,
         properties: {
-          comment,
+          comment: cc.toString(),
+          source: {
+            id,
+          },
         },
       });
     });

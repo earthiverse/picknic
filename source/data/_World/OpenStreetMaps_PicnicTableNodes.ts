@@ -5,7 +5,7 @@ import { Picnic } from "../../models/Picnic";
 import { CommentCreator } from "../CommentCreator";
 import { Downloader } from "../Downloader";
 
-export class OSMXMLDownloader extends Downloader {
+export class OSMDownloader extends Downloader {
   constructor() {
     super(
       "Open Street Maps",
@@ -65,7 +65,7 @@ export class OSMXMLDownloader extends Downloader {
   }
 }
 
-export const downloader = new OSMXMLDownloader();
+export const downloader = new OSMDownloader();
 
 export async function run(): Promise<number> {
   await downloader.downloadDataset();
