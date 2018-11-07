@@ -5,6 +5,11 @@ import Path = require("path");
 import Request = require("request-promise-native");
 import { IPicnic, Picnic } from "../models/Picnic";
 
+// NOTE: This is here to suppress Mongoose DeprecationWarnings.
+Mongoose.set("useNewUrlParser", true);
+Mongoose.set("useFindAndModify", false);
+Mongoose.set("useCreateIndex", true);
+
 // From https://stackoverflow.com/a/2332821
 export function capitalCase(s: string) {
   return s.toLowerCase().replace(/\b./g, (a: string) => a.toUpperCase());
@@ -82,20 +87,9 @@ export class Downloader {
 
   /** Download the dataset */
   public async downloadDataset() {
-    try {
-      const fileStats = Fs.statSync(this.datasetFile);
-      const modifiedTime = new Date(fileStats.mtime);
-      this.datasetRetrieved = new Date();
-      // TODO: Move this to a config parameter.
-      // 1000 * 3600 * 4 = 14400000 =  4 hour.
-      if (this.datasetRetrieved.getTime() - modifiedTime.getTime() < (14400000)) {
-        // Don't download the file again, just use the file we already have.
-        return;
-      }
-    } catch (error) {
-      // TODO: Make sure that it was a no-file error, and not another different error.
-      // We don't care about no file errors, because that's what we'll get when we run a download script for the first
-      // time.
+    if (this.checkDownload()) {
+      // It's already good to go.
+      return;
     }
 
     // TODO: Error checking for the Request. If it fails, don't save the file.
@@ -112,7 +106,7 @@ export class Downloader {
     const text = Fs.readFileSync(this.datasetFile, "utf8");
     const data = JSON.parse(text);
 
-    return this.parseBase(parseFunction, data, cleanFunction);
+    return await this.parseBase(parseFunction, data, cleanFunction);
   }
 
   public async defaultCleanFunction() {
@@ -142,5 +136,24 @@ export class Downloader {
     await this.disconnect();
 
     return this.numOps;
+  }
+
+  protected checkDownload() {
+    try {
+      const fileStats = Fs.statSync(this.datasetFile);
+      const modifiedTime = new Date(fileStats.mtime);
+      this.datasetRetrieved = new Date();
+      // TODO: Move this to a config parameter.
+      // 1000 * 3600 * 4 = 14400000 =  4 hour.
+      if (this.datasetRetrieved.getTime() - modifiedTime.getTime() < (14400000)) {
+        // Don't download the file again, just use the file we already have.
+        return true;
+      }
+    } catch (error) {
+      // TODO: Make sure that it was a no-file error, and not another different error.
+      // We don't care about no file errors, because that's what we'll get when we run a download script for the first
+      // time.
+    }
+    return false;
   }
 }

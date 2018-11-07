@@ -18,6 +18,6 @@ export class CSVDownloader extends Downloader {
     const text = Fs.readFileSync(this.datasetFile, "utf8");
     const data = CSVParse(text, { columns: true, ltrim: true });
 
-    return this.parseBase(parseFunction, data, cleanFunction);
+    return await this.parseBase(parseFunction, data, cleanFunction);
   }
 }
