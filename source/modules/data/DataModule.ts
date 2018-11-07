@@ -16,63 +16,83 @@ const picknicConfig = Nconf.get("picknic");
 
 export class DataModule extends Module {
   public addRoutes(app: Express.Application) {
-    // Tables
-    app.post("/data/tables/find/near", (req: Express.Request, res: Express.Response) => {
+    // All
+    // NOTE: Right now these are the same as /data/tables/find/near because we only return tables...
+    //       If we start returning more than tables, it will be handier.
+    app.post("/data/all/find/near", async (req: Express.Request, res: Express.Response) => {
       const bounds = req.body;
       const query = Picnic.find({}).limit(picknicConfig.data.near.default).where("geometry").near(bounds).lean();
-      query.exec().then((tables: any) => {
-        res.send(tables);
+      res.send({
+        tables: await query.exec(),
       });
     });
-    app.post("/data/tables/find/within", (req: Express.Request, res: Express.Response) => {
+    app.post("/data/all/find/within", async (req: Express.Request, res: Express.Response) => {
       const bounds = req.body;
-      Picnic.find({}).where("geometry").within(bounds).lean().exec().then((tables) => {
-        res.send(tables);
+      const query = Picnic.find({}).where("geometry").within(bounds).lean();
+      res.send({
+        tables: await query.exec(),
       });
     });
-    app.get("/data/tables/get", (req: Express.Request, res: Express.Response) => {
+
+    // Tables
+    app.post("/data/tables/find/near", async (req: Express.Request, res: Express.Response) => {
+      const bounds = req.body;
+      const query = Picnic.find({}).limit(picknicConfig.data.near.default).where("geometry").near(bounds).lean();
+      res.send({
+        tables: await query.exec(),
+      });
+    });
+    app.post("/data/tables/find/within", async (req: Express.Request, res: Express.Response) => {
+      const bounds = req.body;
+      const query = Picnic.find({}).where("geometry").within(bounds).lean();
+      res.send({
+        tables: await query.exec(),
+      });
+    });
+    app.get("/data/tables/get", async (req: Express.Request, res: Express.Response) => {
       const id = req.query.id;
       if (id) {
-        Picnic.findById(id).lean().exec().then((table) => {
-          res.send(table);
+        const query = Picnic.findById(id).lean();
+        res.send({
+          tables: await query.exec(),
         });
       } else {
         res.send("Error: No ID supplied.");
       }
     });
-    app.get("/data/tables/heatmap", (req: Express.Request, res: Express.Response) => {
+    app.get("/data/tables/heatmap", async (req: Express.Request, res: Express.Response) => {
       // TODO: Add admin permissions, because this is quite computational.
 
-      Picnic.find().lean().exec().then((tables: any) => {
-        // Geohash the locations, and calculate the number of tables in each hashed area.
-        // TODO: Change this to a set?
-        const weightedSet: any = {};
-        const newWeightedSet: Set<string> = new Set<string>();
+      const query = Picnic.find().lean();
+      const tables = await query.exec();
+      // Geohash the locations, and calculate the number of tables in each hashed area.
+      // TODO: Change this to a set?
+      const weightedSet: any = {};
+      const newWeightedSet: Set<string> = new Set<string>();
 
-        for (const table of tables) {
-          const lng: number = table.geometry.coordinates[0];
-          const lat: number = table.geometry.coordinates[1];
-          // TODO: This 4 was created by trial and error. If there are more than 10,000 results returned
-          //       then decrease the number by one (i.e. change 4 to 3)
-          const geohash = Geohash.encode(lat, lng, 4);
-          newWeightedSet.add(geohash);
-          if (weightedSet.hasOwnProperty(geohash)) {
-            weightedSet[geohash] += 1;
-          } else {
-            weightedSet[geohash] = 1;
-          }
+      for (const table of tables) {
+        const lng: number = table.geometry.coordinates[0];
+        const lat: number = table.geometry.coordinates[1];
+        // TODO: This 4 was created by trial and error. If there are more than 10,000 results returned
+        //       then decrease the number by one (i.e. change 4 to 3)
+        const geohash = Geohash.encode(lat, lng, 4);
+        newWeightedSet.add(geohash);
+        if (weightedSet.hasOwnProperty(geohash)) {
+          weightedSet[geohash] += 1;
+        } else {
+          weightedSet[geohash] = 1;
         }
+      }
 
-        // Decode the geohashes and return a weighted heatmap
-        const returnSet = new Array();
-        newWeightedSet.forEach((table) => {
-          const point = Geohash.decode(table);
-          const numTables = weightedSet[table];
-          returnSet.push([point.lat, point.lon, numTables]);
-        });
-
-        res.send(JSON.stringify(returnSet));
+      // Decode the geohashes and return a weighted heatmap
+      const returnSet = new Array();
+      newWeightedSet.forEach((table) => {
+        const point = Geohash.decode(table);
+        const numTables = weightedSet[table];
+        returnSet.push([point.lat, point.lon, numTables]);
       });
+
+      res.send(JSON.stringify(returnSet));
     });
     app.post("/data/tables/add", multer().single(), (req: Express.Request, res: Express.Response) => {
       // Authenticate

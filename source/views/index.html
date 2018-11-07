@@ -43,14 +43,13 @@
         var circle = { "center": [circleLng, circleLat], "radius": circleRadius, "spherical": true };
         $.ajax({
           type: 'POST',
-          url: '/data/tables/find/within',
+          url: '/data/all/find/within',
           dataType: 'json',
           contentType: 'application/json',
           data: JSON.stringify(circle),
-          success: function (tables) {
-            if (tables.length > 0) {
-              for (var i = 0; i < tables.length; i++) {
-                var table = tables[i];
+          success: function (data) {
+            if (data.tables.length > 0) {
+              for(let table of data.tables) {
                 if (!allTables.hasOwnProperty(table._id)) {
                   allTables[table._id] = true;
                   map.data.addGeoJson(table);
@@ -60,13 +59,12 @@
               // Nothing within, find nearest instead
               $.ajax({
                 type: 'POST',
-                url: '/data/tables/find/near',
+                url: '/data/all/find/near',
                 dataType: 'json',
                 contentType: 'application/json',
                 data: JSON.stringify(point),
-                success: function (tables) {
-                  for (var i = 0; i < tables.length; i++) {
-                    var table = tables[i];
+                success: function (data) {
+                  for(let table of data.tables) {
                     if (!allTables.hasOwnProperty(table._id)) {
                       allTables[table._id] = true;
                       map.data.addGeoJson(table);
