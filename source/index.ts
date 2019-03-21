@@ -12,7 +12,8 @@ import requestLanguage = require("express-request-language");
 import ExpressSession = require("express-session");
 // tslint:disable-next-line:no-var-requires
 const geoip2 = require("geoip2");
-import I18next = require("i18next");
+import I18next from "i18next";
+
 // tslint:disable-next-line:no-var-requires
 const i18nextBackend = require("i18next-sync-fs-backend");
 import Mongoose = require("mongoose");

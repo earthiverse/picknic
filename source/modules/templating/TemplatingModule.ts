@@ -1,6 +1,6 @@
 import Express = require("express");
 import Fs = require("fs");
-import I18next = require("i18next");
+import I18next from "i18next";
 import Mustache = require("mustache");
 import Nconf = require("nconf");
 import Path = require("path");
@@ -74,9 +74,14 @@ export class TemplatingModule extends Module {
               // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
               const result = TemplatingModule.geoip2.lookupSimpleSync((req as any).clientIp);
               if (result) {
-                return JSON.stringify({ lat: result.location.latitude, lng: result.location.longitude });
+                try {
+                  return JSON.stringify({ lat: result.location.latitude, lng: result.location.longitude });
+                } catch {
+                  // Something went wrong trying to retrieve the location, so we'll just use Edmonton's.
+                  return "{ lat: 53.5444, lng: -113.4904 }";
+                }
               } else {
-                // Edmonton's latitutde and longitude
+                // No location identified by geoip2, so we'll just use Edmonton's.
                 return "{ lat: 53.5444, lng: -113.4904 }";
               }
             };
