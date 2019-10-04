@@ -19,10 +19,10 @@ Download.parseDataJSON(dsName, dsURL, async (parks: any[]) => {
   const retrieved = new Date();
 
   for (const park of parks) {
-    const parkId = park.ID;
-    const parkName = park.Name;
+    let parkId = park.ID;
+    let parkName = park.Name;
 
-    const parkData = await Request({
+    let parkData = await Request({
       json: true,
       uri: "https://parkmaps.winnipeg.ca/POSInfo.ashx?park_id=" + parkId + "&keyword=24%7C64&keyword_type=AND",
     });
@@ -36,9 +36,9 @@ Download.parseDataJSON(dsName, dsURL, async (parks: any[]) => {
         continue;
       }
 
-      const assetID = asset.ID;
-      const lat = asset.Latitude;
-      const lng = asset.Longitude;
+      let assetID = asset.ID;
+      let lat = asset.Latitude;
+      let lng = asset.Longitude;
 
       let comment;
       if (asset.InfoRecords) {

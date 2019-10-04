@@ -11,7 +11,7 @@ const licenseURL = "http://creativecommons.org/licenses/by/4.0/";
 
 parseDataJSON(dsName, dsURL, async (res: any) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const feature of res.features) {
     // Check if it's a picnic table first

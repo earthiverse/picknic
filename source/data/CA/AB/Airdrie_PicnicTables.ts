@@ -16,14 +16,14 @@ const licenseURL = "http://data-airdrie.opendata.arcgis.com/pages/our-open-licen
 
 Download.parseDataString(dsName, dsURL, async (res: string) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const color: string = data.COLOUR.trim().toLowerCase();
-    const manufacturer: string = data.MANUFACTUR.trim().toLowerCase();
+    let color: string = data.COLOUR.trim().toLowerCase();
+    let manufacturer: string = data.MANUFACTUR.trim().toLowerCase();
     let material: string = data.MATERIAL.trim().toLowerCase();
     // TODO: NOTE: This FID doesn't look meaninful, so it might break in the future. :(
-    const assetID: string = data.FID;
+    let assetID: string = data.FID;
 
     let comment: string;
     if (color) {
@@ -42,8 +42,8 @@ Download.parseDataString(dsName, dsURL, async (res: string) => {
     }
     comment += ".";
 
-    const lat: number = parseFloat(data.Y);
-    const lng: number = parseFloat(data.X);
+    let lat: number = parseFloat(data.Y);
+    let lng: number = parseFloat(data.X);
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,

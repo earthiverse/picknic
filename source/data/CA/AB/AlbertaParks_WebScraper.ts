@@ -14,14 +14,14 @@ const licenseURL = "https://creativecommons.org/licenses/by-nc/4.0/";
 
 Download.parseDataString(dsName, dsURL, async (body: string) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
   // Find the JSON in the code that represents the park data
   let parkData: any[];
-  const matches1: RegExpExecArray = /var\s*sites\s*=\s*(\[[\s\S]*?\])/.exec(body);
+  let matches1: RegExpExecArray = /var\s*sites\s*=\s*(\[[\s\S]*?\])/.exec(body);
   if (matches1 !== null) {
     // Found data (Probably)!
     // Put the array of parks in a simple JSON object so I can parse it to an actual object
-    const data = JSON.parse("{\"data\":" + matches1[1] + "}");
+    let data = JSON.parse("{\"data\":" + matches1[1] + "}");
     parkData = data.data;
   } else {
     console.log("Could not find the list of parks...");
@@ -34,11 +34,11 @@ Download.parseDataString(dsName, dsURL, async (body: string) => {
       continue;
     }
     console.log("Parsing " + park.label + "...");
-    const parkURL = "https://www.albertaparks.ca" + park.url;
+    let parkURL = "https://www.albertaparks.ca" + park.url;
     // Load the park URL
-    const body2 = await Request(parkURL);
+    let body2 = await Request(parkURL);
     let siteData: any[];
-    const matches2 = /var\s*sites\s*=\s*(\[[\s\S]*?\])\s*;/.exec(body2);
+    let matches2 = /var\s*sites\s*=\s*(\[[\s\S]*?\])\s*;/.exec(body2);
     if (matches2 !== null) {
       // Found data (Probably)!
       // Put the array of parks in a simple JSON object so I can parse it to an actual object
@@ -70,34 +70,34 @@ Download.parseDataString(dsName, dsURL, async (body: string) => {
     }
 
     for (const site of siteData) {
-      const facility = site.facility;
+      let facility = site.facility;
       if (facility !== "Day Use") {
         // Not a facility we care about
         continue;
       }
-      const facilityURL = "https://www.albertaparks.ca" + site.link;
-      const coordinates = site.latlng.reverse();
-      const siteName = park.label + " - " + site.name;
+      let facilityURL = "https://www.albertaparks.ca" + site.link;
+      let coordinates = site.latlng.reverse();
+      let siteName = park.label + " - " + site.name;
 
       // TODO: Load park_url and see if the text "no picnic tables" appears on website.
-      const body3 = await Request(facilityURL);
+      let body3 = await Request(facilityURL);
       // Check for references that this place has no picnic tables
-      const noPicnicTablesRegex1 = /no picnic/i;
-      const hasPicnicTables = (noPicnicTablesRegex1.exec(body3) == null);
+      let noPicnicTablesRegex1 = /no picnic/i;
+      let hasPicnicTables = (noPicnicTablesRegex1.exec(body3) == null);
       if (!hasPicnicTables) {
         // No picnic tables here :(
         continue;
       }
       // Check for any reference of picnic tables
-      const noPicnicTablesRegex2 = /picnic/i;
-      const doesntSpecifyPicnicTables = (noPicnicTablesRegex2.exec(body3) == null);
+      let noPicnicTablesRegex2 = /picnic/i;
+      let doesntSpecifyPicnicTables = (noPicnicTablesRegex2.exec(body3) == null);
       if (doesntSpecifyPicnicTables) {
         // It could have picnic tables, but it probably doesn't...
         continue;
       }
 
-      const notesRegex = /<div class=\"callout\">\s*<h4>notes<\/h4>([\s\S]*?)<\/div>/i;
-      const m2 = notesRegex.exec(body3);
+      let notesRegex = /<div class=\"callout\">\s*<h4>notes<\/h4>([\s\S]*?)<\/div>/i;
+      let m2 = notesRegex.exec(body3);
       let notes: string;
       if ((m2) !== null) {
         notes = Striptags(m2[1]).trim();

@@ -11,14 +11,14 @@ const licenseURL = "Unknwon";
 
 parseDataArcGIS(dsName, gisURL, "1=1", "*", 1000, async (res: any[]) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const data of res) {
-    const coordinates: any = [data.geometry.x, data.geometry.y];
-    const objID = data.attributes.GLOBALID;
+    let coordinates: any = [data.geometry.x, data.geometry.y];
+    let objID = data.attributes.GLOBALID;
 
     let comment: string;
-    const material = data.attributes.MATERIAL;
+    let material = data.attributes.MATERIAL;
     if (material === "1") {
       comment = "The table is made of metal.";
     } else if (material === "2") {

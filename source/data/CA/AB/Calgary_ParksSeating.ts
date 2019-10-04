@@ -14,22 +14,22 @@ const licenseURL = "https://data.calgary.ca/stories/s/Open-Calgary-Terms-of-Use/
 
 Download.parseDataString(dsName, dsURL, async (res: string) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   const csv = CSVParse(res, { columns: true, ltrim: true });
   for (const data of csv) {
-    const lat = parseFloat(data.latitude);
-    const lng = parseFloat(data.longitude);
-    const type = data.TYPE_DESCRIPTION;
+    let lat = parseFloat(data.latitude);
+    let lng = parseFloat(data.longitude);
+    let type = data.TYPE_DESCRIPTION;
     if (type !== "PICNIC TABLE" && type !== "MEMORIAL PICNIC TABLE") {
       continue;
     }
-    const active = data.LIFE_CYCLE_STATUS;
+    let active = data.LIFE_CYCLE_STATUS;
     if (active !== "ACTIVE") {
       continue;
     }
-    const assetClass: string = data.ASSET_CLASS;
-    const maintInfo: string = data.MAINT_INFO;
+    let assetClass: string = data.ASSET_CLASS;
+    let maintInfo: string = data.MAINT_INFO;
     let comment = "";
     if (assetClass.search("REMOVED") !== -1) {
       comment += " Might be missing.";

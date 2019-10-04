@@ -18,42 +18,42 @@ const licenseURL = "Unknown";
 
 Download.parseDataString(dsName, dsHumanURL, async (body: string) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
-  const $ = Cheerio.load(body);
-  const parks: any[] = [];
+  let $ = Cheerio.load(body);
+  let parks: any[] = [];
   $("table.collapse").find("tr").each(async (i) => {
     if (i === 0) {
       // Skip the table header
       return;
     }
-    const columns = $(this).find("td");
-    const siteName = columns.eq(0).text().trim();
-    const parkLocationID = columns.eq(1).find("a").attr("href").slice(-4);
-    const parkDetails = columns.eq(3).text().trim().replace(/[\n\r]+/g, ". ").replace(/\s+/g, " ").trim() + ".";
+    let columns = $(this).find("td");
+    let siteName = columns.eq(0).text().trim();
+    let parkLocationID = columns.eq(1).find("a").attr("href").slice(-4);
+    let parkDetails = columns.eq(3).text().trim().replace(/[\n\r]+/g, ". ").replace(/\s+/g, " ").trim() + ".";
     parks.push({ siteName, parkLocationID, parkDetails });
   });
 
   for (const park of parks) {
-    const siteName = park.siteName;
-    const parkLocationID = park.parkLocationID;
-    const parkDetails: string = park.siteName + ". " + park.parkDetails;
+    let siteName = park.siteName;
+    let parkLocationID = park.parkLocationID;
+    let parkDetails: string = park.siteName + ". " + park.parkDetails;
 
     // What's the opposite of not sheltered? Sheltered!
-    const hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails);
+    let hasPicnicShelter = !/not\s+sheltered/i.test(parkDetails);
 
     console.log("Finding location for " + siteName + "...");
     const data = await Request({
       uri: "http://vanmapp1.vancouver.ca/googleKml/designated_picnic_locations/id/" + parkLocationID,
     }).then((body2: string) => {
       // Lol, KML...
-      const result = /<coordinates>([\-.0-9]+),([\-.0-9]+)/.exec(body2);
-      const lng = result[1];
-      const lat = result[2];
+      let result = /<coordinates>([\-.0-9]+),([\-.0-9]+)/.exec(body2);
+      let lng = result[1];
+      let lat = result[2];
       return [lng, lat];
     });
 
-    const coordinates = data;
+    let coordinates = data;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,
