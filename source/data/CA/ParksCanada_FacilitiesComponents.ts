@@ -14,7 +14,7 @@ const licenseURL = "http://open.canada.ca/en/open-government-licence-canada";
 
 Download.parseDataJSON(dsName, dsURL, async (res: any) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const feature of res.features) {
     // Check if it's a picnic table first
@@ -22,8 +22,8 @@ Download.parseDataJSON(dsName, dsURL, async (res: any) => {
       || feature.properties.Component_Type_Composante.search(/Picnic/i) === -1) {
       continue;
     }
-    const coordinates = feature.geometry.coordinates;
-    const objID = feature.properties.OBJECTID;
+    let coordinates = feature.geometry.coordinates;
+    let objID = feature.properties.OBJECTID;
     let accessible: boolean;
     if (feature.properties.Accessible.search(/Yes/i) !== -1) {
       accessible = true;

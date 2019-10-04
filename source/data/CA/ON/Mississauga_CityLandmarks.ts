@@ -18,12 +18,12 @@ parseDataString(dsName, dsURL, async (res: string) => {
     if (data.LANDMARKTY !== "PICAR") {
       continue;
     }
-    const lat = parseFloat(data.Y);
-    const lng = parseFloat(data.X);
+    let lat = parseFloat(data.Y);
+    let lng = parseFloat(data.X);
 
-    const comment: string = capitalize(data.LANDMARKNA);
+    let comment: string = capitalize(data.LANDMARKNA);
 
-    const fid = data.FID;
+    let fid = data.FID;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,

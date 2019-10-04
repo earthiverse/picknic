@@ -66,21 +66,21 @@ Request(dsHumanURL).then((body: string) => {
 
     for (const park of parks) {
       // There's a park name with two spaces in the name for some reason, let's fix that...
-      const parkName = park.parkName.replace(/\s+/, " ");
-      const parkURL = park.parkURL;
+      let parkName = park.parkName.replace(/\s+/, " ");
+      let parkURL = park.parkURL;
 
       console.log("Parsing " + parkName + "...");
-      const data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL)
+      let data = await Request("https://www.richmond.ca/parks/parks/about/amenities/" + parkURL)
         .then((body3: string) => {
           // Find the number of picnic tables at this park.
-          const numPicnicTables2 = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/i.exec(body3)[1];
-          const address2 = /maps\.google\.com\/maps\?q=(.+?)&/i.exec(body3)[1];
+          let numPicnicTables2 = /class="subtitle">Picnic Tables[\s\S]+AmenitiesNumber">([0-9]+)/i.exec(body3)[1];
+          let address2 = /maps\.google\.com\/maps\?q=(.+?)&/i.exec(body3)[1];
 
           return ({ numPicnicTables2, address2 });
         });
 
-      const numPicnicTables = data.numPicnicTables2;
-      const address = data.address2;
+      let numPicnicTables = data.numPicnicTables2;
+      let address = data.address2;
 
       let comment = parkName + ".";
       if (numPicnicTables === "1") {
@@ -94,8 +94,8 @@ Request(dsHumanURL).then((body: string) => {
       }).asPromise();
       googleData = googleData.json.results[0];
       if (googleData) {
-        const lat = googleData.geometry.location.lat;
-        const lng = googleData.geometry.location.lng;
+        let lat = googleData.geometry.location.lat;
+        let lng = googleData.geometry.location.lng;
 
         await Picnic.updateOne({
           "properties.source.dataset": dsName,

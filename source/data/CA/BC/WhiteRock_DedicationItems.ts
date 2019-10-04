@@ -12,19 +12,19 @@ const licenseURL = "https://www2.gov.bc.ca/gov/content/data/open-data/open-gover
 
 parseDataJSON(dsName, dsURL, async (res: any) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const parkItem of res.features) {
-    const type: string = parkItem.properties.Item_Type;
-    const itemID: string = parkItem.properties.Item_Id;
+    let type: string = parkItem.properties.Item_Type;
+    let itemID: string = parkItem.properties.Item_Id;
     if (type !== "PICNIC TABLE") {
       continue;
     }
     // The data for this dataset is in EPSG:26910.
     // See: http://spatialreference.org/ref/epsg/nad83-utm-zone-10n/
-    const coordinates =
+    let coordinates =
       Proj4("+proj=utm +zone=10 +ellps=GRS80 +datum=NAD83 +units=m +no_defs", "WGS84", parkItem.geometry.coordinates);
-    const parkName: string = parkItem.properties.Park_Name.trim();
+    let parkName: string = parkItem.properties.Park_Name.trim();
     let comment: string;
     if (parkName) {
       comment = "Located in " + capitalize(parkName) + ".";

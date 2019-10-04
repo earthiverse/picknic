@@ -10,12 +10,12 @@ const licenseURL = "Unknwon";
 
 parseDataArcGIS(dsName, gisURL, "ASSETCATEGORY=1114", "asset_id,asset_name", 1000, async (res: any[]) => {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   for (const data of res) {
-    const coordinates: any = [data.geometry.x, data.geometry.y];
-    const objID = data.attributes.ASSET_ID;
-    const name = data.attributes.ASSET_NAME;
+    let coordinates: any = [data.geometry.x, data.geometry.y];
+    let objID = data.attributes.ASSET_ID;
+    let name = data.attributes.ASSET_NAME;
 
     await Picnic.updateOne({
       "properties.source.dataset": dsName,

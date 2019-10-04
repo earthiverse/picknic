@@ -16,16 +16,16 @@ const licenseURL = "http://www.edmonton.ca/city_government/documents/Web-version
 
 export async function parse(res: string) {
   let numOps = 0;
-  const retrieved = new Date();
+  let retrieved = new Date();
 
   const csv = CSVParse(res, { columns: true, ltrim: true });
   for (const data of csv) {
-    const lat = parseFloat(data.Latitude);
-    const lng = parseFloat(data.Longitude);
+    let lat = parseFloat(data.Latitude);
+    let lng = parseFloat(data.Longitude);
 
-    const type = data["Table Type"].toLowerCase();
-    const surface = data["Surface Material"].toLowerCase();
-    const structural = data["Structural Material"].toLowerCase();
+    let type = data["Table Type"].toLowerCase();
+    let surface = data["Surface Material"].toLowerCase();
+    let structural = data["Structural Material"].toLowerCase();
     let comment: string;
     if (type === "other table") {
       comment = "A table";

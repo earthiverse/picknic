@@ -18,16 +18,16 @@ Download.parseDataString(datasetName, datasetURL, async (res: string) => {
   const retrieved = new Date();
 
   for (const data of CSVParse(res, { columns: true, ltrim: true })) {
-    const lat: number = parseFloat(data.Y);
-    const lng: number = parseFloat(data.X);
+    let lat: number = parseFloat(data.Y);
+    let lng: number = parseFloat(data.X);
 
-    const assetID: string = data.AssetID;
-    const accessible: boolean = data.Accessible.startsWith("Y");
-    const material: string = data.Material.toLowerCase();
-    const surface: string = data.Surface.toLowerCase();
-    const plaque: boolean = data.Plaque === "Yes";
-    const dedication: string = data.Dedication.trim();
-    const greenspaceID: string = data.Grnspc_ID;
+    let assetID: string = data.AssetID;
+    let accessible: boolean = data.Accessible.startsWith("Y");
+    //let material: string = data.Material.toLowerCase();  Not being used at the moment
+    let surface: string = data.Surface.toLowerCase();
+    let plaque: boolean = data.Plaque === "Yes";
+    let dedication: string = data.Dedication.trim();
+    //let greenspaceID: string = data.Grnspc_ID;           Not being used at the moment.
 
     let comment: string = data.Comment.trim();
     if (comment) {
