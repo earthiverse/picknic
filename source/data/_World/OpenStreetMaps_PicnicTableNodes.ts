@@ -27,7 +27,7 @@ export class OSMDownloader extends Downloader {
     const data = await new Promise<any[]>((resolve) => {
       Xml2js.parseString(text, (error, xmlData) => {
         if (error) {
-          throw new Error(error);
+          throw error;
         }
         resolve(xmlData.osm.node);
       });

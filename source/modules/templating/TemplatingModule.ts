@@ -33,12 +33,12 @@ Fs.readdir(viewsPath, (readDirError, files) => {
 
 export class TemplatingModule extends Module {
   public static mi18n: I18next.i18n;
-  public static geoip2: any;
+  public static maxmind: any;
 
-  constructor(app: Express.Application, i18n: I18next.i18n, geoip2: any) {
+  constructor(app: Express.Application, i18n: I18next.i18n, maxmind: any) {
     super(app);
     TemplatingModule.mi18n = i18n;
-    TemplatingModule.geoip2 = geoip2;
+    TemplatingModule.maxmind = maxmind;
   }
   public addRoutes(app: Express.Application) {
     app.get("/", (req: Express.Request, res: Express.Response) => {
@@ -69,19 +69,14 @@ export class TemplatingModule extends Module {
           session: req.session,
           // TODO: This is clunky, and shouldn't be here.
           show_map_search: (req.path.endsWith("index.html")),
-          geoip2() {
+          maxmind() {
             return () => {
-              // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
-              const result = TemplatingModule.geoip2.lookupSimpleSync((req as any).clientIp);
-              if (result) {
-                try {
-                  return JSON.stringify({ lat: result.location.latitude, lng: result.location.longitude });
-                } catch {
-                  // Something went wrong trying to retrieve the location, so we'll just use Edmonton's.
-                  return "{ lat: 53.5444, lng: -113.4904 }";
-                }
-              } else {
-                // No location identified by geoip2, so we'll just use Edmonton's.
+              try {
+                // NOTE: req's "clientIp" property is only available due to the 'request-ip' package
+                const result = TemplatingModule.maxmind.get((req as any).clientIp);
+                return JSON.stringify({ lat: result.location.latitude, lng: result.location.longitude });
+              } catch {
+                // Something went wrong trying to retrieve the location, so we'll just use Edmonton's.
                 return "{ lat: 53.5444, lng: -113.4904 }";
               }
             };

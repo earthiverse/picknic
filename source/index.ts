@@ -10,9 +10,9 @@ const ConnectMongo = require("connect-mongo");
 import Express = require("express");
 import requestLanguage = require("express-request-language");
 import ExpressSession = require("express-session");
-// tslint:disable-next-line:no-var-requires
-const geoip2 = require("geoip2");
 import I18next from "i18next";
+// tslint:disable-next-line:no-var-requires
+import maxmind, { CityResponse } from "maxmind";
 
 // tslint:disable-next-line:no-var-requires
 const i18nextBackend = require("i18next-sync-fs-backend");
@@ -51,8 +51,8 @@ I18next
     saveMissingTo: "all",
   });
 
-// Setup Geoip2
-geoip2.init();
+// Setup Maxmind
+const lookup = maxmind.open<CityResponse>("source/data/GeoLite2-City.mmdb");
 
 // Setup Express
 const app = Express();
@@ -75,7 +75,7 @@ const dataModule = new DataModule(app);
 import { UserModule } from "./modules/user/UserModule";
 const userModule = new UserModule(app);
 import { TemplatingModule } from "./modules/templating/TemplatingModule";
-const templatingModule = new TemplatingModule(app, I18next, geoip2);
+const templatingModule = new TemplatingModule(app, I18next, lookup);
 
 // Serve static files
 app.use(Express.static(Path.join(__dirname, "../source/public")));

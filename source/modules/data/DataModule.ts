@@ -1,9 +1,9 @@
 import Express = require("express");
-import Geohash = require("latlon-geohash");
+import Geohash from "latlon-geohash";
 import Nconf = require("nconf");
 import Path = require("path");
 
-import * as multer from "multer";
+import multer from "multer";
 
 import { Picnic } from "../../models/Picnic";
 import { User } from "../../models/User";
