@@ -63,7 +63,7 @@
     "@types/request": "^2.47.1",
     "@types/request-ip": "0.0.33",
     "@types/request-promise-native": "^1.0.15",
-    "bcrypt": "^3.0.1",
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.18.3",
     "cheerio": "^1.0.0-rc.2",
     "connect-mongo": "^2.0.1",
