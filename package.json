@@ -89,7 +89,7 @@
     "request-ip": "^2.1.1",
     "request-promise-native": "^1.0.5",
     "striptags": "^3.1.1",
-    "xlsx": "^0.14.0"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.6",
